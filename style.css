@@ -1,0 +1,833 @@
+@import url("https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@500;700;900&display=swap");
+
+:root {
+  color-scheme: dark;
+  --ink: #071018;
+  --panel: #0e1a21;
+  --line: rgba(255, 255, 255, 0.13);
+  --acid: #c8ef29;
+  --orange: #ff7a16;
+  --paper: #f7f3df;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow-x: hidden;
+  color: var(--paper);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(53, 93, 97, 0.38), transparent 42rem),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 8px),
+    #05090c;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+button {
+  font: inherit;
+}
+
+.page-shell {
+  width: min(100%, 1480px);
+  min-height: 100vh;
+  margin: auto;
+  padding: clamp(10px, 2.5vw, 34px);
+  display: grid;
+  place-items: center;
+}
+
+.game-frame {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 22px;
+  background: #111a1f;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.game-header,
+.game-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 13px clamp(16px, 3vw, 30px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent),
+    var(--panel);
+}
+
+.game-header {
+  min-height: 73px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: grid;
+  line-height: 1;
+}
+
+.brand-kicker,
+.eyebrow {
+  color: var(--acid);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+.brand strong {
+  margin-top: 6px;
+  font-family: "Black Ops One", Impact, sans-serif;
+  font-size: clamp(1.15rem, 2.2vw, 1.75rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-button {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: 150ms ease;
+}
+
+.icon-button:hover,
+.icon-button:focus-visible {
+  color: #fff;
+  border-color: rgba(200, 239, 41, 0.6);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: #111f2d;
+  isolation: isolate;
+}
+
+#game-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  outline: none;
+}
+
+.stage::after {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  content: "";
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 0 80px rgba(3, 8, 10, 0.34),
+    inset 0 0 0 8px rgba(3, 8, 10, 0.08);
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  visibility: hidden;
+  opacity: 0;
+  background: rgba(4, 11, 16, 0.54);
+  backdrop-filter: blur(2px);
+  transition:
+    opacity 180ms ease,
+    visibility 180ms ease;
+}
+
+.screen--visible {
+  visibility: visible;
+  opacity: 1;
+}
+
+#menu-screen {
+  place-items: center start;
+  padding-left: clamp(28px, 8vw, 116px);
+  background:
+    linear-gradient(90deg, rgba(4, 9, 12, 0.88) 0%, rgba(4, 9, 12, 0.58) 38%, transparent 68%),
+    linear-gradient(0deg, rgba(4, 9, 12, 0.2), transparent);
+  backdrop-filter: none;
+}
+
+.menu-card {
+  width: min(450px, 47vw);
+}
+
+.menu-card h1,
+.compact-card h2 {
+  margin: 10px 0 8px;
+  color: #fff8dc;
+  font-family: "Black Ops One", Impact, sans-serif;
+  font-weight: 400;
+  line-height: 0.92;
+  text-shadow: 0 5px 0 rgba(0, 0, 0, 0.35);
+}
+
+.menu-card h1 {
+  font-size: clamp(2.7rem, 6vw, 6.4rem);
+}
+
+.menu-card h1 em {
+  color: var(--orange);
+  font-style: normal;
+}
+
+.mission-copy {
+  width: min(390px, 100%);
+  margin: 17px 0 23px;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: clamp(0.8rem, 1.35vw, 1.02rem);
+  line-height: 1.55;
+}
+
+.difficulty-picker {
+  width: min(430px, 100%);
+  margin: 0 0 18px;
+}
+
+.difficulty-label {
+  display: block;
+  margin-bottom: 7px;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.difficulty-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+
+.difficulty-option {
+  min-height: 52px;
+  padding: 7px 6px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 7px;
+  color: rgba(255, 255, 255, 0.62);
+  background: rgba(4, 11, 15, 0.48);
+  text-align: left;
+  cursor: pointer;
+  transition: 150ms ease;
+}
+
+.difficulty-option strong,
+.difficulty-option small {
+  display: block;
+}
+
+.difficulty-option strong {
+  color: inherit;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.difficulty-option small {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.43);
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.difficulty-option:hover,
+.difficulty-option:focus-visible {
+  border-color: rgba(200, 239, 41, 0.68);
+  color: #fff;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.difficulty-option.is-selected {
+  border-color: rgba(200, 239, 41, 0.85);
+  color: #ecff9b;
+  background: rgba(112, 145, 12, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(200, 239, 41, 0.15);
+}
+
+.difficulty-option.is-selected small {
+  color: rgba(236, 255, 155, 0.7);
+}
+
+.helicopter-picker {
+  width: min(430px, 100%);
+  margin: 0 0 18px;
+}
+
+.helicopter-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 7px;
+}
+
+.helicopter-option {
+  min-height: 112px;
+  padding: 5px 7px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.62);
+  background: rgba(4, 11, 15, 0.52);
+  text-align: left;
+  cursor: pointer;
+  transition: 150ms ease;
+}
+
+.helicopter-option img {
+  display: block;
+  width: 100%;
+  height: 67px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 7px rgba(0, 0, 0, 0.35));
+}
+
+.helicopter-option strong,
+.helicopter-option small {
+  display: block;
+}
+
+.helicopter-option strong {
+  color: inherit;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+
+.helicopter-option small {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.43);
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.helicopter-option:hover,
+.helicopter-option:focus-visible {
+  border-color: rgba(200, 239, 41, 0.68);
+  color: #fff;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.helicopter-option.is-selected {
+  border-color: rgba(200, 239, 41, 0.85);
+  color: #ecff9b;
+  background: rgba(112, 145, 12, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(200, 239, 41, 0.15);
+}
+
+.helicopter-option.is-selected small {
+  color: rgba(236, 255, 155, 0.7);
+}
+
+.helicopter-change-card {
+  width: min(620px, 92vw);
+}
+
+.helicopter-change-card h2 {
+  font-size: clamp(2rem, 5vw, 3.7rem);
+}
+
+.helicopter-options--change {
+  margin: 0 auto 22px;
+  width: min(480px, 100%);
+}
+
+.primary-button {
+  min-width: 220px;
+  min-height: 54px;
+  padding: 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 9px;
+  color: #122000;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 42%),
+    linear-gradient(180deg, #d7fa42, #82ad0d);
+  box-shadow:
+    inset 0 0 0 3px rgba(20, 32, 2, 0.24),
+    0 6px 0 #3d5506,
+    0 12px 26px rgba(0, 0, 0, 0.3);
+  font-family: "Black Ops One", Impact, sans-serif;
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.primary-button:hover,
+.primary-button:focus-visible {
+  filter: saturate(1.15) brightness(1.08);
+  outline: 2px solid white;
+  outline-offset: 3px;
+  transform: translateY(-2px);
+}
+
+.primary-button:active {
+  transform: translateY(4px);
+  box-shadow:
+    inset 0 0 0 3px rgba(20, 32, 2, 0.24),
+    0 2px 0 #3d5506;
+}
+
+.controls-card {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+kbd {
+  padding: 3px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.38);
+  font: inherit;
+}
+
+.compact-card {
+  width: min(440px, 86vw);
+  padding: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 16px;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent),
+    rgba(8, 17, 22, 0.94);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.compact-card h2 {
+  font-size: clamp(2.6rem, 7vw, 4.8rem);
+}
+
+.compact-card p {
+  margin: 12px 0 28px;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.shop-card {
+  width: min(900px, 92vw);
+  padding: clamp(22px, 4vw, 36px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 38%),
+    rgba(8, 17, 22, 0.96);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+.shop-card h2 {
+  margin: 7px 0 5px;
+  color: #fff8dc;
+  font-family: "Black Ops One", Impact, sans-serif;
+  font-size: clamp(2rem, 4.5vw, 3.7rem);
+  font-weight: 400;
+  line-height: 0.96;
+}
+
+.shop-summary {
+  margin: 10px 0 15px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.82rem;
+}
+
+.shop-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+  color: var(--acid);
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.shop-items {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.shop-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 35px 1fr;
+  min-height: 92px;
+  padding: 12px 12px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9px;
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.045);
+  text-align: left;
+  cursor: pointer;
+  transition: 150ms ease;
+}
+
+.shop-item:hover:not(:disabled),
+.shop-item:focus-visible:not(:disabled) {
+  border-color: rgba(200, 239, 41, 0.7);
+  background: rgba(112, 145, 12, 0.2);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.shop-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.43;
+}
+
+.shop-item-icon {
+  color: var(--orange);
+  font-family: "Black Ops One", Impact, sans-serif;
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.shop-item-copy strong,
+.shop-item-copy small {
+  display: block;
+}
+
+.shop-item-copy strong {
+  color: #fff;
+  font-size: 0.73rem;
+  letter-spacing: 0.06em;
+}
+
+.shop-item-copy small {
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.62rem;
+  line-height: 1.25;
+}
+
+.shop-item-price {
+  position: absolute;
+  right: 11px;
+  bottom: 9px;
+  color: #ffd63c;
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.shop-item-status {
+  position: absolute;
+  right: 10px;
+  top: 9px;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.shop-continue {
+  display: block;
+  margin: 20px auto 0;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 5px solid rgba(255, 255, 255, 0.16);
+  border-top-color: var(--acid);
+  border-radius: 50%;
+  animation: spin 750ms linear infinite;
+}
+
+#loading-screen p {
+  margin-top: 74px;
+  position: absolute;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.mobile-hint {
+  position: absolute;
+  z-index: 4;
+  right: 14px;
+  bottom: 12px;
+  display: none;
+  padding: 6px 9px;
+  border-radius: 5px;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(0, 0, 0, 0.36);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
+.game-footer {
+  justify-content: center;
+  min-height: 46px;
+  border-top: 1px solid var(--line);
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.footer-dot {
+  color: var(--orange);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (pointer: coarse), (max-width: 760px) {
+  .page-shell {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    align-items: start;
+  }
+
+  .game-frame {
+    width: 100vw;
+    max-width: 100vw;
+    min-width: 0;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .game-header {
+    width: 100%;
+    min-height: 58px;
+    padding-block: 9px;
+  }
+
+  .brand-kicker,
+  .game-footer {
+    display: none;
+  }
+
+  .brand {
+    min-width: 0;
+  }
+
+  .brand strong {
+    overflow: hidden;
+    font-size: 0.98rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .header-actions {
+    margin-left: auto;
+  }
+
+  #sound-button {
+    display: none;
+  }
+
+  .icon-button {
+    min-height: 32px;
+    padding-inline: 9px;
+    font-size: 0.58rem;
+  }
+
+  #menu-screen {
+    place-items: center;
+    padding: 8px;
+    text-align: center;
+    background: rgba(4, 9, 12, 0.62);
+  }
+
+  .menu-card {
+    width: min(350px, 92vw);
+  }
+
+  .menu-card h1 {
+    margin: 4px 0 9px;
+    font-size: clamp(1.8rem, 9vw, 2.5rem);
+    line-height: 0.86;
+  }
+
+  .mission-copy {
+    display: none;
+  }
+
+  .difficulty-picker {
+    margin-bottom: 10px;
+  }
+
+  .helicopter-picker {
+    margin-bottom: 10px;
+  }
+
+  .difficulty-label {
+    margin-bottom: 4px;
+    font-size: 0.54rem;
+  }
+
+  .difficulty-options {
+    gap: 4px;
+  }
+
+  .difficulty-option {
+    min-height: 37px;
+    padding: 5px 4px;
+  }
+
+  .difficulty-option strong {
+    font-size: 0.58rem;
+  }
+
+  .difficulty-option small {
+    display: none;
+  }
+
+  .helicopter-option {
+    min-height: 70px;
+    padding: 4px 5px 5px;
+  }
+
+  .helicopter-option img {
+    height: 39px;
+  }
+
+  .helicopter-option strong {
+    font-size: 0.55rem;
+  }
+
+  .helicopter-option small {
+    display: none;
+  }
+
+  .helicopter-change-card {
+    width: min(94vw, 520px);
+    padding: 20px;
+  }
+
+  .shop-card {
+    width: min(94vw, 520px);
+    padding: 17px;
+  }
+
+  .shop-card h2 {
+    font-size: 1.85rem;
+  }
+
+  .shop-summary {
+    margin-block: 7px 10px;
+    font-size: 0.68rem;
+  }
+
+  .shop-meta {
+    margin-bottom: 7px;
+    font-size: 0.54rem;
+  }
+
+  .shop-items {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .shop-item {
+    min-height: 48px;
+    padding: 7px 9px 7px;
+    grid-template-columns: 28px 1fr;
+  }
+
+  .shop-item-icon {
+    font-size: 1.15rem;
+  }
+
+  .shop-item-copy strong {
+    font-size: 0.62rem;
+  }
+
+  .shop-item-copy small {
+    display: none;
+  }
+
+  .shop-item-price {
+    right: 9px;
+    bottom: auto;
+    top: 17px;
+  }
+
+  .shop-continue {
+    margin-top: 10px;
+  }
+
+  .primary-button {
+    min-width: 170px;
+    min-height: 40px;
+    padding-inline: 16px;
+    font-size: 0.88rem;
+    box-shadow:
+      inset 0 0 0 2px rgba(20, 32, 2, 0.24),
+      0 4px 0 #3d5506,
+      0 8px 18px rgba(0, 0, 0, 0.3);
+  }
+
+  .controls-card {
+    display: none;
+  }
+
+  .mobile-hint {
+    display: block;
+  }
+}
+
+@media (max-height: 620px) and (orientation: landscape) {
+  .page-shell {
+    padding: 0;
+  }
+
+  .game-frame {
+    width: min(100%, 1120px);
+    border-radius: 0;
+  }
+
+  .game-header,
+  .game-footer {
+    display: none;
+  }
+}

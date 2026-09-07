@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Operación Nacho: juego arcade de helicópteros hecho con JavaScript."
+    />
+    <title>Operación Nacho</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="game-frame" aria-label="Operación Nacho">
+        <div class="game-header">
+          <div class="brand">
+            <span class="brand-kicker">ESCUADRÓN 3000</span>
+            <strong>OPERACIÓN NACHO</strong>
+          </div>
+          <div class="header-actions">
+            <button id="sound-button" class="icon-button" type="button" aria-label="Activar o desactivar sonido">
+              SONIDO: ON
+            </button>
+            <button id="pause-button" class="icon-button" type="button" aria-label="Pausar partida">
+              PAUSA
+            </button>
+          </div>
+        </div>
+
+        <div id="stage" class="stage">
+          <canvas
+            id="game-canvas"
+            width="1200"
+            height="675"
+            tabindex="0"
+            aria-label="Área de juego. Usa WASD o las flechas para moverte y espacio para disparar."
+          ></canvas>
+
+          <div id="loading-screen" class="screen screen--visible">
+            <div class="spinner" aria-hidden="true"></div>
+            <p>Cargando el arsenal…</p>
+          </div>
+
+          <div id="menu-screen" class="screen">
+            <div class="menu-card">
+              <span class="eyebrow">MISIÓN ARCADE</span>
+              <h1>OPERACIÓN<br /><em>NACHO</em></h1>
+              <p class="mission-copy">
+                Cruza el valle, protege la ciudad y derriba a los jefes del cielo.
+              </p>
+              <div class="difficulty-picker" role="group" aria-label="Elegir dificultad">
+                <span class="difficulty-label">DIFICULTAD</span>
+                <div class="difficulty-options">
+                  <button class="difficulty-option" type="button" data-difficulty="easy" aria-pressed="false">
+                    <strong>FÁCIL</strong>
+                    <small>Más blindaje</small>
+                  </button>
+                  <button class="difficulty-option is-selected" type="button" data-difficulty="normal" aria-pressed="true">
+                    <strong>NORMAL</strong>
+                    <small>Equilibrado</small>
+                  </button>
+                  <button class="difficulty-option" type="button" data-difficulty="hard" aria-pressed="false">
+                    <strong>DIFÍCIL</strong>
+                    <small>Sin piedad</small>
+                  </button>
+                </div>
+              </div>
+              <div class="helicopter-picker" role="group" aria-label="Elegir helicóptero">
+                <span class="difficulty-label">HELICÓPTERO</span>
+                <div class="helicopter-options">
+                  <button class="helicopter-option is-selected" type="button" data-helicopter="v1" aria-pressed="true">
+                    <img src="assets/helicopter-player-v1.png" alt="" />
+                    <strong>BLINDADO</strong>
+                    <small>+2 vida · -25% daño</small>
+                  </button>
+                  <button class="helicopter-option" type="button" data-helicopter="v2" aria-pressed="false">
+                    <img src="assets/helicopter-player-v2.png" alt="" />
+                    <strong>SIGILO</strong>
+                    <small>+22% velocidad · hitbox menor</small>
+                  </button>
+                </div>
+              </div>
+              <button id="play-button" class="primary-button" type="button">
+                <span>▶</span> JUGAR
+              </button>
+              <div class="controls-card">
+                <span><kbd>WASD</kbd> o <kbd>← ↑ ↓ →</kbd> mover</span>
+                <span><kbd>ESPACIO</kbd> disparar</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="pause-screen" class="screen">
+            <div class="compact-card">
+              <span class="eyebrow">MISIÓN EN ESPERA</span>
+              <h2>PAUSA</h2>
+              <button id="resume-button" class="primary-button" type="button">CONTINUAR</button>
+            </div>
+          </div>
+
+          <div id="shop-screen" class="screen">
+            <div class="shop-card">
+              <span class="eyebrow">ENTRE OLEADAS</span>
+              <h2>ARMERÍA DE CAMPAÑA</h2>
+              <p id="shop-summary" class="shop-summary">La oleada ha terminado. Repara y equipa el helicóptero.</p>
+              <div class="shop-meta">
+                <span id="shop-coins">0 MONEDAS</span>
+                <span id="shop-wave">PREPARANDO OLEADA 2</span>
+              </div>
+              <div class="shop-items">
+                <button class="shop-item" type="button" data-shop-item="life">
+                  <span class="shop-item-icon">♥</span>
+                  <span class="shop-item-copy"><strong>VIDA +1</strong><small>Recupera una vida</small></span>
+                  <span class="shop-item-price">3 ★</span>
+                  <span class="shop-item-status" aria-live="polite"></span>
+                </button>
+                <button class="shop-item" type="button" data-shop-item="explosive">
+                  <span class="shop-item-icon">✹</span>
+                  <span class="shop-item-copy"><strong>MISIL EXPLOSIVO</strong><small>8 impactos dañan en área</small></span>
+                  <span class="shop-item-price">5 ★</span>
+                  <span class="shop-item-status" aria-live="polite"></span>
+                </button>
+                <button class="shop-item" type="button" data-shop-item="shield">
+                  <span class="shop-item-icon">◆</span>
+                  <span class="shop-item-copy"><strong>ESCUDO REFLECTOR</strong><small>Rebota disparos durante 15 s</small></span>
+                  <span class="shop-item-price">6 ★</span>
+                  <span class="shop-item-status" aria-live="polite"></span>
+                </button>
+                <button class="shop-item" type="button" data-shop-item="rapid">
+                  <span class="shop-item-icon">»</span>
+                  <span class="shop-item-copy"><strong>RÁFAGA</strong><small>Doble disparo durante 10 s</small></span>
+                  <span class="shop-item-price">4 ★</span>
+                  <span class="shop-item-status" aria-live="polite"></span>
+                </button>
+              </div>
+              <button id="continue-button" class="primary-button shop-continue" type="button">
+                CONTINUAR · OLEADA 2
+              </button>
+            </div>
+          </div>
+
+          <div id="helicopter-screen" class="screen">
+            <div class="compact-card helicopter-change-card">
+              <span class="eyebrow">BASE AÉREA</span>
+              <h2>CAMBIO DE HELICÓPTERO</h2>
+              <p id="helicopter-summary">Has aterrizado sobre la plataforma volante.</p>
+              <div class="helicopter-options helicopter-options--change" role="group" aria-label="Cambiar helicóptero">
+                <button class="helicopter-option is-selected" type="button" data-helicopter="v1" aria-pressed="true">
+                  <img src="assets/helicopter-player-v1.png" alt="" />
+                  <strong>BLINDADO</strong>
+                  <small>+2 vida · -25% daño</small>
+                </button>
+                <button class="helicopter-option" type="button" data-helicopter="v2" aria-pressed="false">
+                  <img src="assets/helicopter-player-v2.png" alt="" />
+                  <strong>SIGILO</strong>
+                  <small>+22% velocidad · hitbox menor</small>
+                </button>
+              </div>
+              <button id="helicopter-continue" class="primary-button" type="button">DESPEGAR</button>
+            </div>
+          </div>
+
+          <div id="gameover-screen" class="screen">
+            <div class="compact-card">
+              <span class="eyebrow">INFORME DE VUELO</span>
+              <h2 id="result-title">MISIÓN TERMINADA</h2>
+              <p id="result-copy">Puntuación: 0</p>
+              <button id="restart-button" class="primary-button" type="button">VOLVER A JUGAR</button>
+            </div>
+          </div>
+
+          <div class="mobile-hint">ARRASTRA PARA MOVER Y DISPARAR</div>
+        </div>
+
+        <footer class="game-footer">
+          <span>Recoge monedas y mejoras</span>
+          <span class="footer-dot">•</span>
+          <span>Sobrevive a cada oleada</span>
+          <span class="footer-dot">•</span>
+          <span>Derrota a los jefes</span>
+        </footer>
+      </section>
+    </main>
+
+    <script src="game.js"></script>
+  </body>
+</html>
