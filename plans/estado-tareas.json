@@ -187,9 +187,17 @@
       "prioridad": "P2",
       "titulo": "Eliminar state.defeated",
       "detalle": "game.js:1031; se incrementa pero nunca se lee",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 13:24"
+      "actualizada": "2026-10-10 13:24",
+      "decisiones": [
+        "Grep previo: solo init (defeated: 0) e incremento (state.defeated += 1); ninguna lectura en HUD, récord ni tienda"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "node --check OK; grep 0 referencias a defeated",
+      "commit": "cc1c839"
     },
     {
       "id": "1.5",
@@ -197,8 +205,9 @@
       "prioridad": "P2",
       "titulo": "Eliminar previousMode",
       "detalle": "game.js:206; siempre vale 'playing'; simplificar togglePause",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 13:24"
     },
     {
       "id": "1.6",

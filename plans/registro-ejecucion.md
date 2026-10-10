@@ -134,3 +134,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 13:24] 1.4 — Eliminar state.defeated
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 13:24] 1.4 — Eliminar state.defeated
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Grep previo: solo init (defeated: 0) e incremento (state.defeated += 1); ninguna lectura en HUD, récord ni tienda
+- **Archivos:** game.js
+- **Verificación:** node --check OK; grep 0 referencias a defeated
+- **Commit:** cc1c839
+
+### [2026-10-10 13:24] 1.5 — Eliminar previousMode
+- **Estado:** pendiente → en_curso
+

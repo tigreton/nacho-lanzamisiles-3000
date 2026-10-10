@@ -202,7 +202,6 @@
   const pointer = { active: false, x: W * 0.22, y: H * 0.5 };
 
   let mode = "loading";
-  let previousMode = "menu";
   let lastTime = performance.now();
   let audioContext = null;
   let soundEnabled = true;
@@ -657,10 +656,9 @@
 
   function togglePause() {
     if (mode === "playing") {
-      previousMode = "playing";
       setMode("paused");
     } else if (mode === "paused") {
-      setMode(previousMode);
+      setMode("playing");
       lastTime = performance.now();
       canvas.focus();
     }
