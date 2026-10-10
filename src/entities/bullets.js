@@ -1,7 +1,14 @@
 // Proyectiles: trayectorias, rebotes del escudo y balas explosivas.
-import { W, H, SHIELD_RADIUS, NEAR_MISS_RADIUS, NEAR_MISS_POINTS } from "../config.js";
+import {
+  W,
+  H,
+  SHIELD_RADIUS,
+  NEAR_MISS_RADIUS,
+  NEAR_MISS_POINTS,
+  HOMING_TURN_RATE,
+} from "../config.js";
 import { G } from "../state.js";
-import { clamp, overlaps } from "../utils.js";
+import { rand, clamp, overlaps } from "../utils.js";
 import { tone } from "../audio.js";
 import { createBurst, createExplosion, createFloater } from "./particles.js";
 import { killEnemy } from "./enemies.js";
@@ -11,6 +18,21 @@ import { notifyNearMiss } from "../systems/achievements.js";
 // El tono de esquiva se limita en densidad para no ametrallar el oído
 // cuando varios proyectiles rozan en el mismo fotograma.
 let ultimoTonoEsquiva = -1;
+
+
+// Puntos de esquiva de milagro: lo cobran los proyectiles rozados y también
+// los kamikazes cuyo piqué pasa de largo (véase enemies.js).
+export function awardNearMiss(x, y) {
+  const puntos = Math.round(NEAR_MISS_POINTS * G.state.difficulty.scoreMultiplier);
+  G.state.score += puntos;
+  G.state.nearMisses += 1;
+  createFloater(x, y - 20, `¡ESQUIVA +${puntos}!`, "#9ff3ff");
+  if (G.state.elapsed - ultimoTonoEsquiva > 0.12) {
+    ultimoTonoEsquiva = G.state.elapsed;
+    tone(940, 0.07, "sine", 0.022, 240);
+  }
+  notifyNearMiss();
+}
 
 
 export function detonateExplosiveBullet(bullet, directHit) {
@@ -30,10 +52,72 @@ export function detonateExplosiveBullet(bullet, directHit) {
 }
 
 
+// Misil cargado: daño directo según el tiempo de carga y una onda
+// expansiva proporcional alrededor del impacto.
+export function detonateChargedBullet(bullet, directHit) {
+  for (const enemy of G.enemies) {
+    if (enemy.dead) continue;
+    const distance = Math.hypot(enemy.x - bullet.x, enemy.y - bullet.y);
+    if (enemy === directHit || distance <= bullet.blastRadius) {
+      enemy.hp -= enemy === directHit ? bullet.damage : bullet.splashDamage;
+      enemy.flash = 0.12;
+      createBurst(enemy.x, enemy.y, "#ffb02e", 5, 130);
+      if (enemy.hp <= 0) killEnemy(enemy);
+    }
+  }
+  createExplosion(bullet.x, bullet.y, bullet.blastRadius * 1.35);
+  tone(150, 0.26, "sawtooth", 0.038, 120);
+}
+
+
+function nearestEnemyTo(x, y) {
+  let best = null;
+  let bestDistance = Infinity;
+  for (const enemy of G.enemies) {
+    if (enemy.dead) continue;
+    const distance = Math.hypot(enemy.x - x, enemy.y - y);
+    if (distance < bestDistance) {
+      best = enemy;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+
+function steerHoming(bullet, dt) {
+  const target = nearestEnemyTo(bullet.x, bullet.y);
+  if (!target) return;
+  const heading = Math.atan2(bullet.vy, bullet.vx);
+  const desired = Math.atan2(target.y - bullet.y, target.x - bullet.x);
+  let delta = desired - heading;
+  while (delta > Math.PI) delta -= Math.PI * 2;
+  while (delta < -Math.PI) delta += Math.PI * 2;
+  const step = clamp(delta, -HOMING_TURN_RATE * dt, HOMING_TURN_RATE * dt);
+  const speed = Math.hypot(bullet.vx, bullet.vy) || 1;
+  bullet.vx = Math.cos(heading + step) * speed;
+  bullet.vy = Math.sin(heading + step) * speed;
+}
+
+
 export function updateProjectiles(dt) {
   for (const bullet of G.playerBullets) {
+    if (bullet.homing) steerHoming(bullet, dt);
     bullet.x += bullet.vx * dt;
     bullet.y += bullet.vy * dt;
+    // Estela de los misiles especiales: teledirigidos en verde, cargado en ámbar.
+    if ((bullet.homing || bullet.charged) && Math.random() < dt * 30) {
+      G.particles.push({
+        x: bullet.x - Math.sign(bullet.vx) * bullet.w * 0.45,
+        y: bullet.y,
+        vx: -rand(50, 130),
+        vy: rand(-22, 22),
+        life: rand(0.12, 0.22),
+        maxLife: 0.22,
+        size: rand(2, 4),
+        color: bullet.homing ? "#b6ff3c" : "#ffb02e",
+      });
+    }
     if (bullet.x > W + 120 || bullet.y < -40 || bullet.y > H + 40) bullet.dead = true;
   }
 
@@ -84,15 +168,7 @@ export function updateProjectiles(dt) {
       !overlaps(G.player, bullet, bulletHitbox)
     ) {
       bullet.grazed = true;
-      const puntos = Math.round(NEAR_MISS_POINTS * G.state.difficulty.scoreMultiplier);
-      G.state.score += puntos;
-      G.state.nearMisses += 1;
-      createFloater(bullet.x, bullet.y - 20, `¡ESQUIVA +${puntos}!`, "#9ff3ff");
-      if (G.state.elapsed - ultimoTonoEsquiva > 0.12) {
-        ultimoTonoEsquiva = G.state.elapsed;
-        tone(940, 0.07, "sine", 0.022, 240);
-      }
-      notifyNearMiss();
+      awardNearMiss(bullet.x, bullet.y);
     }
     if (!bullet.dead && !bullet.reflected && overlaps(G.player, bullet, bulletHitbox)) {
       bullet.dead = true;

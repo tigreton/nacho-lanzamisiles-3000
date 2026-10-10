@@ -87,6 +87,10 @@ function resetGame() {
     shield: 0,
     rapid: 0,
     explosiveAmmo: 0,
+    homingAmmo: 0,
+    allyArmed: false,
+    charge: 0,
+    chargeFull: false,
     frame: 0,
     tilt: 0,
   };
@@ -113,9 +117,13 @@ function resetGame() {
     waveDamageTaken: false,
     toast: null,
     newAchievements: [],
+    squads: {},
+    squadSeq: 0,
+    squadTimer: 8,
     difficulty,
   };
 
+  G.ally = null;
   G.enemies = [];
   G.playerBullets = [];
   G.enemyBullets = [];

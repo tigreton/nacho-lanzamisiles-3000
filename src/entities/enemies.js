@@ -1,11 +1,25 @@
 // Enemigos y jefes: aparicion, disparo, muerte y desprendimientos.
-import { W, H, COMBO_TIMEOUT } from "../config.js";
+import {
+  W,
+  H,
+  COMBO_TIMEOUT,
+  KAMIKAZE_TRIGGER_DISTANCE,
+  KAMIKAZE_TELEGRAPH,
+  KAMIKAZE_DIVE_SPEED,
+  KAMIKAZE_DAMAGE,
+  SQUAD_SIZE,
+  SQUAD_DISPERSE_X,
+  SQUAD_BONUS_COINS,
+  SQUAD_BONUS_SCORE,
+  GUNSHIP_WEAKPOINT,
+  GUNSHIP_ARMOR,
+} from "../config.js";
 import { G, showToast, comboMultiplier } from "../state.js";
 import { rand, clamp, lerp, overlaps, isBossEnemy } from "../utils.js";
 import { tone } from "../audio.js";
 import { createBurst, createExplosion } from "./particles.js";
 import { hurtPlayer } from "./player.js";
-import { detonateExplosiveBullet } from "./bullets.js";
+import { detonateExplosiveBullet, detonateChargedBullet, awardNearMiss } from "./bullets.js";
 import { announceWave } from "../systems/waves.js";
 import { unlock, notifyKill } from "../systems/achievements.js";
 
@@ -15,8 +29,10 @@ export function spawnEnemy(forcedType) {
   const roll = Math.random();
   let type = forcedType;
   if (!type) {
-    if (G.state.wave >= 3 && roll < 0.25) type = "fighter";
-    else if (G.state.wave >= 2 && roll < 0.58) type = "drone";
+    if (G.state.wave >= 5 && roll < 0.07) type = "gunship";
+    else if (G.state.wave >= 4 && roll < 0.19) type = "kamikaze";
+    else if (G.state.wave >= 3 && roll < 0.44) type = "fighter";
+    else if (G.state.wave >= 2 && roll < 0.72) type = "drone";
     else type = "heli";
   }
 
@@ -55,6 +71,40 @@ export function spawnEnemy(forcedType) {
       score: 260,
       amplitude: rand(18, 45),
     });
+  } else if (type === "kamikaze") {
+    // Frágil pero letal: su cuerpo es el arma, así que nunca dispara.
+    const hp = Math.max(1, Math.ceil((2 + Math.floor(G.state.wave / 6)) * difficulty.enemyHpMultiplier));
+    G.enemies.push({
+      ...base,
+      w: 82,
+      h: 74,
+      hp,
+      maxHp: hp,
+      vx: (rand(230, 280) + G.state.wave * 4) * difficulty.enemySpeedMultiplier,
+      score: 300,
+      amplitude: rand(30, 60),
+      fireTimer: Infinity,
+      diveState: "patrol",
+      telegraphTimer: 0,
+      beepTimer: 0,
+      grazeAwarded: false,
+    });
+  } else if (type === "gunship") {
+    // Blindado por delante: solo el punto débil superior-trasero recibe
+    // daño de los disparos normales.
+    const hp = Math.max(1, Math.ceil((13 + G.state.wave * 2) * difficulty.enemyHpMultiplier));
+    G.enemies.push({
+      ...base,
+      y: rand(150, H - 130),
+      w: 152,
+      h: 106,
+      hp,
+      maxHp: hp,
+      vx: 55 * difficulty.enemySpeedMultiplier,
+      score: 620,
+      amplitude: rand(10, 22),
+      fireTimer: rand(1.2, 2) * difficulty.enemyFireIntervalMultiplier,
+    });
   } else {
     const hp = Math.max(1, Math.ceil((4 + Math.floor(G.state.wave / 3)) * difficulty.enemyHpMultiplier));
     G.enemies.push({
@@ -67,6 +117,99 @@ export function spawnEnemy(forcedType) {
       score: 220,
       amplitude: rand(24, 55),
     });
+  }
+}
+
+
+// Escuadrón en V: cinco cazas que comparten un ancla hasta dispersarse.
+// Si caen todos antes de la dispersión, el escuadrón suelta monedas extra.
+export function spawnSquad() {
+  const difficulty = G.state.difficulty;
+  const id = G.state.squadSeq + 1;
+  G.state.squadSeq = id;
+  const hp = Math.max(1, Math.ceil((3 + Math.floor(G.state.wave / 4)) * difficulty.enemyHpMultiplier));
+  const squad = {
+    id,
+    total: SQUAD_SIZE,
+    kills: 0,
+    dispersed: false,
+    x: W + 200,
+    y: rand(180, H - 180),
+    vx: (175 + G.state.wave * 3) * difficulty.enemySpeedMultiplier,
+    age: 0,
+  };
+  G.state.squads[id] = squad;
+
+  const offsets = [
+    [0, 0],
+    [-72, -52],
+    [-72, 52],
+    [-144, -104],
+    [-144, 104],
+  ];
+  offsets.forEach(([offsetX, offsetY]) => {
+    G.enemies.push({
+      type: "fighter",
+      x: squad.x + offsetX,
+      y: squad.y + offsetY,
+      w: 132,
+      h: 77,
+      hp,
+      maxHp: hp,
+      vx: squad.vx,
+      score: 260,
+      age: 0,
+      phase: rand(0, Math.PI * 2),
+      fireTimer: rand(1.6, 3.6) * difficulty.enemyFireIntervalMultiplier,
+      dead: false,
+      flash: 0,
+      squadId: id,
+      squadOffset: { x: offsetX, y: offsetY },
+      amplitude: rand(18, 45),
+    });
+  });
+  showToast("¡ESCUADRÓN EN FORMACIÓN!", "#ff9d3c", 1.6);
+  tone(320, 0.14, "square", 0.03, 60);
+}
+
+
+function rewardSquadWipe(squad) {
+  for (let i = 0; i < SQUAD_BONUS_COINS; i += 1) {
+    G.pickups.push({
+      type: "coin",
+      x: squad.x + rand(-120, 60),
+      y: squad.y + rand(-90, 90),
+      vx: rand(-90, 30),
+      vy: rand(-120, 120),
+      age: 0,
+      w: 44,
+      h: 44,
+    });
+  }
+  G.state.score += Math.round(SQUAD_BONUS_SCORE * G.state.difficulty.scoreMultiplier);
+  showToast(`¡ESCUADRÓN COMPLETO! +${SQUAD_BONUS_COINS}★`, "#ffd63c", 1.8);
+  createBurst(squad.x, squad.y, "#ffd63c", 18, 220);
+  tone(520, 0.1, "square", 0.03, 140);
+  setTimeout(() => tone(780, 0.14, "square", 0.03), 100);
+}
+
+
+// Las anclas avanzan y marcan la dispersión; al quedar sin miembros vivos
+// el escuadrón se retira del registro.
+function updateSquads(dt) {
+  for (const id of Object.keys(G.state.squads)) {
+    const squad = G.state.squads[id];
+    squad.age += dt;
+    if (!squad.dispersed) {
+      squad.x -= squad.vx * dt;
+      squad.y += Math.sin(squad.age * 1.1) * 16 * dt;
+      if (squad.x < SQUAD_DISPERSE_X || squad.age >= 7.5) {
+        squad.dispersed = true;
+        showToast("¡ESCUADRÓN DISPERSO!", "#ffffff", 1.1);
+      }
+    }
+    const quedanMiembros = G.enemies.some((enemy) => enemy.squadId === squad.id && !enemy.dead);
+    if (!quedanMiembros) delete G.state.squads[id];
   }
 }
 
@@ -228,19 +371,21 @@ function shootEnemy(enemy) {
   const dx = G.player.x - enemy.x;
   const dy = G.player.y - enemy.y;
   const length = Math.hypot(dx, dy) || 1;
-  const speed = (enemy.type === "fighter" ? 340 : 250) * difficulty.enemySpeedMultiplier;
+  const speed = (enemy.type === "fighter" ? 340 : enemy.type === "gunship" ? 265 : 250) *
+    difficulty.enemySpeedMultiplier;
   G.enemyBullets.push({
     x: enemy.x - enemy.w * 0.35,
     y: enemy.y + 8,
     vx: (dx / length) * speed,
     vy: (dy / length) * speed,
-    w: enemy.type === "drone" ? 27 : 31,
-    h: enemy.type === "drone" ? 27 : 31,
+    w: enemy.type === "drone" ? 27 : enemy.type === "gunship" ? 39 : 31,
+    h: enemy.type === "drone" ? 27 : enemy.type === "gunship" ? 39 : 31,
     damage: 1,
     age: 0,
   });
+  const baseInterval = enemy.type === "gunship" ? rand(2.3, 3.1) : rand(1.5, 2.8);
   enemy.fireTimer =
-    rand(1.5, 2.8) * difficulty.enemyFireIntervalMultiplier * Math.max(0.55, 1 - G.state.wave * 0.025);
+    baseInterval * difficulty.enemyFireIntervalMultiplier * Math.max(0.55, 1 - G.state.wave * 0.025);
 }
 
 
@@ -313,9 +458,23 @@ export function killEnemy(enemy) {
     tone(420 + G.state.combo.kills * 12, 0.1, "square", 0.03, 150);
   }
   G.state.score += Math.round(enemy.score * G.state.difficulty.scoreMultiplier * comboMultiplier());
-  createExplosion(enemy.x, enemy.y, isBossEnemy(enemy) ? (enemy.type === "airship" ? 210 : 240) : enemy.w * 0.88);
+  const explosionSize = isBossEnemy(enemy)
+    ? (enemy.type === "airship" ? 210 : 240)
+    : enemy.type === "kamikaze"
+      ? 120
+      : enemy.w * 0.88;
+  createExplosion(enemy.x, enemy.y, explosionSize);
   dropReward(enemy);
   notifyKill(enemy);
+
+  // Escuadrón: la última baja antes de la dispersión dispara el bonus.
+  if (enemy.squadId != null) {
+    const squad = G.state.squads[enemy.squadId];
+    if (squad && !squad.dispersed) {
+      squad.kills += 1;
+      if (squad.kills >= squad.total) rewardSquadWipe(squad);
+    }
+  }
 
   if (isBossEnemy(enemy)) {
     G.state.bossActive = false;
@@ -329,13 +488,39 @@ export function killEnemy(enemy) {
 }
 
 
+// El punto débil del blindado es un círculo sobre el sprite (daño doble) y
+// la coraza es la propia placa frontal dibujada: los disparos que la tocan
+// rebotan; el resto del casco recibe daño normal.
+function hitsGunshipWeakpoint(bullet, enemy) {
+  const weakX = enemy.x + enemy.w * GUNSHIP_WEAKPOINT.offsetX;
+  const weakY = enemy.y + enemy.h * GUNSHIP_WEAKPOINT.offsetY;
+  const radius = enemy.w * GUNSHIP_WEAKPOINT.radius + Math.max(bullet.w, bullet.h) * 0.25;
+  return Math.hypot(bullet.x - weakX, bullet.y - weakY) <= radius;
+}
+
+
+function hitsGunshipArmor(bullet, enemy) {
+  const margen = bullet.w * 0.3;
+  const dentroX =
+    bullet.x >= enemy.x + GUNSHIP_ARMOR.x1 * enemy.w - margen &&
+    bullet.x <= enemy.x + GUNSHIP_ARMOR.x2 * enemy.w;
+  const dentroY =
+    bullet.y >= enemy.y + GUNSHIP_ARMOR.y1 * enemy.h &&
+    bullet.y <= enemy.y + GUNSHIP_ARMOR.y2 * enemy.h;
+  return dentroX && dentroY;
+}
+
+
 export function updateEnemies(dt) {
+  updateSquads(dt);
+
   for (const enemy of G.enemies) {
     if (enemy.dead) continue;
     enemy.age += dt;
     enemy.flash = Math.max(0, enemy.flash - dt);
     enemy.fireTimer -= dt;
 
+    const squad = enemy.squadId != null ? G.state.squads[enemy.squadId] : null;
     if (isBossEnemy(enemy)) {
       if (enemy.x > enemy.targetX) enemy.x -= enemy.vx * dt;
       enemy.y = (enemy.type === "airship" ? H * 0.32 : H * 0.5) +
@@ -345,6 +530,63 @@ export function updateEnemies(dt) {
       enemy.x -= enemy.vx * dt;
       enemy.y += enemy.vy * dt;
       enemy.y += Math.sin(enemy.age * 3.2 + enemy.phase) * enemy.amplitude * dt;
+    } else if (enemy.type === "kamikaze") {
+      if (enemy.diveState === "patrol") {
+        enemy.x -= enemy.vx * dt;
+        enemy.y += Math.sin(enemy.age * 3.4 + enemy.phase) * enemy.amplitude * dt;
+        const distancia = Math.hypot(G.player.x - enemy.x, G.player.y - enemy.y);
+        if (distancia <= KAMIKAZE_TRIGGER_DISTANCE && enemy.x > G.player.x + 60) {
+          enemy.diveState = "telegraph";
+          enemy.telegraphTimer = KAMIKAZE_TELEGRAPH;
+          enemy.beepTimer = 0;
+        }
+      } else if (enemy.diveState === "telegraph") {
+        // Frena apuntando: parpadea y pita para avisar del piqué.
+        enemy.x -= enemy.vx * 0.35 * dt;
+        enemy.telegraphTimer -= dt;
+        enemy.beepTimer -= dt;
+        if (enemy.beepTimer <= 0) {
+          tone(960, 0.05, "square", 0.02, -80);
+          enemy.beepTimer = 0.13;
+        }
+        if (enemy.telegraphTimer <= 0) {
+          // El rumbo se fija aquí y ya no se corrige: esquivable.
+          const dx = G.player.x - enemy.x;
+          const dy = G.player.y - enemy.y;
+          const length = Math.hypot(dx, dy) || 1;
+          const speed = (KAMIKAZE_DIVE_SPEED + G.state.wave * 6) *
+            G.state.difficulty.enemySpeedMultiplier;
+          enemy.vx = (dx / length) * speed;
+          enemy.vy = (dy / length) * speed;
+          enemy.diveState = "dive";
+          tone(180, 0.3, "sawtooth", 0.035, -60);
+        }
+      } else {
+        enemy.x += enemy.vx * dt;
+        enemy.y += enemy.vy * dt;
+        if (Math.random() < dt * 26) {
+          createBurst(enemy.x + Math.sign(enemy.vx) * -enemy.w * 0.4, enemy.y, "#ff8a4a", 1, 70);
+        }
+        // Rozar el piqué sin tocarlo cuenta como esquiva de milagro.
+        const distancia = Math.hypot(G.player.x - enemy.x, G.player.y - enemy.y);
+        const hitbox = clamp(0.34 + G.player.hitboxBonus, 0, 0.8);
+        if (
+          !enemy.grazeAwarded &&
+          G.player.invulnerable <= 0 &&
+          distancia <= 100 &&
+          !overlaps(G.player, enemy, hitbox)
+        ) {
+          enemy.grazeAwarded = true;
+          awardNearMiss(enemy.x, enemy.y - 20);
+        }
+        if (enemy.x > W + 180 || enemy.x < -180 || enemy.y < -130 || enemy.y > H + 130) {
+          enemy.dead = true;
+        }
+      }
+    } else if (squad && !squad.dispersed) {
+      // En formación: cada caza sigue su offset respecto al ancla común.
+      enemy.x = squad.x + enemy.squadOffset.x;
+      enemy.y = squad.y + enemy.squadOffset.y + Math.sin(squad.age * 2.2 + enemy.phase) * 10;
     } else {
       enemy.x -= enemy.vx * dt;
       enemy.y += Math.sin(enemy.age * (enemy.type === "drone" ? 4 : 2.2) + enemy.phase) *
@@ -354,6 +596,7 @@ export function updateEnemies(dt) {
 
     if (
       enemy.type !== "balloon" &&
+      enemy.type !== "kamikaze" &&
       enemy.fireTimer <= 0 &&
       enemy.x < W - 70 &&
       enemy.x > G.player.x + 120
@@ -365,7 +608,8 @@ export function updateEnemies(dt) {
     const hitboxInset = isBossEnemy(enemy) ? 0.42 : enemy.type === "balloon" ? 0.18 : 0.34;
     const playerEnemyHitbox = clamp(hitboxInset + G.player.hitboxBonus, 0, 0.8);
     if (!enemy.dead && overlaps(G.player, enemy, playerEnemyHitbox)) {
-      hurtPlayer(isBossEnemy(enemy) ? 2 : 1);
+      const damage = isBossEnemy(enemy) ? 2 : enemy.type === "kamikaze" ? KAMIKAZE_DAMAGE : 1;
+      hurtPlayer(damage);
       if (!isBossEnemy(enemy)) killEnemy(enemy);
     }
   }
@@ -374,9 +618,27 @@ export function updateEnemies(dt) {
     for (const enemy of G.enemies) {
       const hitboxInset = isBossEnemy(enemy) ? 0.25 : enemy.type === "balloon" ? 0.18 : 0.16;
       if (!bullet.dead && !enemy.dead && overlaps(bullet, enemy, hitboxInset)) {
+        // Blindado: el punto débil hace daño doble y la placa frontal
+        // repele los disparos normales (teledirigidos y explosivos la rodean).
+        if (enemy.type === "gunship" && !bullet.ignoresArmor && hitsGunshipWeakpoint(bullet, enemy)) {
+          bullet.dead = true;
+          enemy.hp -= bullet.damage * 2;
+          enemy.flash = 0.07;
+          createBurst(bullet.x, bullet.y, "#ff5b26", 6, 120);
+          if (enemy.hp <= 0) killEnemy(enemy);
+          continue;
+        }
+        if (enemy.type === "gunship" && !bullet.ignoresArmor && hitsGunshipArmor(bullet, enemy)) {
+          bullet.dead = true;
+          createBurst(bullet.x, bullet.y, "#cfd8dc", 5, 130);
+          tone(rand(1100, 1400), 0.05, "square", 0.012, -40);
+          continue;
+        }
         bullet.dead = true;
         if (bullet.explosive) {
           detonateExplosiveBullet(bullet, enemy);
+        } else if (bullet.charged) {
+          detonateChargedBullet(bullet, enemy);
         } else {
           enemy.hp -= bullet.damage;
           enemy.flash = 0.07;

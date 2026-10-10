@@ -31,7 +31,8 @@ El servidor local sigue siendo la opción recomendada.
 ## Controles
 
 - `WASD` o flechas: mover
-- `Espacio` o `J`: disparar
+- `Espacio` o `J`: disparar; mantener pulsado carga un misil grande
+  (daño y onda expansiva crecen con la carga) que se lanza al soltar
 - `P` o `Escape`: pausa
 - Ratón/táctil: arrastrar sobre el juego para mover y disparar
 - Mando: stick izquierdo o cruceta mueven, `A` dispara y `Start` pausa. En
@@ -53,10 +54,25 @@ En `Fácil`, además, los proyectiles enemigos tienen un hitbox reducido para
 que sea más sencillo esquivarlos.
 
 Al terminar cada oleada se abre la armería: puedes gastar monedas en una vida,
-8 misiles explosivos, un escudo reflector o una ráfaga de doble disparo antes
-de continuar. La ráfaga dura 10 s, tanto comprada como recogida del enemigo.
-Los misiles hacen daño en área al impactar y el escudo devuelve
-los proyectiles enemigos al tocar su barrera, hacia sus atacantes, durante 15 s.
+8 misiles explosivos, un escudo reflector, una ráfaga de doble disparo, 8
+misiles teledirigidos o un dron aliado antes de continuar. La ráfaga dura 10 s,
+tanto comprada como recogida del enemigo. Los misiles explosivos hacen daño en
+área al impactar y el escudo devuelve los proyectiles enemigos al tocar su
+barrera, hacia sus atacantes, durante 15 s.
+
+Los teledirigidos corrigen su rumbo hacia el enemigo más cercano e ignoran el
+blindaje frontal. El dron aliado escolta al helicóptero durante toda la oleada
+siguiente y dispara al enemigo más cercano por su cuenta.
+
+Además de helis, drones y cazas, desde la oleada 4 aparecen kamikazes: avisan
+con un pitido y un parpadeo antes de lanzarse en piqué recto hacia tu
+posición (no corrigen el rumbo, así que se esquivan en el último momento; si
+el piqué te roza sin tocarte, cuenta como esquiva de milagro). Desde la oleada
+5 aparece el blindado: su placa frontal repele los disparos normales; apunta
+a la cúpula roja del morro para hacer daño doble o pásate por encima o por
+detrás para dañarlo con normalidad. Desde la oleada 3 llegan
+escuadrones de cinco cazas en V: si derribas el grupo completo antes de que se
+disperse, suelta monedas extra.
 
 En las oleadas de jefe se alternan el acorazado y un dirigible especial. El
 dirigible lanza globos que debes derribar antes de que lleguen al helicóptero.

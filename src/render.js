@@ -1,5 +1,5 @@
 // Renderizado: fondo, entidades, HUD y banners sobre el canvas logico.
-import { W, H, CROPS, SHIELD_RADIUS, COMBO_TIMEOUT } from "./config.js";
+import { W, H, CROPS, SHIELD_RADIUS, COMBO_TIMEOUT, CHARGE_TIME, GUNSHIP_WEAKPOINT, GUNSHIP_ARMOR } from "./config.js";
 import { G, comboMultiplier } from "./state.js";
 import { rand, clamp, isBossEnemy } from "./utils.js";
 import { bakedGlow } from "./sprites.js";
@@ -20,6 +20,52 @@ function drawSprite(image, x, y, width, height, options = {}) {
   } else {
     G.ctx.drawImage(image, -width / 2, -height / 2, width, height);
   }
+  G.ctx.restore();
+}
+
+
+function drawGunshipArmor(enemy) {
+  G.ctx.save();
+  G.ctx.translate(enemy.x, enemy.y);
+  G.ctx.rotate(Math.sin(enemy.age * 2.2 + enemy.phase) * 0.02);
+
+  // Coraza frontal: placa metálica con remaches. Usa la misma geometría que
+  // la hitbox de hitsGunshipArmor para que lo que se ve sea lo que repite.
+  G.ctx.fillStyle = "#3a4a52";
+  G.ctx.strokeStyle = "#16211f";
+  G.ctx.lineWidth = 4;
+  G.ctx.beginPath();
+  G.ctx.moveTo(enemy.w * GUNSHIP_ARMOR.x1, enemy.h * GUNSHIP_ARMOR.y1);
+  G.ctx.lineTo(enemy.w * GUNSHIP_ARMOR.x2, enemy.h * GUNSHIP_ARMOR.y1 - 6);
+  G.ctx.lineTo(enemy.w * GUNSHIP_ARMOR.x2, enemy.h * GUNSHIP_ARMOR.y2);
+  G.ctx.lineTo(enemy.w * GUNSHIP_ARMOR.x1, enemy.h * GUNSHIP_ARMOR.y2 + 5);
+  G.ctx.closePath();
+  G.ctx.fill();
+  G.ctx.stroke();
+  G.ctx.fillStyle = "#93a7ad";
+  for (const [nx, ny] of [[-0.36, -0.12], [-0.2, -0.12], [-0.36, 0.24], [-0.2, 0.24]]) {
+    G.ctx.beginPath();
+    G.ctx.arc(enemy.w * nx, enemy.h * ny, 3, 0, Math.PI * 2);
+    G.ctx.fill();
+  }
+  G.ctx.restore();
+
+  // Punto débil: cúpula roja pulsante arriba y atrás, donde los impactos
+  // hacen daño doble (coincide con el círculo de hitsGunshipWeakpoint).
+  const weakX = enemy.x + enemy.w * GUNSHIP_WEAKPOINT.offsetX;
+  const weakY = enemy.y + enemy.h * GUNSHIP_WEAKPOINT.offsetY;
+  const weakR = enemy.w * GUNSHIP_WEAKPOINT.radius * 0.62;
+  const pulso = 0.75 + Math.sin(G.state.elapsed * 7) * 0.25;
+  G.ctx.save();
+  G.ctx.shadowColor = "#ff3b18";
+  G.ctx.shadowBlur = 10 + 8 * pulso;
+  G.ctx.fillStyle = `rgba(255, 60, 25, ${0.55 + pulso * 0.3})`;
+  G.ctx.beginPath();
+  G.ctx.arc(weakX, weakY, weakR, 0, Math.PI * 2);
+  G.ctx.fill();
+  G.ctx.strokeStyle = "rgba(255, 214, 200, 0.85)";
+  G.ctx.lineWidth = 2;
+  G.ctx.stroke();
   G.ctx.restore();
 }
 
@@ -126,6 +172,8 @@ function drawHud() {
 
   const powerLabels = [];
   if (G.player.explosiveAmmo > 0) powerLabels.push({ text: `EXPLOSIVOS ${G.player.explosiveAmmo}`, color: "#ff8a18" });
+  if (G.player.homingAmmo > 0) powerLabels.push({ text: `TELEDIRIGIDOS ${G.player.homingAmmo}`, color: "#b6ff3c" });
+  if (G.ally) powerLabels.push({ text: "DRON ALIADO", color: "#6cecff" });
   if (G.player.rapid > 0) powerLabels.push({ text: `RÁFAGA ${Math.ceil(G.player.rapid)}s`, color: "#ffb02e" });
   if (G.player.shield > 0) powerLabels.push({ text: `ESCUDO ${Math.ceil(G.player.shield)}s`, color: "#68d8ff" });
   G.ctx.font = '900 11px Inter, sans-serif';
@@ -395,11 +443,39 @@ function drawEntities() {
 
   if (G.airbase) drawAirbase(G.airbase);
 
-  for (const bullet of G.playerBullets) {
-    drawSprite(bullet.explosive ? G.sprites.missile : G.sprites.playerBullet, bullet.x, bullet.y, bullet.w, bullet.h, {
-      glow: bullet.explosive ? "#ff8a18" : "#6cecff",
-      blur: 13,
+  if (G.ally) {
+    const frame = Math.floor(G.ally.age * 6) % G.sprites.drone.length;
+    drawSprite(G.sprites.drone[frame], G.ally.x, G.ally.y, 64, 74, {
+      flipX: true,
+      glow: "rgba(108, 236, 255, 0.55)",
+      blur: 12,
     });
+  }
+
+  for (const bullet of G.playerBullets) {
+    if (bullet.homing) {
+      drawSprite(G.sprites.missile, bullet.x, bullet.y, bullet.w, bullet.h, {
+        rotate: Math.atan2(bullet.vy, bullet.vx),
+        glow: "#b6ff3c",
+        blur: 13,
+      });
+    } else if (bullet.charged) {
+      drawSprite(G.sprites.missile, bullet.x, bullet.y, bullet.w, bullet.h, {
+        glow: "#ffb02e",
+        blur: 18,
+      });
+    } else if (bullet.fromAlly) {
+      drawSprite(G.sprites.playerBullet, bullet.x, bullet.y, bullet.w, bullet.h, {
+        rotate: Math.atan2(bullet.vy, bullet.vx),
+        glow: "#6cecff",
+        blur: 10,
+      });
+    } else {
+      drawSprite(bullet.explosive ? G.sprites.missile : G.sprites.playerBullet, bullet.x, bullet.y, bullet.w, bullet.h, {
+        glow: bullet.explosive ? "#ff8a18" : "#6cecff",
+        blur: 13,
+      });
+    }
   }
 
   for (const bullet of G.enemyBullets) {
@@ -432,9 +508,32 @@ function drawEntities() {
       drawSprite(G.sprites.drone[frame], enemy.x, enemy.y, enemy.w, enemy.h, {
         rotate: Math.sin(enemy.age * 3) * 0.05,
       });
+    } else if (enemy.type === "kamikaze") {
+      const frame = Math.floor(enemy.age * 8 + enemy.phase) % G.sprites.drone.length;
+      // El sprite del dron mira a la izquierda: en el piqué se orienta según
+      // el rumbo fijado, y en el aviso parpadea blanco/rojo.
+      const parpadeo = enemy.diveState === "telegraph" && Math.floor(enemy.telegraphTimer * 16) % 2 === 0;
+      drawSprite(G.sprites.drone[frame], enemy.x, enemy.y, enemy.w, enemy.h, {
+        rotate: enemy.diveState === "dive" ? Math.atan2(enemy.vy, enemy.vx) - Math.PI : 0,
+        glow: parpadeo ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 40, 10, 0.6)",
+        blur: 14,
+      });
+    } else if (enemy.type === "gunship") {
+      const frame = Math.floor(enemy.age * 5 + enemy.phase) % G.sprites.enemyHeli.length;
+      drawSprite(G.sprites.enemyHeli[frame], enemy.x, enemy.y, enemy.w, enemy.h);
+      drawGunshipArmor(enemy);
     } else if (enemy.type === "fighter") {
       const frame = Math.floor(enemy.phase) % G.sprites.fighter.length;
-      drawSprite(G.sprites.fighter[frame], enemy.x, enemy.y, enemy.w, enemy.h);
+      const squad = enemy.squadId != null ? G.state.squads[enemy.squadId] : null;
+      const enFormacion = squad && !squad.dispersed;
+      drawSprite(
+        G.sprites.fighter[frame],
+        enemy.x,
+        enemy.y,
+        enemy.w,
+        enemy.h,
+        enFormacion ? { glow: "rgba(255, 176, 46, 0.42)", blur: 12 } : {},
+      );
     } else {
       const frame = Math.floor(enemy.age * 5 + enemy.phase) % G.sprites.enemyHeli.length;
       drawSprite(G.sprites.enemyHeli[frame], enemy.x, enemy.y, enemy.w, enemy.h);
@@ -460,6 +559,24 @@ function drawEntities() {
     rotate: G.player.tilt,
     alpha: playerAlpha,
   });
+
+  // Medidor de carga: un arco alrededor del helicóptero que se cierra al
+  // mantener el disparo; al completarse pasa a naranja y late.
+  if (G.player.charge > 0) {
+    const progress = clamp(G.player.charge / CHARGE_TIME, 0, 1);
+    const cargado = progress >= 1;
+    G.ctx.save();
+    G.ctx.translate(G.player.x, G.player.y);
+    G.ctx.strokeStyle = cargado ? "#ff8a18" : "#ffd63c";
+    G.ctx.lineWidth = 5;
+    G.ctx.shadowColor = cargado ? "#ff8a18" : "#ffd63c";
+    G.ctx.shadowBlur = cargado ? 16 : 8;
+    if (cargado) G.ctx.globalAlpha = 0.7 + Math.sin(G.state.elapsed * 14) * 0.3;
+    G.ctx.beginPath();
+    G.ctx.arc(0, 0, 80, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2);
+    G.ctx.stroke();
+    G.ctx.restore();
+  }
 }
 
 
@@ -568,13 +685,15 @@ function drawHowTo() {
 
   seccion("ENEMIGOS", 122);
   const enemigos = [
-    [G.sprites.enemyHeli?.[0], "HELI", 220],
-    [G.sprites.drone?.[0], "DRON", 370],
-    [G.sprites.fighter?.[0], "CAZA", 520],
-    [G.sprites.boss, "ACORAZADO", 700, 190],
-    [G.sprites.airshipBoss, "DIRIGIBLE", 920, 210],
+    [G.sprites.enemyHeli?.[0], "HELI", 135, 88],
+    [G.sprites.drone?.[0], "DRON", 275, 80],
+    [G.sprites.fighter?.[0], "CAZA", 415, 96],
+    [G.sprites.drone?.[2], "KAMIKAZE", 555, 80],
+    [G.sprites.enemyHeli?.[1], "BLINDADO", 700, 92],
+    [G.sprites.boss, "ACORAZADO", 880, 150],
+    [G.sprites.airshipBoss, "DIRIGIBLE", 1065, 170],
   ];
-  for (const [sprite, texto, x, tam = 96] of enemigos) {
+  for (const [sprite, texto, x, tam] of enemigos) {
     drawSprite(sprite, x, 210, tam, tam * 0.75, { glow: "rgba(255, 72, 20, 0.25)", blur: 12 });
     etiqueta(texto, x, 285);
   }
@@ -596,10 +715,11 @@ function drawHowTo() {
   G.ctx.fillStyle = "rgba(255, 255, 255, 0.66)";
   G.ctx.font = "700 13px Inter, sans-serif";
   G.ctx.fillText("WASD / flechas mover · ESPACIO / J disparar · P / ESC pausa · ratón y táctil arrastrando", W / 2, 572);
-  G.ctx.fillText("Mando: stick mueve · A dispara · Start pausa", W / 2, 598);
+  G.ctx.fillText("Mantén pulsado el disparo para cargar un misil grande · suelta para lanzarlo", W / 2, 596);
+  G.ctx.fillText("Mando: stick mueve · A dispara (mantén para cargar) · Start pausa", W / 2, 620);
   G.ctx.fillStyle = "#d8f23b";
-  G.ctx.fillText("Sobrevive a las oleadas · Jefes cada 4 · Dirigible cada 8", W / 2, 622);
-  G.ctx.fillText("Bajas seguidas = multiplicador · Rozar proyectiles = puntos de esquiva", W / 2, 648);
+  G.ctx.fillText("Sobrevive a las oleadas · Jefes cada 4 · Dirigible cada 8", W / 2, 644);
+  G.ctx.fillText("Bajas seguidas = multiplicador · Rozar proyectiles = puntos de esquiva", W / 2, 668);
 }
 
 export function render() {

@@ -69,7 +69,55 @@ export const SHOP_ITEMS = {
   explosive: { price: 5 },
   shield: { price: 6 },
   rapid: { price: 4 },
+  homing: { price: 6 },
+  ally: { price: 7 },
 };
+
+
+// Kamikaze: patrulla hasta acercarse, avisa (parpadeo) KAMIKAZE_TELEGRAPH
+// segundos y se lanza en picado recto hacia donde estabas: no corrige, así
+// que se esquiva moviéndose en el último momento.
+export const KAMIKAZE_TRIGGER_DISTANCE = 430;
+export const KAMIKAZE_TELEGRAPH = 0.5;
+export const KAMIKAZE_DIVE_SPEED = 560;
+export const KAMIKAZE_DAMAGE = 2;
+
+// Escuadrón en V: cinco cazas que comparten ancla. Si caen todos antes de
+// que la formación se disperse (ancla a SQUAD_DISPERSE_X del jugador),
+// sueltan monedas extra.
+export const SQUAD_SIZE = 5;
+export const SQUAD_DISPERSE_X = 430;
+export const SQUAD_BONUS_COINS = 5;
+export const SQUAD_BONUS_SCORE = 800;
+
+// Blindado: la placa frontal (GUNSHIP_ARMOR, misma geometría que se dibuja)
+// repele los disparos normales. La cúpula roja del morro (punto débil, daño
+// doble) queda por encima de la placa y en el borde de ataque, de modo que un
+// disparo que llegue alto la toca antes que el casco. Quien pase por encima
+// o por detrás daña con normalidad. Teledirigidos y explosivos ignoran toda
+// la coraza.
+export const GUNSHIP_WEAKPOINT = { offsetX: -0.3, offsetY: -0.38, radius: 0.18 };
+export const GUNSHIP_ARMOR = { x1: -0.5, x2: -0.02, y1: -0.3, y2: 0.42 };
+
+// Carga de disparo: mantener pulsado el disparo carga hasta CHARGE_TIME
+// segundos; al soltar con al menos CHARGE_MIN sale un misil grande cuyo
+// daño y onda expansiva escalan con la carga.
+export const CHARGE_TIME = 1.15;
+export const CHARGE_MIN = 0.35;
+export const CHARGE_COOLDOWN = 0.42;
+
+// Misiles teledirigidos: corrigen su rumbo hacia el enemigo más cercano
+// con HOMING_TURN_RATE rad/s como máximo (se pueden ver venir).
+export const HOMING_TURN_RATE = 4.2;
+export const HOMING_SPEED = 620;
+export const HOMING_PACK_SIZE = 8;
+
+// Dron aliado: escolta al helicóptero durante la oleada siguiente a la
+// compra y dispara al enemigo más cercano por su cuenta.
+export const ALLY_OFFSET_X = -120;
+export const ALLY_OFFSET_Y = -78;
+export const ALLY_FIRE_INTERVAL = 0.34;
+export const ALLY_BULLET_SPEED = 720;
 
 
 // Combo: cada 4 bajas seguidas el multiplicador de puntos sube 1 (hasta x8).

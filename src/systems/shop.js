@@ -1,5 +1,5 @@
 // Armeria entre oleadas.
-import { SHOP_ITEMS, SHIELD_DURATION } from "../config.js";
+import { SHOP_ITEMS, SHIELD_DURATION, HOMING_PACK_SIZE } from "../config.js";
 import { G, setMode } from "../state.js";
 import { tone } from "../audio.js";
 import { createBurst } from "../entities/particles.js";
@@ -19,10 +19,13 @@ export function updateShopUI() {
     const item = SHOP_ITEMS[itemId];
     const status = button.querySelector(".shop-item-status");
     const lifeAlreadyFull = itemId === "life" && G.player.hp >= G.player.maxHp;
-    const canBuy = G.state.coins >= item.price && !lifeAlreadyFull;
+    const allyAlreadySet = itemId === "ally" && (G.ally || G.player.allyArmed);
+    const canBuy = G.state.coins >= item.price && !lifeAlreadyFull && !allyAlreadySet;
     button.disabled = !canBuy;
     if (lifeAlreadyFull) status.textContent = "COMPLETO";
+    else if (allyAlreadySet) status.textContent = "YA ARMADO";
     else if (itemId === "explosive" && G.player.explosiveAmmo > 0) status.textContent = `${G.player.explosiveAmmo} RESTANTES`;
+    else if (itemId === "homing" && G.player.homingAmmo > 0) status.textContent = `${G.player.homingAmmo} RESTANTES`;
     else if (G.state.coins < item.price) status.textContent = "FALTAN MONEDAS";
     else status.textContent = "DISPONIBLE";
   }
@@ -34,13 +37,20 @@ export function buyShopItem(itemId) {
   const item = SHOP_ITEMS[itemId];
   if (G.state.coins < item.price) return;
   if (itemId === "life" && G.player.hp >= G.player.maxHp) return;
+  if (itemId === "ally" && (G.ally || G.player.allyArmed)) return;
 
   G.state.coins -= item.price;
   if (itemId === "life") G.player.hp = Math.min(G.player.maxHp, G.player.hp + 1);
   if (itemId === "shield") G.player.shield = Math.max(G.player.shield, SHIELD_DURATION);
   if (itemId === "rapid") G.player.rapid = Math.max(G.player.rapid, 10);
   if (itemId === "explosive") G.player.explosiveAmmo += 8;
-  const purchaseColor = itemId === "shield" ? "#68d8ff" : itemId === "explosive" ? "#ff8a18" : "#d8f23b";
+  if (itemId === "homing") G.player.homingAmmo += HOMING_PACK_SIZE;
+  if (itemId === "ally") G.player.allyArmed = true;
+  const purchaseColor =
+    itemId === "shield" || itemId === "ally" ? "#68d8ff"
+      : itemId === "explosive" ? "#ff8a18"
+        : itemId === "homing" ? "#b6ff3c"
+          : "#d8f23b";
   createBurst(G.player.x, G.player.y, purchaseColor, 12, 150);
   tone(itemId === "life" ? 430 : 620, 0.16, "sine", 0.028, 220);
   updateShopUI();
@@ -59,6 +69,9 @@ export function openShop() {
   G.airshipGondolas = [];
   G.pickups = [];
   G.floaters = [];
+  // El dron aliado cubre una oleada: al acabar, se retira con la tienda.
+  G.ally = null;
+  G.state.squads = {};
   G.state.bossClearTimer = 0;
   updateShopUI();
   setMode("shop");

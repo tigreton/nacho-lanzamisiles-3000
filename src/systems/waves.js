@@ -4,11 +4,12 @@ import { G } from "../state.js";
 import { rand } from "../utils.js";
 import { tone } from "../audio.js";
 import { updatePlayer } from "../entities/player.js";
-import { spawnEnemy, spawnBoss, updateEnemies, updateBalloonBaskets, updateAirshipGondolas } from "../entities/enemies.js";
+import { spawnEnemy, spawnBoss, spawnSquad, updateEnemies, updateBalloonBaskets, updateAirshipGondolas } from "../entities/enemies.js";
 import { updateProjectiles } from "../entities/bullets.js";
 import { updatePickups } from "../entities/pickups.js";
 import { updateEffects } from "../entities/particles.js";
 import { spawnAirbase, updateAirbase } from "../entities/airbase.js";
+import { spawnAlly, updateAlly } from "../entities/ally.js";
 import { openShop } from "./shop.js";
 import { unlock } from "./achievements.js";
 
@@ -30,6 +31,13 @@ export function advanceWave() {
   G.state.bossClearTimer = 0;
   G.state.airbaseSpawned = false;
   G.airbase = null;
+  G.state.squads = {};
+  G.state.squadTimer = rand(6, 9);
+  // El dron comprado en la armería despega con la nueva oleada.
+  if (G.player.allyArmed) {
+    G.player.allyArmed = false;
+    spawnAlly();
+  }
   // El combo es impulso de una oleada: al cambiar de oleada se empieza de cero.
   G.state.combo.kills = 0;
   G.state.combo.timer = 0;
@@ -68,6 +76,7 @@ export function updateGame(dt) {
   }
 
   updatePlayer(dt);
+  updateAlly(dt);
   updateAirbase(dt);
   updateProjectiles(dt);
   updateEnemies(dt);
@@ -107,6 +116,17 @@ export function updateGame(dt) {
         Math.max(0.48, 1.28 - G.state.wave * 0.055) *
         G.state.difficulty.spawnIntervalMultiplier *
         rand(0.78, 1.24);
+    }
+    // Escuadrones en formación: como mucho uno en pantalla, y solo a partir
+    // de la oleada 3, para que la V se lea sobre el resto de tráfico.
+    G.state.squadTimer -= dt;
+    if (G.state.wave >= 3 && G.state.squadTimer <= 0) {
+      if (Object.keys(G.state.squads).length > 0) {
+        G.state.squadTimer = 2;
+      } else {
+        spawnSquad();
+        G.state.squadTimer = rand(15, 22);
+      }
     }
     if (G.state.waveTime > G.state.difficulty.waveDuration && !G.airbase) completeWave();
   }

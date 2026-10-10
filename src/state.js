@@ -53,6 +53,7 @@ export const G = {
   selectedHelicopter: "v1",
   player: undefined,
   state: undefined,
+  ally: null,
   enemies: [],
   playerBullets: [],
   enemyBullets: [],
