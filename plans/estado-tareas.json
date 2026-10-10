@@ -205,9 +205,17 @@
       "prioridad": "P2",
       "titulo": "Eliminar previousMode",
       "detalle": "game.js:206; siempre vale 'playing'; simplificar togglePause",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 13:24"
+      "actualizada": "2026-10-10 13:24",
+      "decisiones": [
+        "Verificado con grep que setMode('paused') solo ocurre en togglePause tras asignar previousMode='playing', así que reanudar a 'playing' es equivalente; la declaración inicial ('menu') era inalcanzable como valor de reanudación"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "node --check OK; grep 0 referencias; togglePause queda con setMode literal",
+      "commit": "8413a81"
     },
     {
       "id": "1.6",
@@ -215,8 +223,9 @@
       "prioridad": "P3",
       "titulo": "Reducir CROPS.missile al frame usado",
       "detalle": "Solo se usa missile[4] (game.js:2106)",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 13:24"
     },
     {
       "id": "1.7",

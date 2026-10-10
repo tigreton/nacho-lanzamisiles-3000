@@ -119,14 +119,7 @@
       [667, 47, 83, 99],
     ],
     face: [796, 49, 95, 101],
-    missile: [
-      [18, 229, 127, 82],
-      [141, 229, 139, 82],
-      [277, 229, 139, 82],
-      [410, 229, 111, 82],
-      [519, 229, 140, 82],
-      [652, 229, 143, 82],
-    ],
+    missile: [519, 229, 140, 82],
     enemyHeli: [
       [18, 380, 105, 95],
       [118, 380, 106, 95],
@@ -507,7 +500,7 @@
   function prepareSprites() {
     sprites.player = CROPS.player.map(cutSprite);
     sprites.face = cutSprite(CROPS.face);
-    sprites.missile = CROPS.missile.map(cutSprite);
+    sprites.missile = cutSprite(CROPS.missile);
     sprites.enemyHeli = CROPS.enemyHeli.map(cutSprite);
     sprites.drone = CROPS.drone.map(cutSprite);
     sprites.fighter = CROPS.fighter.map(cutSprite);
@@ -1779,7 +1772,7 @@
     if (airbase) drawAirbase(airbase);
 
     for (const bullet of playerBullets) {
-      drawSprite(bullet.explosive ? sprites.missile[4] : sprites.playerBullet, bullet.x, bullet.y, bullet.w, bullet.h, {
+      drawSprite(bullet.explosive ? sprites.missile : sprites.playerBullet, bullet.x, bullet.y, bullet.w, bullet.h, {
         glow: bullet.explosive ? "#ff8a18" : "#6cecff",
         blur: 13,
       });

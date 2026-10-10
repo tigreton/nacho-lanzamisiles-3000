@@ -145,3 +145,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 13:24] 1.5 — Eliminar previousMode
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 13:24] 1.5 — Eliminar previousMode
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Verificado con grep que setMode('paused') solo ocurre en togglePause tras asignar previousMode='playing', así que reanudar a 'playing' es equivalente; la declaración inicial ('menu') era inalcanzable como valor de reanudación
+- **Archivos:** game.js
+- **Verificación:** node --check OK; grep 0 referencias; togglePause queda con setMode literal
+- **Commit:** 8413a81
+
+### [2026-10-10 13:24] 1.6 — Reducir CROPS.missile al frame usado
+- **Estado:** pendiente → en_curso
+
