@@ -168,7 +168,6 @@
       [35, 942, 84, 80],
       [120, 942, 85, 80],
       [205, 942, 85, 80],
-      [292, 942, 82, 80],
       [377, 942, 88, 80],
     ],
   };
@@ -1760,7 +1759,7 @@
           blur: 9,
         });
       } else {
-        const index = { rapid: 0, shield: 1, heart: 2, star: 4 }[pickup.type] ?? 4;
+        const index = { rapid: 0, shield: 1, heart: 2, star: 3 }[pickup.type] ?? 3;
         drawSprite(sprites.powerups[index], pickup.x, pickup.y + bob, pickup.w, pickup.h, {
           glow: pickup.type === "heart" ? "#ff472c" : "#9ce7ff",
           blur: 10,

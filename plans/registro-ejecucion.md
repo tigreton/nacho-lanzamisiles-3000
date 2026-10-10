@@ -167,3 +167,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 13:25] 1.7 — Eliminar campo enemy.sprite
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 13:25] 1.7 — Eliminar campo enemy.sprite
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Grep previo: ninguna lectura de .sprite en todo game.js; el dibujado de enemigos usa sprites.enemyHeli/drone/fighter por tipo
+- **Archivos:** game.js
+- **Verificación:** node --check OK; grep sin coincidencias de lecturas
+- **Commit:** a6383ee
+
+### [2026-10-10 13:25] 1.8 — Eliminar powerups[3] del crop
+- **Estado:** pendiente → en_curso
+

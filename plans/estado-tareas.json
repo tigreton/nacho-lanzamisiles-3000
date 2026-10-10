@@ -241,9 +241,17 @@
       "prioridad": "P3",
       "titulo": "Eliminar campo enemy.sprite",
       "detalle": "game.js:717; se inicializa pero nunca se lee",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 13:25"
+      "actualizada": "2026-10-10 13:25",
+      "decisiones": [
+        "Grep previo: ninguna lectura de .sprite en todo game.js; el dibujado de enemigos usa sprites.enemyHeli/drone/fighter por tipo"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "node --check OK; grep sin coincidencias de lecturas",
+      "commit": "a6383ee"
     },
     {
       "id": "1.8",
@@ -251,8 +259,9 @@
       "prioridad": "P3",
       "titulo": "Eliminar powerups[3] del crop",
       "detalle": "game.js:175-181; índice 3 nunca se dibuja",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 13:25"
     },
     {
       "id": "2.1",
