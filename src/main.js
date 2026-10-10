@@ -3,217 +3,123 @@ import {
   W, H, DIFFICULTIES, HELICOPTERS, SHOP_ITEMS, CROPS, AIRSHIP_CROPS,
   SHIELD_DURATION, SHIELD_RADIUS, MAX_PARTICLES,
 } from "./config.js";
+import { G, setMode, selectDifficulty, selectHelicopter } from "./state.js";
+import { getHighScore, saveHighScore } from "./records.js";
 
 
-const canvas = document.querySelector("#game-canvas");
-const ctx = canvas.getContext("2d");
-// El mundo del juego vive en coordenadas lógicas fijas; el canvas físico se
-// dimensiona al tamaño CSS × devicePixelRatio para texto y sprites nítidos.
+// El mundo del juego vive en coordenadas lógicas fijas; el G.canvas físico se
+// dimensiona al tamaño CSS × devicePixelRatio para texto y G.sprites nítidos.
 
 function resizeCanvas() {
   const ratio = Math.min(window.devicePixelRatio || 1, 2);
-  const rect = canvas.getBoundingClientRect();
+  const rect = G.canvas.getBoundingClientRect();
   const ancho = Math.max(1, Math.round(rect.width * ratio));
   const alto = Math.max(1, Math.round(rect.height * ratio));
-  if (canvas.width !== ancho || canvas.height !== alto) {
-    canvas.width = ancho;
-    canvas.height = alto;
+  if (G.canvas.width !== ancho || G.canvas.height !== alto) {
+    G.canvas.width = ancho;
+    G.canvas.height = alto;
   }
   // Escalas independientes: si el contenedor no es 16:9 el juego se estira
-  // exactamente igual que cuando el canvas era fijo.
-  ctx.setTransform(ancho / W, 0, 0, alto / H, 0, 0);
+  // exactamente igual que cuando el G.canvas era fijo.
+  G.ctx.setTransform(ancho / W, 0, 0, alto / H, 0, 0);
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-const ui = {
-  loading: document.querySelector("#loading-screen"),
-  menu: document.querySelector("#menu-screen"),
-  pause: document.querySelector("#pause-screen"),
-  shop: document.querySelector("#shop-screen"),
-  helicopter: document.querySelector("#helicopter-screen"),
-  gameover: document.querySelector("#gameover-screen"),
-  play: document.querySelector("#play-button"),
-  restart: document.querySelector("#restart-button"),
-  resume: document.querySelector("#resume-button"),
-  pauseButton: document.querySelector("#pause-button"),
-  soundButton: document.querySelector("#sound-button"),
-  resultTitle: document.querySelector("#result-title"),
-  resultCopy: document.querySelector("#result-copy"),
-  menuRecord: document.querySelector("#menu-record"),
-  difficultyButtons: [...document.querySelectorAll(".difficulty-option")],
-  helicopterButtons: [...document.querySelectorAll("#menu-screen .helicopter-option")],
-  changeHelicopterButtons: [...document.querySelectorAll("#helicopter-screen .helicopter-option")],
-  helicopterContinue: document.querySelector("#helicopter-continue"),
-  helicopterSummary: document.querySelector("#helicopter-summary"),
-  shopSummary: document.querySelector("#shop-summary"),
-  shopCoins: document.querySelector("#shop-coins"),
-  shopWave: document.querySelector("#shop-wave"),
-  continueButton: document.querySelector("#continue-button"),
-  shopItemButtons: [...document.querySelectorAll(".shop-item")],
-};
 
-const sheet = new Image();
-const airshipSheet = new Image();
-const gondolaSheet = new Image();
-const helicopterSheets = {
-  v1: new Image(),
-  v2: new Image(),
-};
-const sprites = {};
-const keys = new Set();
-const pointer = { active: false, x: W * 0.22, y: H * 0.5 };
-
-let mode = "loading";
-let lastTime = performance.now();
 let audioContext = null;
 let soundEnabled = true;
-let selectedDifficulty = "normal";
-let selectedHelicopter = "v1";
 let airshipReady = false;
 let gondolaReady = false;
 let helicopterVariantsReady = 0;
 let fontsReady = false;
 
-let player;
-let state;
-let enemies = [];
-let playerBullets = [];
-let enemyBullets = [];
-let balloonBaskets = [];
-let airshipGondolas = [];
-let airbase = null;
-let pickups = [];
-let effects = [];
-let particles = [];
-let stars = [];
 
 const rand = (min, max) => min + Math.random() * (max - min);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const lerp = (a, b, amount) => a + (b - a) * amount;
 
-function showOnly(screen) {
-  [ui.loading, ui.menu, ui.pause, ui.shop, ui.helicopter, ui.gameover].forEach((item) => {
-    item.classList.toggle("screen--visible", item === screen);
-  });
-}
-
-function setMode(nextMode) {
-  mode = nextMode;
-  if (nextMode === "menu") {
-    showOnly(ui.menu);
-    updateMenuRecord();
-  }
-  else if (nextMode === "paused") showOnly(ui.pause);
-  else if (nextMode === "shop") showOnly(ui.shop);
-  else if (nextMode === "helicopter") showOnly(ui.helicopter);
-  else if (nextMode === "gameover") showOnly(ui.gameover);
-  else showOnly(null);
-  ui.pauseButton.textContent = nextMode === "paused" ? "SEGUIR" : "PAUSA";
-}
-
-function selectDifficulty(id) {
-  if (!DIFFICULTIES[id]) return;
-  selectedDifficulty = id;
-  for (const button of ui.difficultyButtons) {
-    const selected = button.dataset.difficulty === id;
-    button.classList.toggle("is-selected", selected);
-    button.setAttribute("aria-pressed", String(selected));
-  }
-  updateMenuRecord();
-}
-
-function selectHelicopter(id) {
-  if (!HELICOPTERS[id]) return;
-  selectedHelicopter = id;
-  for (const button of [...ui.helicopterButtons, ...ui.changeHelicopterButtons]) {
-    const selected = button.dataset.helicopter === id;
-    button.classList.toggle("is-selected", selected);
-    button.setAttribute("aria-pressed", String(selected));
-  }
-}
-
 function applyHelicopterStats(id) {
   const stats = HELICOPTERS[id];
-  if (!stats || !player || !state) return;
-  const previousHp = player.hp;
-  player.helicopter = id;
-  player.maxHp = state.difficulty.playerHp + stats.maxHpBonus;
-  player.hp = Math.min(previousHp, player.maxHp);
-  player.speedMultiplier = stats.speedMultiplier;
-  player.fireCooldownMultiplier = stats.fireCooldownMultiplier;
-  player.damageReduction = stats.damageReduction;
-  player.hitboxBonus = stats.hitboxBonus;
+  if (!stats || !G.player || !G.state) return;
+  const previousHp = G.player.hp;
+  G.player.helicopter = id;
+  G.player.maxHp = G.state.difficulty.playerHp + stats.maxHpBonus;
+  G.player.hp = Math.min(previousHp, G.player.maxHp);
+  G.player.speedMultiplier = stats.speedMultiplier;
+  G.player.fireCooldownMultiplier = stats.fireCooldownMultiplier;
+  G.player.damageReduction = stats.damageReduction;
+  G.player.hitboxBonus = stats.hitboxBonus;
 }
 
 function updateShopUI() {
-  if (!state || !player) return;
-  const nextWave = state.wave + 1;
-  ui.shopCoins.textContent = `${state.coins} MONEDAS`;
-  ui.shopWave.textContent = `PREPARANDO OLEADA ${nextWave}`;
-  ui.shopSummary.textContent = `OLEADA ${state.wave} SUPERADA · Dificultad ${state.difficulty.label}`;
-  ui.continueButton.textContent = `CONTINUAR · OLEADA ${nextWave}`;
+  if (!G.state || !G.player) return;
+  const nextWave = G.state.wave + 1;
+  G.ui.shopCoins.textContent = `${G.state.coins} MONEDAS`;
+  G.ui.shopWave.textContent = `PREPARANDO OLEADA ${nextWave}`;
+  G.ui.shopSummary.textContent = `OLEADA ${G.state.wave} SUPERADA · Dificultad ${G.state.difficulty.label}`;
+  G.ui.continueButton.textContent = `CONTINUAR · OLEADA ${nextWave}`;
 
-  for (const button of ui.shopItemButtons) {
+  for (const button of G.ui.shopItemButtons) {
     const itemId = button.dataset.shopItem;
     const item = SHOP_ITEMS[itemId];
     const status = button.querySelector(".shop-item-status");
-    const lifeAlreadyFull = itemId === "life" && player.hp >= player.maxHp;
-    const canBuy = state.coins >= item.price && !lifeAlreadyFull;
+    const lifeAlreadyFull = itemId === "life" && G.player.hp >= G.player.maxHp;
+    const canBuy = G.state.coins >= item.price && !lifeAlreadyFull;
     button.disabled = !canBuy;
     if (lifeAlreadyFull) status.textContent = "COMPLETO";
-    else if (state.coins < item.price) status.textContent = "FALTAN MONEDAS";
-    else if (itemId === "explosive" && player.explosiveAmmo > 0) status.textContent = `${player.explosiveAmmo} RESTANTES`;
+    else if (G.state.coins < item.price) status.textContent = "FALTAN MONEDAS";
+    else if (itemId === "explosive" && G.player.explosiveAmmo > 0) status.textContent = `${G.player.explosiveAmmo} RESTANTES`;
     else status.textContent = "DISPONIBLE";
   }
 }
 
 function buyShopItem(itemId) {
-  if (mode !== "shop" || !SHOP_ITEMS[itemId]) return;
+  if (G.mode !== "shop" || !SHOP_ITEMS[itemId]) return;
   const item = SHOP_ITEMS[itemId];
-  if (state.coins < item.price) return;
-  if (itemId === "life" && player.hp >= player.maxHp) return;
+  if (G.state.coins < item.price) return;
+  if (itemId === "life" && G.player.hp >= G.player.maxHp) return;
 
-  state.coins -= item.price;
-  if (itemId === "life") player.hp = Math.min(player.maxHp, player.hp + 1);
-  if (itemId === "shield") player.shield = Math.max(player.shield, SHIELD_DURATION);
-  if (itemId === "rapid") player.rapid = Math.max(player.rapid, 10);
-  if (itemId === "explosive") player.explosiveAmmo += 8;
+  G.state.coins -= item.price;
+  if (itemId === "life") G.player.hp = Math.min(G.player.maxHp, G.player.hp + 1);
+  if (itemId === "shield") G.player.shield = Math.max(G.player.shield, SHIELD_DURATION);
+  if (itemId === "rapid") G.player.rapid = Math.max(G.player.rapid, 10);
+  if (itemId === "explosive") G.player.explosiveAmmo += 8;
   const purchaseColor = itemId === "shield" ? "#68d8ff" : itemId === "explosive" ? "#ff8a18" : "#d8f23b";
-  createBurst(player.x, player.y, purchaseColor, 12, 150);
+  createBurst(G.player.x, G.player.y, purchaseColor, 12, 150);
   tone(itemId === "life" ? 430 : 620, 0.16, "sine", 0.028, 220);
   updateShopUI();
 }
 
 function openShop() {
-  if (mode !== "playing") return;
-  for (const pickup of pickups) {
-    if (pickup.type === "coin") state.coins += 1;
+  if (G.mode !== "playing") return;
+  for (const pickup of G.pickups) {
+    if (pickup.type === "coin") G.state.coins += 1;
   }
-  enemies = [];
-  enemyBullets = [];
-  playerBullets = [];
-  balloonBaskets = [];
-  airshipGondolas = [];
-  pickups = [];
-  state.bossClearTimer = 0;
+  G.enemies = [];
+  G.enemyBullets = [];
+  G.playerBullets = [];
+  G.balloonBaskets = [];
+  G.airshipGondolas = [];
+  G.pickups = [];
+  G.state.bossClearTimer = 0;
   updateShopUI();
   setMode("shop");
   tone(300, 0.13, "square", 0.026, 160);
 }
 
 function continueFromShop() {
-  if (mode !== "shop") return;
+  if (G.mode !== "shop") return;
   advanceWave();
   setMode("playing");
-  lastTime = performance.now();
-  canvas.focus();
+  G.lastTime = performance.now();
+  G.canvas.focus();
 }
 
 function spawnAirbase() {
-  if (airbase || state.airbaseSpawned) return;
+  if (G.airbase || G.state.airbaseSpawned) return;
   const homeY = rand(170, H - 170);
-  airbase = {
+  G.airbase = {
     x: W + 180,
     y: homeY,
     homeY,
@@ -225,46 +131,46 @@ function spawnAirbase() {
     dockAge: 0,
     phase: rand(0, Math.PI * 2),
   };
-  state.airbaseSpawned = true;
+  G.state.airbaseSpawned = true;
   announceWave("BASE AÉREA · CAMBIO DISPONIBLE");
   tone(320, 0.2, "triangle", 0.026, 160);
 }
 
 function updateAirbase(dt) {
-  if (!airbase) return;
-  airbase.age += dt;
-  airbase.y = airbase.homeY + Math.sin(airbase.age * 1.6 + airbase.phase) * 9;
+  if (!G.airbase) return;
+  G.airbase.age += dt;
+  G.airbase.y = G.airbase.homeY + Math.sin(G.airbase.age * 1.6 + G.airbase.phase) * 9;
 
-  if (airbase.x > airbase.targetX) {
-    airbase.x -= airbase.vx * dt;
+  if (G.airbase.x > G.airbase.targetX) {
+    G.airbase.x -= G.airbase.vx * dt;
   } else {
-    airbase.dockAge += dt;
-    if (airbase.dockAge > 14) {
-      airbase = null;
+    G.airbase.dockAge += dt;
+    if (G.airbase.dockAge > 14) {
+      G.airbase = null;
       return;
     }
   }
 
-  if (overlaps(player, airbase, 0.25)) openHelicopterBay();
+  if (overlaps(G.player, G.airbase, 0.25)) openHelicopterBay();
 }
 
 function openHelicopterBay() {
-  if (mode !== "playing" || !airbase) return;
-  selectHelicopter(player.helicopter || selectedHelicopter);
-  ui.helicopterSummary.textContent = `Helicóptero actual: ${HELICOPTERS[player.helicopter].label}. Elige tu nuevo aparato.`;
+  if (G.mode !== "playing" || !G.airbase) return;
+  selectHelicopter(G.player.helicopter || G.selectedHelicopter);
+  G.ui.helicopterSummary.textContent = `Helicóptero actual: ${HELICOPTERS[G.player.helicopter].label}. Elige tu nuevo aparato.`;
   setMode("helicopter");
   tone(520, 0.16, "sine", 0.03, 220);
 }
 
 function continueFromHelicopter() {
-  if (mode !== "helicopter") return;
-  applyHelicopterStats(selectedHelicopter);
-  createBurst(player.x, player.y, selectedHelicopter === "v2" ? "#66e8ff" : "#d8f23b", 16, 180);
+  if (G.mode !== "helicopter") return;
+  applyHelicopterStats(G.selectedHelicopter);
+  createBurst(G.player.x, G.player.y, G.selectedHelicopter === "v2" ? "#66e8ff" : "#d8f23b", 16, 180);
   tone(620, 0.18, "square", 0.028, 260);
-  airbase = null;
+  G.airbase = null;
   setMode("playing");
-  lastTime = performance.now();
-  canvas.focus();
+  G.lastTime = performance.now();
+  G.canvas.focus();
 }
 
 function cutSprite(crop) {
@@ -274,23 +180,23 @@ function cutSprite(crop) {
   const output = document.createElement("canvas");
   output.width = sw;
   output.height = sh;
-  output.getContext("2d").drawImage(sheet, sx, sy, sw, sh, 0, 0, sw, sh);
+  output.getContext("2d").drawImage(G.sheet, sx, sy, sw, sh, 0, 0, sw, sh);
   return output;
 }
 
 function prepareSprites() {
-  sprites.player = CROPS.player.map(cutSprite);
-  sprites.face = cutSprite(CROPS.face);
-  sprites.missile = cutSprite(CROPS.missile);
-  sprites.enemyHeli = CROPS.enemyHeli.map(cutSprite);
-  sprites.drone = CROPS.drone.map(cutSprite);
-  sprites.fighter = CROPS.fighter.map(cutSprite);
-  sprites.boss = cutSprite(CROPS.boss);
-  sprites.explosion = CROPS.explosion.map(cutSprite);
-  sprites.enemyBullet = cutSprite(CROPS.enemyBullet);
-  sprites.playerBullet = cutSprite(CROPS.playerBullet);
-  sprites.coin = cutSprite(CROPS.coin);
-  sprites.powerups = CROPS.powerups.map(cutSprite);
+  G.sprites.player = CROPS.player.map(cutSprite);
+  G.sprites.face = cutSprite(CROPS.face);
+  G.sprites.missile = cutSprite(CROPS.missile);
+  G.sprites.enemyHeli = CROPS.enemyHeli.map(cutSprite);
+  G.sprites.drone = CROPS.drone.map(cutSprite);
+  G.sprites.fighter = CROPS.fighter.map(cutSprite);
+  G.sprites.boss = cutSprite(CROPS.boss);
+  G.sprites.explosion = CROPS.explosion.map(cutSprite);
+  G.sprites.enemyBullet = cutSprite(CROPS.enemyBullet);
+  G.sprites.playerBullet = cutSprite(CROPS.playerBullet);
+  G.sprites.coin = cutSprite(CROPS.coin);
+  G.sprites.powerups = CROPS.powerups.map(cutSprite);
 }
 
 function cutAirshipSprite(crop) {
@@ -298,25 +204,25 @@ function cutAirshipSprite(crop) {
   const output = document.createElement("canvas");
   output.width = sw;
   output.height = sh;
-  output.getContext("2d").drawImage(airshipSheet, sx, sy, sw, sh, 0, 0, sw, sh);
+  output.getContext("2d").drawImage(G.airshipSheet, sx, sy, sw, sh, 0, 0, sw, sh);
   return output;
 }
 
 function prepareAirshipSprites() {
-  sprites.airshipBoss = cutAirshipSprite(AIRSHIP_CROPS.boss);
-  sprites.balloons = AIRSHIP_CROPS.balloons.map(cutAirshipSprite);
+  G.sprites.airshipBoss = cutAirshipSprite(AIRSHIP_CROPS.boss);
+  G.sprites.balloons = AIRSHIP_CROPS.balloons.map(cutAirshipSprite);
 }
 
 function resetGame() {
-  const difficulty = DIFFICULTIES[selectedDifficulty];
-  const helicopter = HELICOPTERS[selectedHelicopter];
+  const difficulty = DIFFICULTIES[G.selectedDifficulty];
+  const helicopter = HELICOPTERS[G.selectedHelicopter];
   const maxHp = difficulty.playerHp + helicopter.maxHpBonus;
-  player = {
+  G.player = {
     x: 150,
     y: H * 0.5,
     w: 150,
     h: 100,
-    helicopter: selectedHelicopter,
+    helicopter: G.selectedHelicopter,
     hp: maxHp,
     maxHp,
     speedMultiplier: helicopter.speedMultiplier,
@@ -332,7 +238,7 @@ function resetGame() {
     tilt: 0,
   };
 
-  state = {
+  G.state = {
     score: 0,
     coins: 0,
     wave: 1,
@@ -348,20 +254,20 @@ function resetGame() {
     shake: 0,
     flash: 0,
     background: 0,
-    highScore: getHighScore(selectedDifficulty),
+    highScore: getHighScore(G.selectedDifficulty),
     difficulty,
   };
 
-  enemies = [];
-  playerBullets = [];
-  enemyBullets = [];
-  balloonBaskets = [];
-  airshipGondolas = [];
-  airbase = null;
-  pickups = [];
-  effects = [];
-  particles = [];
-  stars = Array.from({ length: 46 }, () => ({
+  G.enemies = [];
+  G.playerBullets = [];
+  G.enemyBullets = [];
+  G.balloonBaskets = [];
+  G.airshipGondolas = [];
+  G.airbase = null;
+  G.pickups = [];
+  G.effects = [];
+  G.particles = [];
+  G.stars = Array.from({ length: 46 }, () => ({
     x: rand(0, W),
     y: rand(0, H),
     speed: rand(18, 72),
@@ -373,42 +279,10 @@ function resetGame() {
 function startGame() {
   resetGame();
   setMode("playing");
-  canvas.focus();
+  G.canvas.focus();
   unlockAudio();
   tone(360, 0.08, "square", 0.035);
   setTimeout(() => tone(540, 0.12, "square", 0.035), 90);
-}
-
-function getHighScore(difficultyId = selectedDifficulty) {
-  try {
-    const record =
-      Number(localStorage.getItem(`operacion-nacho-record-${difficultyId}`)) || 0;
-    // El récord global anterior (sin dificultad) se conserva como suelo:
-    // nunca hizo falta distinguir y los récords no deben bajar.
-    const legado = Number(localStorage.getItem("operacion-nacho-record")) || 0;
-    return Math.max(record, legado);
-  } catch {
-    return 0;
-  }
-}
-
-function saveHighScore(score, difficultyId = selectedDifficulty) {
-  try {
-    const clave = `operacion-nacho-record-${difficultyId}`;
-    if (score > Number(localStorage.getItem(clave)) || 0) {
-      localStorage.setItem(clave, String(score));
-    }
-  } catch {
-    // The game still works when storage is unavailable.
-  }
-}
-
-function updateMenuRecord() {
-  const etiqueta = DIFFICULTIES[selectedDifficulty].label;
-  const record = getHighScore();
-  ui.menuRecord.textContent = record
-    ? `RÉCORD ${etiqueta}: ${record.toLocaleString("es-ES")}`
-    : `AÚN SIN RÉCORD EN ${etiqueta}`;
 }
 
 function unlockAudio() {
@@ -437,7 +311,7 @@ function tone(frequency, duration, type = "square", volume = 0.025, slide = 0) {
 
 function toggleSound() {
   soundEnabled = !soundEnabled;
-  ui.soundButton.textContent = `SONIDO: ${soundEnabled ? "ON" : "OFF"}`;
+  G.ui.soundButton.textContent = `SONIDO: ${soundEnabled ? "ON" : "OFF"}`;
   if (soundEnabled) {
     unlockAudio();
     tone(520, 0.09, "square", 0.03);
@@ -445,18 +319,18 @@ function toggleSound() {
 }
 
 function togglePause() {
-  if (mode === "playing") {
+  if (G.mode === "playing") {
     setMode("paused");
-  } else if (mode === "paused") {
+  } else if (G.mode === "paused") {
     setMode("playing");
-    lastTime = performance.now();
-    canvas.focus();
+    G.lastTime = performance.now();
+    G.canvas.focus();
   }
 }
 
 function announceWave(text) {
-  state.banner = 2.3;
-  state.bannerText = text;
+  G.state.banner = 2.3;
+  G.state.bannerText = text;
   tone(220, 0.12, "sawtooth", 0.035, 90);
   setTimeout(() => tone(440, 0.16, "square", 0.03), 110);
 }
@@ -466,27 +340,27 @@ function isBossEnemy(enemy) {
 }
 
 function advanceWave() {
-  state.wave += 1;
-  state.waveTime = 0;
-  state.spawnTimer = 1;
-  state.bossSpawned = false;
-  state.bossActive = false;
-  state.bossClearTimer = 0;
-  state.airbaseSpawned = false;
-  airbase = null;
-  state.background = Math.floor((state.wave - 1) / 2) % CROPS.backgrounds.length;
-  const bossWave = state.wave % 4 === 0;
-  const airshipWave = state.wave % 8 === 0;
-  announceWave(bossWave ? `${airshipWave ? "DIRIGIBLE" : "JEFE"} · OLEADA ${state.wave}` : `OLEADA ${state.wave}`);
+  G.state.wave += 1;
+  G.state.waveTime = 0;
+  G.state.spawnTimer = 1;
+  G.state.bossSpawned = false;
+  G.state.bossActive = false;
+  G.state.bossClearTimer = 0;
+  G.state.airbaseSpawned = false;
+  G.airbase = null;
+  G.state.background = Math.floor((G.state.wave - 1) / 2) % CROPS.backgrounds.length;
+  const bossWave = G.state.wave % 4 === 0;
+  const airshipWave = G.state.wave % 8 === 0;
+  announceWave(bossWave ? `${airshipWave ? "DIRIGIBLE" : "JEFE"} · OLEADA ${G.state.wave}` : `OLEADA ${G.state.wave}`);
 }
 
 function spawnEnemy(forcedType) {
-  const difficulty = state.difficulty;
+  const difficulty = G.state.difficulty;
   const roll = Math.random();
   let type = forcedType;
   if (!type) {
-    if (state.wave >= 3 && roll < 0.25) type = "fighter";
-    else if (state.wave >= 2 && roll < 0.58) type = "drone";
+    if (G.state.wave >= 3 && roll < 0.25) type = "fighter";
+    else if (G.state.wave >= 2 && roll < 0.58) type = "drone";
     else type = "heli";
   }
 
@@ -502,38 +376,38 @@ function spawnEnemy(forcedType) {
   };
 
   if (type === "drone") {
-    const hp = Math.max(1, Math.ceil((2 + Math.floor(state.wave / 4)) * difficulty.enemyHpMultiplier));
-    enemies.push({
+    const hp = Math.max(1, Math.ceil((2 + Math.floor(G.state.wave / 4)) * difficulty.enemyHpMultiplier));
+    G.enemies.push({
       ...base,
       w: 76,
       h: 76,
       hp,
       maxHp: hp,
-      vx: (rand(190, 245) + state.wave * 4) * difficulty.enemySpeedMultiplier,
+      vx: (rand(190, 245) + G.state.wave * 4) * difficulty.enemySpeedMultiplier,
       score: 180,
       amplitude: rand(38, 82),
     });
   } else if (type === "fighter") {
-    const hp = Math.max(1, Math.ceil((3 + Math.floor(state.wave / 4)) * difficulty.enemyHpMultiplier));
-    enemies.push({
+    const hp = Math.max(1, Math.ceil((3 + Math.floor(G.state.wave / 4)) * difficulty.enemyHpMultiplier));
+    G.enemies.push({
       ...base,
       w: 132,
       h: 77,
       hp,
       maxHp: hp,
-      vx: (rand(260, 340) + state.wave * 5) * difficulty.enemySpeedMultiplier,
+      vx: (rand(260, 340) + G.state.wave * 5) * difficulty.enemySpeedMultiplier,
       score: 260,
       amplitude: rand(18, 45),
     });
   } else {
-    const hp = Math.max(1, Math.ceil((4 + Math.floor(state.wave / 3)) * difficulty.enemyHpMultiplier));
-    enemies.push({
+    const hp = Math.max(1, Math.ceil((4 + Math.floor(G.state.wave / 3)) * difficulty.enemyHpMultiplier));
+    G.enemies.push({
       ...base,
       w: 130,
       h: 98,
       hp,
       maxHp: hp,
-      vx: (rand(105, 145) + state.wave * 4) * difficulty.enemySpeedMultiplier,
+      vx: (rand(105, 145) + G.state.wave * 4) * difficulty.enemySpeedMultiplier,
       score: 220,
       amplitude: rand(24, 55),
     });
@@ -541,10 +415,10 @@ function spawnEnemy(forcedType) {
 }
 
 function spawnBoss() {
-  const difficulty = state.difficulty;
-  const airship = state.wave % 8 === 0;
-  const hp = Math.ceil((65 + state.wave * 8) * difficulty.bossHpMultiplier);
-  enemies.push({
+  const difficulty = G.state.difficulty;
+  const airship = G.state.wave % 8 === 0;
+  const hp = Math.ceil((65 + G.state.wave * 8) * difficulty.bossHpMultiplier);
+  G.enemies.push({
     type: airship ? "airship" : "boss",
     x: W + (airship ? 230 : 260),
     y: airship ? H * 0.32 : H * 0.5,
@@ -561,16 +435,16 @@ function spawnBoss() {
     score: airship ? 6500 : 5000,
     targetX: W - (airship ? 285 : 220),
   });
-  state.bossSpawned = true;
-  state.bossActive = true;
+  G.state.bossSpawned = true;
+  G.state.bossActive = true;
   announceWave(airship ? "¡DIRIGIBLE DE GLOBOS!" : "¡ACORAZADO ENEMIGO!");
   tone(airship ? 170 : 92, 0.55, "sawtooth", 0.05, airship ? 80 : -28);
 }
 
 function spawnBalloon(airship, offsetY = 0) {
-  const difficulty = state.difficulty;
+  const difficulty = G.state.difficulty;
   const hp = Math.max(1, Math.ceil(1.2 * difficulty.enemyHpMultiplier));
-  enemies.push({
+  G.enemies.push({
     type: "balloon",
     x: airship.x - airship.w * 0.4,
     y: clamp(airship.y + offsetY, 90, H - 90),
@@ -578,7 +452,7 @@ function spawnBalloon(airship, offsetY = 0) {
     h: 102,
     hp,
     maxHp: hp,
-    vx: (145 + state.wave * 4) * difficulty.enemySpeedMultiplier,
+    vx: (145 + G.state.wave * 4) * difficulty.enemySpeedMultiplier,
     vy: rand(-14, 14),
     age: rand(0, 0.8),
     phase: rand(0, Math.PI * 2),
@@ -594,10 +468,10 @@ function spawnBalloon(airship, offsetY = 0) {
 function releaseBalloonBasket(balloon) {
   const x = balloon.x;
   const y = balloon.y + balloon.h * 0.4;
-  const dx = player.x - x;
-  const dy = player.y - y;
+  const dx = G.player.x - x;
+  const dy = G.player.y - y;
   const distance = Math.hypot(dx, dy) || 1;
-  balloonBaskets.push({
+  G.balloonBaskets.push({
     type: "balloon-basket",
     x,
     y,
@@ -616,7 +490,7 @@ function releaseBalloonBasket(balloon) {
 function releaseAirshipGondola(airship) {
   const x = airship.x;
   const y = airship.y + airship.h * 0.18;
-  airshipGondolas.push({
+  G.airshipGondolas.push({
     type: "airship-gondola",
     x,
     y,
@@ -628,8 +502,8 @@ function releaseAirshipGondola(airship) {
     phase: rand(0, Math.PI * 2),
     dead: false,
   });
-  state.banner = 1.8;
-  state.bannerText = "¡GÓNDOLA AL ACECHO!";
+  G.state.banner = 1.8;
+  G.state.bannerText = "¡GÓNDOLA AL ACECHO!";
   createBurst(x, y, "#ff5b26", 16, 190);
   tone(150, 0.28, "sawtooth", 0.035, -90);
 }
@@ -642,7 +516,7 @@ function detonateBalloonBasket(basket) {
   tone(190, 0.15, "sawtooth", 0.026, 120);
 
   // The blast is avoidable, but still dangerous if the helicopter stays close.
-  if (Math.hypot(player.x - basket.x, player.y - basket.y) <= 118) {
+  if (Math.hypot(G.player.x - basket.x, G.player.y - basket.y) <= 118) {
     hurtPlayer(1);
   }
 }
@@ -654,39 +528,39 @@ function detonateAirshipGondola(gondola) {
   createBurst(gondola.x, gondola.y, "#ff642c", 20, 220);
   tone(125, 0.22, "sawtooth", 0.032, 180);
 
-  if (Math.hypot(player.x - gondola.x, player.y - gondola.y) <= 142) {
+  if (Math.hypot(G.player.x - gondola.x, G.player.y - gondola.y) <= 142) {
     hurtPlayer(2);
   }
 }
 
 function shootPlayer() {
-  const spread = player.rapid > 0 ? [-0.07, 0.07] : [0];
-  let explosiveShots = player.explosiveAmmo;
+  const spread = G.player.rapid > 0 ? [-0.07, 0.07] : [0];
+  let explosiveShots = G.player.explosiveAmmo;
   let usedExplosive = false;
   spread.forEach((angle) => {
     const speed = 800;
     const explosive = explosiveShots > 0;
     if (explosive) explosiveShots -= 1;
     usedExplosive ||= explosive;
-    playerBullets.push({
-      x: player.x + player.w * 0.42,
-      y: player.y + 12,
+    G.playerBullets.push({
+      x: G.player.x + G.player.w * 0.42,
+      y: G.player.y + 12,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
-      w: explosive ? 72 : player.rapid > 0 ? 57 : 64,
-      h: explosive ? 28 : player.rapid > 0 ? 22 : 25,
+      w: explosive ? 72 : G.player.rapid > 0 ? 57 : 64,
+      h: explosive ? 28 : G.player.rapid > 0 ? 22 : 25,
       damage: explosive ? 2 : 1,
       explosive,
     });
   });
-  player.explosiveAmmo = explosiveShots;
-  player.cooldown = (player.rapid > 0 ? 0.105 : 0.19) * player.fireCooldownMultiplier;
-  createBurst(player.x + player.w * 0.45, player.y + 10, usedExplosive ? "#ff8a18" : "#8ef8ff", 3, 45);
-  tone(usedExplosive ? 380 : player.rapid > 0 ? 640 : 520, 0.035, "square", 0.008, 90);
+  G.player.explosiveAmmo = explosiveShots;
+  G.player.cooldown = (G.player.rapid > 0 ? 0.105 : 0.19) * G.player.fireCooldownMultiplier;
+  createBurst(G.player.x + G.player.w * 0.45, G.player.y + 10, usedExplosive ? "#ff8a18" : "#8ef8ff", 3, 45);
+  tone(usedExplosive ? 380 : G.player.rapid > 0 ? 640 : 520, 0.035, "square", 0.008, 90);
 }
 
 function shootEnemy(enemy) {
-  const difficulty = state.difficulty;
+  const difficulty = G.state.difficulty;
   if (enemy.type === "airship") {
     spawnBalloon(enemy, -30);
     spawnBalloon(enemy, 30);
@@ -697,8 +571,8 @@ function shootEnemy(enemy) {
   if (enemy.type === "boss") {
     const angles = [-0.34, -0.17, 0.17, 0.34];
     angles.forEach((angle) => {
-      const speed = (230 + state.wave * 3) * difficulty.enemySpeedMultiplier;
-      enemyBullets.push({
+      const speed = (230 + G.state.wave * 3) * difficulty.enemySpeedMultiplier;
+      G.enemyBullets.push({
         x: enemy.x - enemy.w * 0.38,
         y: enemy.y + 12,
         vx: -Math.cos(angle) * speed,
@@ -714,11 +588,11 @@ function shootEnemy(enemy) {
     return;
   }
 
-  const dx = player.x - enemy.x;
-  const dy = player.y - enemy.y;
+  const dx = G.player.x - enemy.x;
+  const dy = G.player.y - enemy.y;
   const length = Math.hypot(dx, dy) || 1;
   const speed = (enemy.type === "fighter" ? 340 : 250) * difficulty.enemySpeedMultiplier;
-  enemyBullets.push({
+  G.enemyBullets.push({
     x: enemy.x - enemy.w * 0.35,
     y: enemy.y + 8,
     vx: (dx / length) * speed,
@@ -729,18 +603,18 @@ function shootEnemy(enemy) {
     age: 0,
   });
   enemy.fireTimer =
-    rand(1.5, 2.8) * difficulty.enemyFireIntervalMultiplier * Math.max(0.55, 1 - state.wave * 0.025);
+    rand(1.5, 2.8) * difficulty.enemyFireIntervalMultiplier * Math.max(0.55, 1 - G.state.wave * 0.025);
 }
 
 function createBurst(x, y, color, count = 8, speed = 150) {
   // Tope duro: en oleadas densas con jefes las explosiones podian acumular
   // miles de particulas y castigar el frame time.
-  const restantes = MAX_PARTICLES - particles.length;
+  const restantes = MAX_PARTICLES - G.particles.length;
   const nuevos = Math.min(count, Math.max(0, restantes));
   for (let i = 0; i < nuevos; i += 1) {
     const angle = rand(0, Math.PI * 2);
     const velocity = rand(speed * 0.35, speed);
-    particles.push({
+    G.particles.push({
       x,
       y,
       vx: Math.cos(angle) * velocity,
@@ -754,16 +628,16 @@ function createBurst(x, y, color, count = 8, speed = 150) {
 }
 
 function createExplosion(x, y, size = 110) {
-  effects.push({ x, y, size, age: 0, duration: 0.72 });
+  G.effects.push({ x, y, size, age: 0, duration: 0.72 });
   createBurst(x, y, "#ff8a18", Math.round(size / 10), size * 1.25);
-  state.shake = Math.max(state.shake, Math.min(13, size / 13));
+  G.state.shake = Math.max(G.state.shake, Math.min(13, size / 13));
 }
 
 function dropReward(enemy) {
   const chance = isBossEnemy(enemy) ? 1 : Math.random();
   if (isBossEnemy(enemy)) {
     for (let i = 0; i < 8; i += 1) {
-      pickups.push({
+      G.pickups.push({
         type: "coin",
         x: enemy.x + rand(-100, 100),
         y: enemy.y + rand(-70, 70),
@@ -774,7 +648,7 @@ function dropReward(enemy) {
         h: 44,
       });
     }
-    pickups.push({
+    G.pickups.push({
       type: "star",
       x: enemy.x,
       y: enemy.y,
@@ -785,7 +659,7 @@ function dropReward(enemy) {
       h: 54,
     });
   } else if (chance < 0.34) {
-    pickups.push({
+    G.pickups.push({
       type: "coin",
       x: enemy.x,
       y: enemy.y,
@@ -797,7 +671,7 @@ function dropReward(enemy) {
     });
   } else if (chance > 0.93) {
     const options = ["rapid", "shield", "heart"];
-    pickups.push({
+    G.pickups.push({
       type: options[Math.floor(Math.random() * options.length)],
       x: enemy.x,
       y: enemy.y,
@@ -815,14 +689,14 @@ function killEnemy(enemy) {
   enemy.dead = true;
   if (enemy.type === "balloon") releaseBalloonBasket(enemy);
   if (enemy.type === "airship") releaseAirshipGondola(enemy);
-  state.score += Math.round(enemy.score * state.difficulty.scoreMultiplier);
+  G.state.score += Math.round(enemy.score * G.state.difficulty.scoreMultiplier);
   createExplosion(enemy.x, enemy.y, isBossEnemy(enemy) ? (enemy.type === "airship" ? 210 : 240) : enemy.w * 0.88);
   dropReward(enemy);
 
   if (isBossEnemy(enemy)) {
-    state.bossActive = false;
-    state.bossClearTimer = 3.3;
-    state.flash = 0.35;
+    G.state.bossActive = false;
+    G.state.bossClearTimer = 3.3;
+    G.state.flash = 0.35;
     announceWave(enemy.type === "airship" ? "¡DIRIGIBLE DERRIBADO!" : "¡JEFE DERRIBADO!");
     tone(enemy.type === "airship" ? 180 : 120, 0.42, "sawtooth", 0.045, 420);
   } else {
@@ -831,44 +705,44 @@ function killEnemy(enemy) {
 }
 
 function hurtPlayer(damage) {
-  if (player.invulnerable > 0) return;
-  if (player.shield > 0) {
-    player.invulnerable = 0.28;
-    player.shield = Math.max(0, player.shield - 0.7);
-    createBurst(player.x, player.y, "#68cfff", 12, 190);
+  if (G.player.invulnerable > 0) return;
+  if (G.player.shield > 0) {
+    G.player.invulnerable = 0.28;
+    G.player.shield = Math.max(0, G.player.shield - 0.7);
+    createBurst(G.player.x, G.player.y, "#68cfff", 12, 190);
     tone(710, 0.1, "sine", 0.03, -250);
     return;
   }
 
-  const actualDamage = damage * (1 - player.damageReduction);
-  player.hp -= actualDamage;
-  player.invulnerable = 1.05;
-  state.shake = 12;
-  state.flash = 0.16;
-  createExplosion(player.x + 18, player.y, 72);
+  const actualDamage = damage * (1 - G.player.damageReduction);
+  G.player.hp -= actualDamage;
+  G.player.invulnerable = 1.05;
+  G.state.shake = 12;
+  G.state.flash = 0.16;
+  createExplosion(G.player.x + 18, G.player.y, 72);
   tone(140, 0.22, "sawtooth", 0.035, -90);
-  if (player.hp <= 0) endGame();
+  if (G.player.hp <= 0) endGame();
 }
 
 function collectPickup(pickup) {
   if (pickup.type === "coin") {
-    state.coins += 1;
-    state.score += 100;
+    G.state.coins += 1;
+    G.state.score += 100;
     tone(740, 0.065, "square", 0.024, 180);
   } else if (pickup.type === "heart") {
-    player.hp = Math.min(player.maxHp, player.hp + 2);
+    G.player.hp = Math.min(G.player.maxHp, G.player.hp + 2);
     tone(430, 0.15, "sine", 0.028, 220);
   } else if (pickup.type === "shield") {
-    player.shield = Math.max(player.shield, SHIELD_DURATION);
+    G.player.shield = Math.max(G.player.shield, SHIELD_DURATION);
     tone(520, 0.2, "sine", 0.028, 260);
   } else if (pickup.type === "rapid") {
     // Misma duración que la ráfaga de la tienda (10 s): un solo valor documentado.
-    player.rapid = Math.max(player.rapid, 10);
+    G.player.rapid = Math.max(G.player.rapid, 10);
     tone(300, 0.2, "square", 0.025, 450);
   } else {
-    state.score += 1500;
-    player.hp = Math.min(player.maxHp, player.hp + 1);
-    player.shield = Math.max(player.shield, SHIELD_DURATION);
+    G.state.score += 1500;
+    G.player.hp = Math.min(G.player.maxHp, G.player.hp + 1);
+    G.player.shield = Math.max(G.player.shield, SHIELD_DURATION);
     tone(320, 0.32, "square", 0.03, 520);
   }
   createBurst(pickup.x, pickup.y, "#ffe653", 12, 150);
@@ -876,13 +750,13 @@ function collectPickup(pickup) {
 }
 
 function endGame() {
-  if (mode !== "playing") return;
-  const isRecord = state.score > state.highScore;
-  if (isRecord) saveHighScore(state.score, selectedDifficulty);
-  ui.resultTitle.textContent = isRecord ? "¡NUEVO RÉCORD!" : "MISIÓN TERMINADA";
-  const record = getHighScore(selectedDifficulty);
-  ui.resultCopy.textContent =
-    `Dificultad: ${state.difficulty.label} · Puntuación: ${state.score.toLocaleString("es-ES")} · Récord: ${record.toLocaleString("es-ES")} · Monedas: ${state.coins}`;
+  if (G.mode !== "playing") return;
+  const isRecord = G.state.score > G.state.highScore;
+  if (isRecord) saveHighScore(G.state.score, G.selectedDifficulty);
+  G.ui.resultTitle.textContent = isRecord ? "¡NUEVO RÉCORD!" : "MISIÓN TERMINADA";
+  const record = getHighScore(G.selectedDifficulty);
+  G.ui.resultCopy.textContent =
+    `Dificultad: ${G.state.difficulty.label} · Puntuación: ${G.state.score.toLocaleString("es-ES")} · Récord: ${record.toLocaleString("es-ES")} · Monedas: ${G.state.coins}`;
   setMode("gameover");
 }
 
@@ -896,7 +770,7 @@ function overlaps(a, b, inset = 0.25) {
 
 function detonateExplosiveBullet(bullet, directHit) {
   const radius = 118;
-  for (const enemy of enemies) {
+  for (const enemy of G.enemies) {
     if (enemy.dead) continue;
     const distance = Math.hypot(enemy.x - bullet.x, enemy.y - bullet.y);
     if (enemy === directHit || distance <= radius) {
@@ -913,40 +787,40 @@ function detonateExplosiveBullet(bullet, directHit) {
 function updatePlayer(dt) {
   let dx = 0;
   let dy = 0;
-  if (keys.has("ArrowLeft") || keys.has("KeyA")) dx -= 1;
-  if (keys.has("ArrowRight") || keys.has("KeyD")) dx += 1;
-  if (keys.has("ArrowUp") || keys.has("KeyW")) dy -= 1;
-  if (keys.has("ArrowDown") || keys.has("KeyS")) dy += 1;
+  if (G.keys.has("ArrowLeft") || G.keys.has("KeyA")) dx -= 1;
+  if (G.keys.has("ArrowRight") || G.keys.has("KeyD")) dx += 1;
+  if (G.keys.has("ArrowUp") || G.keys.has("KeyW")) dy -= 1;
+  if (G.keys.has("ArrowDown") || G.keys.has("KeyS")) dy += 1;
 
   if (dx || dy) {
     const length = Math.hypot(dx, dy);
-    const movementSpeed = 390 * player.speedMultiplier;
-    player.x += (dx / length) * movementSpeed * dt;
-    player.y += (dy / length) * movementSpeed * dt;
-    player.tilt = lerp(player.tilt, (dy / length) * 0.11, dt * 9);
-  } else if (pointer.active) {
-    const pointerSpeed = player.speedMultiplier * 8;
-    player.x = lerp(player.x, pointer.x, Math.min(1, dt * pointerSpeed));
-    player.y = lerp(player.y, pointer.y, Math.min(1, dt * pointerSpeed));
-    player.tilt = lerp(player.tilt, clamp((pointer.y - player.y) / 260, -0.11, 0.11), dt * pointerSpeed);
+    const movementSpeed = 390 * G.player.speedMultiplier;
+    G.player.x += (dx / length) * movementSpeed * dt;
+    G.player.y += (dy / length) * movementSpeed * dt;
+    G.player.tilt = lerp(G.player.tilt, (dy / length) * 0.11, dt * 9);
+  } else if (G.pointer.active) {
+    const pointerSpeed = G.player.speedMultiplier * 8;
+    G.player.x = lerp(G.player.x, G.pointer.x, Math.min(1, dt * pointerSpeed));
+    G.player.y = lerp(G.player.y, G.pointer.y, Math.min(1, dt * pointerSpeed));
+    G.player.tilt = lerp(G.player.tilt, clamp((G.pointer.y - G.player.y) / 260, -0.11, 0.11), dt * pointerSpeed);
   } else {
-    player.tilt = lerp(player.tilt, 0, dt * 6);
+    G.player.tilt = lerp(G.player.tilt, 0, dt * 6);
   }
 
-  player.x = clamp(player.x, 68, W - 80);
-  player.y = clamp(player.y, 70, H - 68);
-  player.cooldown = Math.max(0, player.cooldown - dt);
-  player.invulnerable = Math.max(0, player.invulnerable - dt);
-  player.shield = Math.max(0, player.shield - dt);
-  player.rapid = Math.max(0, player.rapid - dt);
-  player.frame = Math.floor(state.elapsed * 8) % sprites.player.length;
+  G.player.x = clamp(G.player.x, 68, W - 80);
+  G.player.y = clamp(G.player.y, 70, H - 68);
+  G.player.cooldown = Math.max(0, G.player.cooldown - dt);
+  G.player.invulnerable = Math.max(0, G.player.invulnerable - dt);
+  G.player.shield = Math.max(0, G.player.shield - dt);
+  G.player.rapid = Math.max(0, G.player.rapid - dt);
+  G.player.frame = Math.floor(G.state.elapsed * 8) % G.sprites.player.length;
 
-  const firing = keys.has("Space") || keys.has("KeyJ") || pointer.active;
-  if (firing && player.cooldown <= 0) shootPlayer();
+  const firing = G.keys.has("Space") || G.keys.has("KeyJ") || G.pointer.active;
+  if (firing && G.player.cooldown <= 0) shootPlayer();
 }
 
 function updateEnemies(dt) {
-  for (const enemy of enemies) {
+  for (const enemy of G.enemies) {
     if (enemy.dead) continue;
     enemy.age += dt;
     enemy.flash = Math.max(0, enemy.flash - dt);
@@ -972,22 +846,22 @@ function updateEnemies(dt) {
       enemy.type !== "balloon" &&
       enemy.fireTimer <= 0 &&
       enemy.x < W - 70 &&
-      enemy.x > player.x + 120
+      enemy.x > G.player.x + 120
     ) {
       shootEnemy(enemy);
     }
     if (enemy.x < -enemy.w) enemy.dead = true;
 
     const hitboxInset = isBossEnemy(enemy) ? 0.42 : enemy.type === "balloon" ? 0.18 : 0.34;
-    const playerEnemyHitbox = clamp(hitboxInset + player.hitboxBonus, 0, 0.8);
-    if (!enemy.dead && overlaps(player, enemy, playerEnemyHitbox)) {
+    const playerEnemyHitbox = clamp(hitboxInset + G.player.hitboxBonus, 0, 0.8);
+    if (!enemy.dead && overlaps(G.player, enemy, playerEnemyHitbox)) {
       hurtPlayer(isBossEnemy(enemy) ? 2 : 1);
       if (!isBossEnemy(enemy)) killEnemy(enemy);
     }
   }
 
-  for (const bullet of playerBullets) {
-    for (const enemy of enemies) {
+  for (const bullet of G.playerBullets) {
+    for (const enemy of G.enemies) {
       const hitboxInset = isBossEnemy(enemy) ? 0.25 : enemy.type === "balloon" ? 0.18 : 0.16;
       if (!bullet.dead && !enemy.dead && overlaps(bullet, enemy, hitboxInset)) {
         bullet.dead = true;
@@ -1003,18 +877,18 @@ function updateEnemies(dt) {
     }
   }
 
-  enemies = enemies.filter((enemy) => !enemy.dead);
+  G.enemies = G.enemies.filter((enemy) => !enemy.dead);
 }
 
 function updateBalloonBaskets(dt) {
-  for (const basket of balloonBaskets) {
+  for (const basket of G.balloonBaskets) {
     if (basket.dead) continue;
     basket.age += dt;
 
     // The basket keeps falling, but corrects its horizontal and vertical
     // course toward the helicopter so it remains a dodgeable threat.
-    const dx = player.x - basket.x;
-    const dy = player.y - basket.y;
+    const dx = G.player.x - basket.x;
+    const dy = G.player.y - basket.y;
     const desiredVx = clamp(dx * 1.7, -300, 300);
     const desiredVy = clamp(dy * 1.4 + 105, -120, 300);
     basket.vx = lerp(basket.vx, desiredVx, Math.min(1, dt * 2.2));
@@ -1027,20 +901,20 @@ function updateBalloonBaskets(dt) {
       continue;
     }
 
-    if (overlaps(player, basket, clamp(0.14 + player.hitboxBonus, 0, 0.8))) {
+    if (overlaps(G.player, basket, clamp(0.14 + G.player.hitboxBonus, 0, 0.8))) {
       detonateBalloonBasket(basket);
     }
   }
-  balloonBaskets = balloonBaskets.filter((basket) => !basket.dead);
+  G.balloonBaskets = G.balloonBaskets.filter((basket) => !basket.dead);
 }
 
 function updateAirshipGondolas(dt) {
-  for (const gondola of airshipGondolas) {
+  for (const gondola of G.airshipGondolas) {
     if (gondola.dead) continue;
     gondola.age += dt;
 
-    const dx = player.x - gondola.x;
-    const dy = player.y - gondola.y;
+    const dx = G.player.x - gondola.x;
+    const dy = G.player.y - gondola.y;
     const desiredVx = clamp(dx * 1.35, -320, 320);
     const desiredVy = clamp(dy * 1.15 + 80, -170, 260);
     gondola.vx = lerp(gondola.vx, desiredVx, Math.min(1, dt * 1.7));
@@ -1053,27 +927,27 @@ function updateAirshipGondolas(dt) {
       continue;
     }
 
-    if (overlaps(player, gondola, clamp(0.22 + player.hitboxBonus, 0, 0.8))) {
+    if (overlaps(G.player, gondola, clamp(0.22 + G.player.hitboxBonus, 0, 0.8))) {
       detonateAirshipGondola(gondola);
     }
   }
-  airshipGondolas = airshipGondolas.filter((gondola) => !gondola.dead);
+  G.airshipGondolas = G.airshipGondolas.filter((gondola) => !gondola.dead);
 }
 
 function updateProjectiles(dt) {
-  for (const bullet of playerBullets) {
+  for (const bullet of G.playerBullets) {
     bullet.x += bullet.vx * dt;
     bullet.y += bullet.vy * dt;
     if (bullet.x > W + 120 || bullet.y < -40 || bullet.y > H + 40) bullet.dead = true;
   }
 
-  for (const bullet of enemyBullets) {
+  for (const bullet of G.enemyBullets) {
     bullet.x += bullet.vx * dt;
     bullet.y += bullet.vy * dt;
     bullet.age += dt;
-    if (!bullet.dead && !bullet.reflected && player.shield > 0) {
-      const dx = bullet.x - player.x;
-      const dy = bullet.y - player.y;
+    if (!bullet.dead && !bullet.reflected && G.player.shield > 0) {
+      const dx = bullet.x - G.player.x;
+      const dy = bullet.y - G.player.y;
       const distance = Math.hypot(dx, dy) || 1;
       const bulletRadius = Math.max(bullet.w, bullet.h) * 0.42;
       if (distance <= SHIELD_RADIUS + bulletRadius) {
@@ -1087,8 +961,8 @@ function updateProjectiles(dt) {
         const reboundSpeed = Math.max(speed * 1.08, 260);
 
         bullet.reflected = true;
-        bullet.x = player.x + nx * (SHIELD_RADIUS + bulletRadius + 2);
-        bullet.y = player.y + ny * (SHIELD_RADIUS + bulletRadius + 2);
+        bullet.x = G.player.x + nx * (SHIELD_RADIUS + bulletRadius + 2);
+        bullet.y = G.player.y + ny * (SHIELD_RADIUS + bulletRadius + 2);
         bullet.vx = (reflectedVx / reflectedSpeed) * reboundSpeed;
         bullet.vy = (reflectedVy / reflectedSpeed) * reboundSpeed;
         bullet.damage = Math.max(2, bullet.damage * 2);
@@ -1098,16 +972,16 @@ function updateProjectiles(dt) {
       }
     }
     const bulletHitbox = clamp(
-      state.difficulty.enemyBulletHitboxInset + player.hitboxBonus,
+      G.state.difficulty.enemyBulletHitboxInset + G.player.hitboxBonus,
       0,
       0.8,
     );
-    if (!bullet.dead && !bullet.reflected && overlaps(player, bullet, bulletHitbox)) {
+    if (!bullet.dead && !bullet.reflected && overlaps(G.player, bullet, bulletHitbox)) {
       bullet.dead = true;
       hurtPlayer(bullet.damage);
     }
     if (!bullet.dead && bullet.reflected) {
-      for (const enemy of enemies) {
+      for (const enemy of G.enemies) {
         if (!enemy.dead && overlaps(bullet, enemy, 0.2)) {
           bullet.dead = true;
           enemy.hp -= bullet.damage;
@@ -1123,38 +997,38 @@ function updateProjectiles(dt) {
     }
   }
 
-  playerBullets = playerBullets.filter((bullet) => !bullet.dead);
-  enemyBullets = enemyBullets.filter((bullet) => !bullet.dead);
+  G.playerBullets = G.playerBullets.filter((bullet) => !bullet.dead);
+  G.enemyBullets = G.enemyBullets.filter((bullet) => !bullet.dead);
 }
 
 function updatePickups(dt) {
-  for (const pickup of pickups) {
+  for (const pickup of G.pickups) {
     pickup.age += dt;
     pickup.x += pickup.vx * dt;
     pickup.y += pickup.vy * dt;
     pickup.y += Math.sin(pickup.age * 4) * 18 * dt;
     pickup.vx = lerp(pickup.vx, -55, dt);
     pickup.vy *= Math.pow(0.985, dt * 60);
-    if (!pickup.collected && overlaps(player, pickup, 0.05)) collectPickup(pickup);
+    if (!pickup.collected && overlaps(G.player, pickup, 0.05)) collectPickup(pickup);
     if (pickup.x < -70) pickup.collected = true;
   }
-  pickups = pickups.filter((pickup) => !pickup.collected);
+  G.pickups = G.pickups.filter((pickup) => !pickup.collected);
 }
 
 function updateEffects(dt) {
-  for (const effect of effects) effect.age += dt;
-  effects = effects.filter((effect) => effect.age < effect.duration);
+  for (const effect of G.effects) effect.age += dt;
+  G.effects = G.effects.filter((effect) => effect.age < effect.duration);
 
-  for (const particle of particles) {
+  for (const particle of G.particles) {
     particle.life -= dt;
     particle.x += particle.vx * dt;
     particle.y += particle.vy * dt;
     particle.vx *= Math.pow(0.96, dt * 60);
     particle.vy *= Math.pow(0.96, dt * 60);
   }
-  particles = particles.filter((particle) => particle.life > 0);
+  G.particles = G.particles.filter((particle) => particle.life > 0);
 
-  for (const star of stars) {
+  for (const star of G.stars) {
     star.x -= star.speed * dt;
     if (star.x < -5) {
       star.x = W + 5;
@@ -1164,11 +1038,11 @@ function updateEffects(dt) {
 }
 
 function updateGame(dt) {
-  state.elapsed += dt;
-  state.waveTime += dt;
-  state.banner = Math.max(0, state.banner - dt);
-  state.shake = Math.max(0, state.shake - dt * 30);
-  state.flash = Math.max(0, state.flash - dt);
+  G.state.elapsed += dt;
+  G.state.waveTime += dt;
+  G.state.banner = Math.max(0, G.state.banner - dt);
+  G.state.shake = Math.max(0, G.state.shake - dt * 30);
+  G.state.flash = Math.max(0, G.state.flash - dt);
 
   updatePlayer(dt);
   updateAirbase(dt);
@@ -1179,44 +1053,44 @@ function updateGame(dt) {
   updatePickups(dt);
   updateEffects(dt);
 
-  if (state.wave % 4 === 0) {
-    if (!state.bossSpawned) spawnBoss();
-    else if (!state.bossActive) {
-      state.bossClearTimer -= dt;
-      const balloonsAlive = enemies.some((enemy) => enemy.type === "balloon");
+  if (G.state.wave % 4 === 0) {
+    if (!G.state.bossSpawned) spawnBoss();
+    else if (!G.state.bossActive) {
+      G.state.bossClearTimer -= dt;
+      const balloonsAlive = G.enemies.some((enemy) => enemy.type === "balloon");
       if (
-        state.bossClearTimer <= 0 &&
+        G.state.bossClearTimer <= 0 &&
         !balloonsAlive &&
-        balloonBaskets.length === 0 &&
-        airshipGondolas.length === 0
+        G.balloonBaskets.length === 0 &&
+        G.airshipGondolas.length === 0
       ) {
         openShop();
       }
     }
   } else {
     if (
-      state.wave >= 2 &&
-      state.wave % 2 === 0 &&
-      state.wave % 4 !== 0 &&
-      !state.airbaseSpawned &&
-      state.waveTime > 6
+      G.state.wave >= 2 &&
+      G.state.wave % 2 === 0 &&
+      G.state.wave % 4 !== 0 &&
+      !G.state.airbaseSpawned &&
+      G.state.waveTime > 6
     ) {
       spawnAirbase();
     }
-    state.spawnTimer -= dt;
-    if (state.spawnTimer <= 0) {
+    G.state.spawnTimer -= dt;
+    if (G.state.spawnTimer <= 0) {
       spawnEnemy();
-      state.spawnTimer =
-        Math.max(0.48, 1.28 - state.wave * 0.055) *
-        state.difficulty.spawnIntervalMultiplier *
+      G.state.spawnTimer =
+        Math.max(0.48, 1.28 - G.state.wave * 0.055) *
+        G.state.difficulty.spawnIntervalMultiplier *
         rand(0.78, 1.24);
     }
-    if (state.waveTime > state.difficulty.waveDuration && !airbase) openShop();
+    if (G.state.waveTime > G.state.difficulty.waveDuration && !G.airbase) openShop();
   }
 }
 
 // Halo pre-horneado: hornear el shadowBlur de cada sprite una sola vez en un
-// canvas aparte cuesta mucho menos que aplicarlo en cada fotograma del loop.
+// G.canvas aparte cuesta mucho menos que aplicarlo en cada fotograma del loop.
 const glowCache = new Map();
 
 function bakedGlow(image, glow, blur) {
@@ -1243,24 +1117,24 @@ function bakedGlow(image, glow, blur) {
 
 function drawSprite(image, x, y, width, height, options = {}) {
   if (!image) return;
-  ctx.save();
-  ctx.translate(x, y);
-  if (options.rotate) ctx.rotate(options.rotate);
-  if (options.flipX) ctx.scale(-1, 1);
-  if (options.alpha !== undefined) ctx.globalAlpha = options.alpha;
+  G.ctx.save();
+  G.ctx.translate(x, y);
+  if (options.rotate) G.ctx.rotate(options.rotate);
+  if (options.flipX) G.ctx.scale(-1, 1);
+  if (options.alpha !== undefined) G.ctx.globalAlpha = options.alpha;
   if (options.glow) {
     const horneado = bakedGlow(image, options.glow, options.blur || 14);
     const w = horneado.width * (width / image.width);
     const h = horneado.height * (height / image.height);
-    ctx.drawImage(horneado, -w / 2, -h / 2, w, h);
+    G.ctx.drawImage(horneado, -w / 2, -h / 2, w, h);
   } else {
-    ctx.drawImage(image, -width / 2, -height / 2, width, height);
+    G.ctx.drawImage(image, -width / 2, -height / 2, width, height);
   }
-  ctx.restore();
+  G.ctx.restore();
 }
 
 function drawAirshipSprite(enemy) {
-  drawSprite(sprites.airshipBoss, enemy.x, enemy.y, enemy.w, enemy.h, {
+  drawSprite(G.sprites.airshipBoss, enemy.x, enemy.y, enemy.w, enemy.h, {
     rotate: Math.sin(enemy.age * 0.65) * 0.018,
     glow: "rgba(255, 72, 20, 0.22)",
     blur: 16,
@@ -1271,7 +1145,7 @@ function drawBalloonSprite(enemy) {
   const bob = Math.sin(enemy.age * 5 + enemy.phase) * 4;
   const animationPose = Math.floor(enemy.age * 2.4 + enemy.phase) % 2;
   const frame = enemy.spriteVariant + animationPose * 2;
-  drawSprite(sprites.balloons[frame], enemy.x, enemy.y + bob, enemy.w, enemy.h, {
+  drawSprite(G.sprites.balloons[frame], enemy.x, enemy.y + bob, enemy.w, enemy.h, {
     rotate: Math.sin(enemy.age * 2.1 + enemy.phase) * 0.035,
     glow: "rgba(255, 74, 35, 0.32)",
     blur: 9,
@@ -1280,354 +1154,354 @@ function drawBalloonSprite(enemy) {
 
 function drawBackground(backgroundIndex = 0) {
   const crop = CROPS.backgrounds[backgroundIndex % CROPS.backgrounds.length];
-  ctx.drawImage(sheet, crop[0], crop[1], crop[2], crop[3], 0, 0, W, H);
+  G.ctx.drawImage(G.sheet, crop[0], crop[1], crop[2], crop[3], 0, 0, W, H);
 
-  const tint = ctx.createLinearGradient(0, 0, 0, H);
+  const tint = G.ctx.createLinearGradient(0, 0, 0, H);
   tint.addColorStop(0, "rgba(12, 49, 72, 0.04)");
   tint.addColorStop(0.62, "rgba(1, 18, 25, 0.02)");
   tint.addColorStop(1, "rgba(0, 7, 11, 0.38)");
-  ctx.fillStyle = tint;
-  ctx.fillRect(0, 0, W, H);
+  G.ctx.fillStyle = tint;
+  G.ctx.fillRect(0, 0, W, H);
 
-  if (state) {
-    for (const star of stars) {
-      ctx.globalAlpha = star.alpha;
-      ctx.fillStyle = backgroundIndex === 2 ? "#ffbb65" : "#d6f7ff";
-      ctx.fillRect(star.x, star.y, star.size * 6, star.size);
+  if (G.state) {
+    for (const star of G.stars) {
+      G.ctx.globalAlpha = star.alpha;
+      G.ctx.fillStyle = backgroundIndex === 2 ? "#ffbb65" : "#d6f7ff";
+      G.ctx.fillRect(star.x, star.y, star.size * 6, star.size);
     }
-    ctx.globalAlpha = 1;
+    G.ctx.globalAlpha = 1;
   }
 }
 
 function drawMenuBackdrop() {
   drawBackground(0);
-  const rightShade = ctx.createLinearGradient(W * 0.45, 0, W, 0);
+  const rightShade = G.ctx.createLinearGradient(W * 0.45, 0, W, 0);
   rightShade.addColorStop(0, "rgba(0, 17, 24, 0)");
   rightShade.addColorStop(1, "rgba(0, 17, 24, 0.16)");
-  ctx.fillStyle = rightShade;
-  ctx.fillRect(0, 0, W, H);
+  G.ctx.fillStyle = rightShade;
+  G.ctx.fillRect(0, 0, W, H);
 
-  drawSprite(sprites.boss, W * 0.81, H * 0.52, 410, 205, {
+  drawSprite(G.sprites.boss, W * 0.81, H * 0.52, 410, 205, {
     rotate: -0.02,
     glow: "rgba(255, 72, 20, 0.28)",
     blur: 24,
   });
-  drawSprite(sprites.player[0], W * 0.59, H * 0.4, 190, 145, {
+  drawSprite(G.sprites.player[0], W * 0.59, H * 0.4, 190, 145, {
     rotate: 0.02,
     glow: "rgba(95, 226, 255, 0.25)",
     blur: 22,
   });
-  drawSprite(sprites.drone[4], W * 0.68, H * 0.2, 88, 98);
-  drawSprite(sprites.fighter[2], W * 0.9, H * 0.22, 145, 88);
+  drawSprite(G.sprites.drone[4], W * 0.68, H * 0.2, 88, 98);
+  drawSprite(G.sprites.fighter[2], W * 0.9, H * 0.22, 145, 88);
 }
 
 function roundedRect(x, y, width, height, radius) {
   const r = Math.min(radius, width / 2, height / 2);
-  ctx.beginPath();
-  ctx.roundRect(x, y, width, height, r);
+  G.ctx.beginPath();
+  G.ctx.roundRect(x, y, width, height, r);
 }
 
 function drawHud() {
-  ctx.save();
-  ctx.textBaseline = "middle";
+  G.ctx.save();
+  G.ctx.textBaseline = "middle";
 
   roundedRect(18, 17, 390, 72, 12);
-  ctx.fillStyle = "rgba(4, 13, 18, 0.77)";
-  ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,0.18)";
-  ctx.stroke();
+  G.ctx.fillStyle = "rgba(4, 13, 18, 0.77)";
+  G.ctx.fill();
+  G.ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  G.ctx.stroke();
 
-  drawSprite(sprites.face, 57, 53, 64, 66);
-  ctx.fillStyle = "#d8f23b";
-  ctx.font = '700 12px Inter, sans-serif';
-  ctx.fillText("BLINDAJE", 96, 37);
+  drawSprite(G.sprites.face, 57, 53, 64, 66);
+  G.ctx.fillStyle = "#d8f23b";
+  G.ctx.font = '700 12px Inter, sans-serif';
+  G.ctx.fillText("BLINDAJE", 96, 37);
 
   const segmentGap = 3;
   const healthBarWidth = 294;
   const segmentWidth = Math.min(
     35,
-    (healthBarWidth - segmentGap * Math.max(0, player.maxHp - 1)) / player.maxHp,
+    (healthBarWidth - segmentGap * Math.max(0, G.player.maxHp - 1)) / G.player.maxHp,
   );
-  for (let i = 0; i < player.maxHp; i += 1) {
+  for (let i = 0; i < G.player.maxHp; i += 1) {
     roundedRect(96 + i * (segmentWidth + segmentGap), 51, segmentWidth, 16, 3);
-    ctx.fillStyle = i < player.hp ? (i < 2 ? "#ff5a24" : "#d7ef31") : "rgba(255,255,255,0.13)";
-    ctx.fill();
+    G.ctx.fillStyle = i < G.player.hp ? (i < 2 ? "#ff5a24" : "#d7ef31") : "rgba(255,255,255,0.13)";
+    G.ctx.fill();
   }
 
-  if (player.explosiveAmmo > 0 || player.rapid > 0 || player.shield > 0) {
-    const label = player.explosiveAmmo > 0
-      ? `EXPLOSIVOS ${player.explosiveAmmo}`
-      : player.rapid > 0
-        ? `RÁFAGA ${Math.ceil(player.rapid)}s`
-        : `ESCUDO ${Math.ceil(player.shield)}s`;
-    ctx.fillStyle = player.explosiveAmmo > 0 ? "#ff8a18" : player.rapid > 0 ? "#ffb02e" : "#68d8ff";
-    ctx.font = '900 11px Inter, sans-serif';
-    ctx.fillText(label, 96, 77);
+  if (G.player.explosiveAmmo > 0 || G.player.rapid > 0 || G.player.shield > 0) {
+    const label = G.player.explosiveAmmo > 0
+      ? `EXPLOSIVOS ${G.player.explosiveAmmo}`
+      : G.player.rapid > 0
+        ? `RÁFAGA ${Math.ceil(G.player.rapid)}s`
+        : `ESCUDO ${Math.ceil(G.player.shield)}s`;
+    G.ctx.fillStyle = G.player.explosiveAmmo > 0 ? "#ff8a18" : G.player.rapid > 0 ? "#ffb02e" : "#68d8ff";
+    G.ctx.font = '900 11px Inter, sans-serif';
+    G.ctx.fillText(label, 96, 77);
   }
 
   roundedRect(W / 2 - 78, 17, 156, 60, 10);
-  ctx.fillStyle = "rgba(4, 13, 18, 0.77)";
-  ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,0.18)";
-  ctx.stroke();
-  ctx.textAlign = "center";
-  ctx.fillStyle = "rgba(255,255,255,0.62)";
-  ctx.font = '900 10px Inter, sans-serif';
-  ctx.fillText("OLEADA", W / 2, 34);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = '400 26px "Black Ops One", Impact, sans-serif';
-  ctx.fillText(String(state.wave).padStart(2, "0"), W / 2, 57);
+  G.ctx.fillStyle = "rgba(4, 13, 18, 0.77)";
+  G.ctx.fill();
+  G.ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  G.ctx.stroke();
+  G.ctx.textAlign = "center";
+  G.ctx.fillStyle = "rgba(255,255,255,0.62)";
+  G.ctx.font = '900 10px Inter, sans-serif';
+  G.ctx.fillText("OLEADA", W / 2, 34);
+  G.ctx.fillStyle = "#ffffff";
+  G.ctx.font = '400 26px "Black Ops One", Impact, sans-serif';
+  G.ctx.fillText(String(G.state.wave).padStart(2, "0"), W / 2, 57);
 
   roundedRect(W - 300, 17, 282, 72, 12);
-  ctx.fillStyle = "rgba(4, 13, 18, 0.77)";
-  ctx.fill();
-  ctx.strokeStyle = "rgba(255,255,255,0.18)";
-  ctx.stroke();
-  ctx.textAlign = "right";
-  ctx.fillStyle = "rgba(255,255,255,0.58)";
-  ctx.font = '900 10px Inter, sans-serif';
-  ctx.fillText("PUNTOS", W - 114, 36);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = '400 25px "Black Ops One", Impact, sans-serif';
-  ctx.fillText(state.score.toLocaleString("es-ES"), W - 114, 62);
-  drawSprite(sprites.coin, W - 67, 53, 45, 43);
-  ctx.textAlign = "left";
-  ctx.fillStyle = "#ffd63c";
-  ctx.font = '900 18px Inter, sans-serif';
-  ctx.fillText(String(state.coins), W - 46, 54);
+  G.ctx.fillStyle = "rgba(4, 13, 18, 0.77)";
+  G.ctx.fill();
+  G.ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  G.ctx.stroke();
+  G.ctx.textAlign = "right";
+  G.ctx.fillStyle = "rgba(255,255,255,0.58)";
+  G.ctx.font = '900 10px Inter, sans-serif';
+  G.ctx.fillText("PUNTOS", W - 114, 36);
+  G.ctx.fillStyle = "#ffffff";
+  G.ctx.font = '400 25px "Black Ops One", Impact, sans-serif';
+  G.ctx.fillText(G.state.score.toLocaleString("es-ES"), W - 114, 62);
+  drawSprite(G.sprites.coin, W - 67, 53, 45, 43);
+  G.ctx.textAlign = "left";
+  G.ctx.fillStyle = "#ffd63c";
+  G.ctx.font = '900 18px Inter, sans-serif';
+  G.ctx.fillText(String(G.state.coins), W - 46, 54);
 
-  const boss = enemies.find((enemy) => isBossEnemy(enemy));
+  const boss = G.enemies.find((enemy) => isBossEnemy(enemy));
   if (boss) {
     const barWidth = 560;
     const x = W / 2 - barWidth / 2;
     const y = H - 39;
     roundedRect(x - 8, y - 8, barWidth + 16, 30, 8);
-    ctx.fillStyle = "rgba(4, 9, 12, 0.82)";
-    ctx.fill();
+    G.ctx.fillStyle = "rgba(4, 9, 12, 0.82)";
+    G.ctx.fill();
     roundedRect(x, y, barWidth, 14, 5);
-    ctx.fillStyle = "rgba(255,255,255,0.13)";
-    ctx.fill();
+    G.ctx.fillStyle = "rgba(255,255,255,0.13)";
+    G.ctx.fill();
     roundedRect(x, y, barWidth * clamp(boss.hp / boss.maxHp, 0, 1), 14, 5);
-    ctx.fillStyle = "#ff4d21";
-    ctx.fill();
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#fff";
-    ctx.font = '900 10px Inter, sans-serif';
-    ctx.fillText(boss.type === "airship" ? "DIRIGIBLE DE GLOBOS" : "ACORAZADO 3000", W / 2, y - 13);
+    G.ctx.fillStyle = "#ff4d21";
+    G.ctx.fill();
+    G.ctx.textAlign = "center";
+    G.ctx.fillStyle = "#fff";
+    G.ctx.font = '900 10px Inter, sans-serif';
+    G.ctx.fillText(boss.type === "airship" ? "DIRIGIBLE DE GLOBOS" : "ACORAZADO 3000", W / 2, y - 13);
   }
-  ctx.restore();
+  G.ctx.restore();
 }
 
 function drawBalloonBasket(basket) {
-  ctx.save();
-  ctx.translate(basket.x, basket.y);
-  ctx.rotate(clamp(basket.vx / 900, -0.24, 0.24) + Math.sin(basket.age * 7 + basket.phase) * 0.08);
-  ctx.shadowColor = "rgba(255, 91, 39, 0.52)";
-  ctx.shadowBlur = 10;
+  G.ctx.save();
+  G.ctx.translate(basket.x, basket.y);
+  G.ctx.rotate(clamp(basket.vx / 900, -0.24, 0.24) + Math.sin(basket.age * 7 + basket.phase) * 0.08);
+  G.ctx.shadowColor = "rgba(255, 91, 39, 0.52)";
+  G.ctx.shadowBlur = 10;
 
   // Broken suspension ropes show that the basket has detached from the balloon.
-  ctx.strokeStyle = "rgba(237, 205, 128, 0.9)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(-11, -14);
-  ctx.lineTo(-7, -4);
-  ctx.moveTo(11, -14);
-  ctx.lineTo(7, -4);
-  ctx.stroke();
+  G.ctx.strokeStyle = "rgba(237, 205, 128, 0.9)";
+  G.ctx.lineWidth = 2;
+  G.ctx.beginPath();
+  G.ctx.moveTo(-11, -14);
+  G.ctx.lineTo(-7, -4);
+  G.ctx.moveTo(11, -14);
+  G.ctx.lineTo(7, -4);
+  G.ctx.stroke();
 
-  const basketFill = ctx.createLinearGradient(0, -5, 0, 15);
+  const basketFill = G.ctx.createLinearGradient(0, -5, 0, 15);
   basketFill.addColorStop(0, "#d18a3d");
   basketFill.addColorStop(0.5, "#8a4e2b");
   basketFill.addColorStop(1, "#42251d");
-  ctx.fillStyle = basketFill;
-  ctx.strokeStyle = "#211615";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(-14, -5);
-  ctx.lineTo(14, -5);
-  ctx.lineTo(11, 14);
-  ctx.lineTo(-11, 14);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+  G.ctx.fillStyle = basketFill;
+  G.ctx.strokeStyle = "#211615";
+  G.ctx.lineWidth = 3;
+  G.ctx.beginPath();
+  G.ctx.moveTo(-14, -5);
+  G.ctx.lineTo(14, -5);
+  G.ctx.lineTo(11, 14);
+  G.ctx.lineTo(-11, 14);
+  G.ctx.closePath();
+  G.ctx.fill();
+  G.ctx.stroke();
 
-  ctx.strokeStyle = "rgba(255, 205, 111, 0.62)";
-  ctx.lineWidth = 1.3;
-  ctx.beginPath();
-  ctx.moveTo(-10, 1);
-  ctx.lineTo(10, 6);
-  ctx.moveTo(-9, 8);
-  ctx.lineTo(9, 2);
-  ctx.stroke();
+  G.ctx.strokeStyle = "rgba(255, 205, 111, 0.62)";
+  G.ctx.lineWidth = 1.3;
+  G.ctx.beginPath();
+  G.ctx.moveTo(-10, 1);
+  G.ctx.lineTo(10, 6);
+  G.ctx.moveTo(-9, 8);
+  G.ctx.lineTo(9, 2);
+  G.ctx.stroke();
 
-  ctx.fillStyle = "#ff4925";
-  ctx.shadowColor = "#ff3b18";
-  ctx.shadowBlur = 8;
-  ctx.beginPath();
-  ctx.arc(0, -1, 3, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
+  G.ctx.fillStyle = "#ff4925";
+  G.ctx.shadowColor = "#ff3b18";
+  G.ctx.shadowBlur = 8;
+  G.ctx.beginPath();
+  G.ctx.arc(0, -1, 3, 0, Math.PI * 2);
+  G.ctx.fill();
+  G.ctx.restore();
 }
 
 function drawAirshipGondola(gondola) {
-  ctx.save();
-  ctx.translate(gondola.x, gondola.y);
-  ctx.rotate(clamp(gondola.vx / 900, -0.25, 0.25) + Math.sin(gondola.age * 4.5 + gondola.phase) * 0.05);
-  drawSprite(sprites.airshipGondola, 0, 0, gondola.w, gondola.h, {
+  G.ctx.save();
+  G.ctx.translate(gondola.x, gondola.y);
+  G.ctx.rotate(clamp(gondola.vx / 900, -0.25, 0.25) + Math.sin(gondola.age * 4.5 + gondola.phase) * 0.05);
+  drawSprite(G.sprites.airshipGondola, 0, 0, gondola.w, gondola.h, {
     glow: "rgba(255, 73, 28, 0.58)",
     blur: 17,
   });
 
   // The ring counts down the ten-second pursuit phase.
   const remaining = clamp(1 - gondola.age / 10, 0, 1);
-  ctx.strokeStyle = "rgba(255, 208, 83, 0.9)";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.arc(0, -34, 11, -Math.PI / 2, -Math.PI / 2 + remaining * Math.PI * 2);
-  ctx.stroke();
-  ctx.restore();
+  G.ctx.strokeStyle = "rgba(255, 208, 83, 0.9)";
+  G.ctx.lineWidth = 3;
+  G.ctx.beginPath();
+  G.ctx.arc(0, -34, 11, -Math.PI / 2, -Math.PI / 2 + remaining * Math.PI * 2);
+  G.ctx.stroke();
+  G.ctx.restore();
 }
 
 function drawAirbase(base) {
-  ctx.save();
-  ctx.translate(base.x, base.y);
-  ctx.shadowColor = "rgba(91, 227, 255, 0.52)";
-  ctx.shadowBlur = 18;
+  G.ctx.save();
+  G.ctx.translate(base.x, base.y);
+  G.ctx.shadowColor = "rgba(91, 227, 255, 0.52)";
+  G.ctx.shadowBlur = 18;
 
   // A compact flying platform with a clear landing pad and approach lights.
-  ctx.fillStyle = "rgba(79, 220, 255, 0.12)";
-  ctx.beginPath();
-  ctx.ellipse(0, 38, 105, 13, 0, 0, Math.PI * 2);
-  ctx.fill();
+  G.ctx.fillStyle = "rgba(79, 220, 255, 0.12)";
+  G.ctx.beginPath();
+  G.ctx.ellipse(0, 38, 105, 13, 0, 0, Math.PI * 2);
+  G.ctx.fill();
 
-  ctx.fillStyle = "#243238";
-  ctx.strokeStyle = "#101719";
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(-112, -20);
-  ctx.lineTo(107, -20);
-  ctx.lineTo(122, 12);
-  ctx.lineTo(91, 31);
-  ctx.lineTo(-91, 31);
-  ctx.lineTo(-122, 12);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+  G.ctx.fillStyle = "#243238";
+  G.ctx.strokeStyle = "#101719";
+  G.ctx.lineWidth = 5;
+  G.ctx.beginPath();
+  G.ctx.moveTo(-112, -20);
+  G.ctx.lineTo(107, -20);
+  G.ctx.lineTo(122, 12);
+  G.ctx.lineTo(91, 31);
+  G.ctx.lineTo(-91, 31);
+  G.ctx.lineTo(-122, 12);
+  G.ctx.closePath();
+  G.ctx.fill();
+  G.ctx.stroke();
 
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = "#d8f23b";
-  ctx.strokeStyle = "#536a16";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(-74, -8);
-  ctx.lineTo(74, -8);
-  ctx.lineTo(61, 13);
-  ctx.lineTo(-61, 13);
-  ctx.closePath();
-  ctx.fill();
-  ctx.stroke();
+  G.ctx.shadowBlur = 0;
+  G.ctx.fillStyle = "#d8f23b";
+  G.ctx.strokeStyle = "#536a16";
+  G.ctx.lineWidth = 3;
+  G.ctx.beginPath();
+  G.ctx.moveTo(-74, -8);
+  G.ctx.lineTo(74, -8);
+  G.ctx.lineTo(61, 13);
+  G.ctx.lineTo(-61, 13);
+  G.ctx.closePath();
+  G.ctx.fill();
+  G.ctx.stroke();
 
-  ctx.fillStyle = "#132126";
-  ctx.font = '900 16px Inter, sans-serif';
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("ATERRIZA", 0, 3);
+  G.ctx.fillStyle = "#132126";
+  G.ctx.font = '900 16px Inter, sans-serif';
+  G.ctx.textAlign = "center";
+  G.ctx.textBaseline = "middle";
+  G.ctx.fillText("ATERRIZA", 0, 3);
 
-  ctx.strokeStyle = "#162326";
-  ctx.lineWidth = 4;
+  G.ctx.strokeStyle = "#162326";
+  G.ctx.lineWidth = 4;
   for (const x of [-78, 78]) {
-    ctx.beginPath();
-    ctx.moveTo(x, 22);
-    ctx.lineTo(x * 0.72, 47);
-    ctx.stroke();
+    G.ctx.beginPath();
+    G.ctx.moveTo(x, 22);
+    G.ctx.lineTo(x * 0.72, 47);
+    G.ctx.stroke();
   }
   for (const x of [-84, -42, 42, 84]) {
-    ctx.fillStyle = Math.floor(base.age * 5 + x) % 2 === 0 ? "#ffe95b" : "#ff6b2c";
-    ctx.beginPath();
-    ctx.arc(x, -27, 4, 0, Math.PI * 2);
-    ctx.fill();
+    G.ctx.fillStyle = Math.floor(base.age * 5 + x) % 2 === 0 ? "#ffe95b" : "#ff6b2c";
+    G.ctx.beginPath();
+    G.ctx.arc(x, -27, 4, 0, Math.PI * 2);
+    G.ctx.fill();
   }
 
-  ctx.strokeStyle = "#1b2629";
-  ctx.lineWidth = 6;
-  ctx.beginPath();
-  ctx.moveTo(-86, -22);
-  ctx.lineTo(-113, -48);
-  ctx.moveTo(86, -22);
-  ctx.lineTo(113, -48);
-  ctx.stroke();
-  ctx.save();
-  ctx.translate(-124, -56);
-  ctx.rotate(base.age * 6);
-  ctx.strokeStyle = "#5d7175";
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(0, -15);
-  ctx.lineTo(0, 15);
-  ctx.moveTo(-15, 0);
-  ctx.lineTo(15, 0);
-  ctx.stroke();
-  ctx.restore();
-  ctx.save();
-  ctx.translate(124, -56);
-  ctx.rotate(-base.age * 6);
-  ctx.strokeStyle = "#5d7175";
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(0, -15);
-  ctx.lineTo(0, 15);
-  ctx.moveTo(-15, 0);
-  ctx.lineTo(15, 0);
-  ctx.stroke();
-  ctx.restore();
-  ctx.restore();
+  G.ctx.strokeStyle = "#1b2629";
+  G.ctx.lineWidth = 6;
+  G.ctx.beginPath();
+  G.ctx.moveTo(-86, -22);
+  G.ctx.lineTo(-113, -48);
+  G.ctx.moveTo(86, -22);
+  G.ctx.lineTo(113, -48);
+  G.ctx.stroke();
+  G.ctx.save();
+  G.ctx.translate(-124, -56);
+  G.ctx.rotate(base.age * 6);
+  G.ctx.strokeStyle = "#5d7175";
+  G.ctx.lineWidth = 5;
+  G.ctx.beginPath();
+  G.ctx.moveTo(0, -15);
+  G.ctx.lineTo(0, 15);
+  G.ctx.moveTo(-15, 0);
+  G.ctx.lineTo(15, 0);
+  G.ctx.stroke();
+  G.ctx.restore();
+  G.ctx.save();
+  G.ctx.translate(124, -56);
+  G.ctx.rotate(-base.age * 6);
+  G.ctx.strokeStyle = "#5d7175";
+  G.ctx.lineWidth = 5;
+  G.ctx.beginPath();
+  G.ctx.moveTo(0, -15);
+  G.ctx.lineTo(0, 15);
+  G.ctx.moveTo(-15, 0);
+  G.ctx.lineTo(15, 0);
+  G.ctx.stroke();
+  G.ctx.restore();
+  G.ctx.restore();
 }
 
 function drawEntities() {
-  for (const pickup of pickups) {
+  for (const pickup of G.pickups) {
     const bob = Math.sin(pickup.age * 7) * 4;
     if (pickup.type === "coin") {
-      drawSprite(sprites.coin, pickup.x, pickup.y + bob, pickup.w, pickup.h, {
+      drawSprite(G.sprites.coin, pickup.x, pickup.y + bob, pickup.w, pickup.h, {
         glow: "#ffd63c",
         blur: 9,
       });
     } else {
       const index = { rapid: 0, shield: 1, heart: 2, star: 3 }[pickup.type] ?? 3;
-      drawSprite(sprites.powerups[index], pickup.x, pickup.y + bob, pickup.w, pickup.h, {
+      drawSprite(G.sprites.powerups[index], pickup.x, pickup.y + bob, pickup.w, pickup.h, {
         glow: pickup.type === "heart" ? "#ff472c" : "#9ce7ff",
         blur: 10,
       });
     }
   }
 
-  if (airbase) drawAirbase(airbase);
+  if (G.airbase) drawAirbase(G.airbase);
 
-  for (const bullet of playerBullets) {
-    drawSprite(bullet.explosive ? sprites.missile : sprites.playerBullet, bullet.x, bullet.y, bullet.w, bullet.h, {
+  for (const bullet of G.playerBullets) {
+    drawSprite(bullet.explosive ? G.sprites.missile : G.sprites.playerBullet, bullet.x, bullet.y, bullet.w, bullet.h, {
       glow: bullet.explosive ? "#ff8a18" : "#6cecff",
       blur: 13,
     });
   }
 
-  for (const bullet of enemyBullets) {
-    drawSprite(sprites.enemyBullet, bullet.x, bullet.y, bullet.w, bullet.h, {
+  for (const bullet of G.enemyBullets) {
+    drawSprite(G.sprites.enemyBullet, bullet.x, bullet.y, bullet.w, bullet.h, {
       rotate: bullet.age * (bullet.reflected ? -4 : 4),
       glow: bullet.reflected ? "#68d8ff" : "#ff6a23",
       blur: 11,
     });
   }
 
-  for (const basket of balloonBaskets) drawBalloonBasket(basket);
-  for (const gondola of airshipGondolas) drawAirshipGondola(gondola);
+  for (const basket of G.balloonBaskets) drawBalloonBasket(basket);
+  for (const gondola of G.airshipGondolas) drawAirshipGondola(gondola);
 
-  for (const enemy of enemies) {
-    ctx.save();
+  for (const enemy of G.enemies) {
+    G.ctx.save();
     if (enemy.flash > 0) {
-      ctx.globalAlpha = 0.5 + Math.random() * 0.5;
-      ctx.filter = "brightness(1.8)";
+      G.ctx.globalAlpha = 0.5 + Math.random() * 0.5;
+      G.ctx.filter = "brightness(1.8)";
     }
     if (enemy.type === "boss") {
-      drawSprite(sprites.boss, enemy.x, enemy.y, enemy.w, enemy.h, {
+      drawSprite(G.sprites.boss, enemy.x, enemy.y, enemy.w, enemy.h, {
         rotate: Math.sin(enemy.age * 1.4) * 0.015,
       });
     } else if (enemy.type === "airship") {
@@ -1635,50 +1509,50 @@ function drawEntities() {
     } else if (enemy.type === "balloon") {
       drawBalloonSprite(enemy);
     } else if (enemy.type === "drone") {
-      const frame = Math.floor(enemy.age * 6 + enemy.phase) % sprites.drone.length;
-      drawSprite(sprites.drone[frame], enemy.x, enemy.y, enemy.w, enemy.h, {
+      const frame = Math.floor(enemy.age * 6 + enemy.phase) % G.sprites.drone.length;
+      drawSprite(G.sprites.drone[frame], enemy.x, enemy.y, enemy.w, enemy.h, {
         rotate: Math.sin(enemy.age * 3) * 0.05,
       });
     } else if (enemy.type === "fighter") {
-      const frame = Math.floor(enemy.phase) % sprites.fighter.length;
-      drawSprite(sprites.fighter[frame], enemy.x, enemy.y, enemy.w, enemy.h);
+      const frame = Math.floor(enemy.phase) % G.sprites.fighter.length;
+      drawSprite(G.sprites.fighter[frame], enemy.x, enemy.y, enemy.w, enemy.h);
     } else {
-      const frame = Math.floor(enemy.age * 5 + enemy.phase) % sprites.enemyHeli.length;
-      drawSprite(sprites.enemyHeli[frame], enemy.x, enemy.y, enemy.w, enemy.h);
+      const frame = Math.floor(enemy.age * 5 + enemy.phase) % G.sprites.enemyHeli.length;
+      drawSprite(G.sprites.enemyHeli[frame], enemy.x, enemy.y, enemy.w, enemy.h);
     }
-    ctx.restore();
+    G.ctx.restore();
   }
 
   const playerAlpha =
-    player.invulnerable > 0 && Math.floor(player.invulnerable * 14) % 2 === 0 ? 0.32 : 1;
-  if (player.shield > 0) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, SHIELD_RADIUS + Math.sin(state.elapsed * 5) * 3, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(88, 218, 255, 0.72)";
-    ctx.lineWidth = 4;
-    ctx.shadowColor = "#5be4ff";
-    ctx.shadowBlur = 14;
-    ctx.stroke();
-    ctx.restore();
+    G.player.invulnerable > 0 && Math.floor(G.player.invulnerable * 14) % 2 === 0 ? 0.32 : 1;
+  if (G.player.shield > 0) {
+    G.ctx.save();
+    G.ctx.beginPath();
+    G.ctx.arc(G.player.x, G.player.y, SHIELD_RADIUS + Math.sin(G.state.elapsed * 5) * 3, 0, Math.PI * 2);
+    G.ctx.strokeStyle = "rgba(88, 218, 255, 0.72)";
+    G.ctx.lineWidth = 4;
+    G.ctx.shadowColor = "#5be4ff";
+    G.ctx.shadowBlur = 14;
+    G.ctx.stroke();
+    G.ctx.restore();
   }
-  const playerSprite = sprites.playerVariants?.[player.helicopter] || sprites.player[player.frame];
-  drawSprite(playerSprite, player.x, player.y, player.w, player.h, {
-    rotate: player.tilt,
+  const playerSprite = G.sprites.playerVariants?.[G.player.helicopter] || G.sprites.player[G.player.frame];
+  drawSprite(playerSprite, G.player.x, G.player.y, G.player.w, G.player.h, {
+    rotate: G.player.tilt,
     alpha: playerAlpha,
   });
 }
 
 function drawEffects() {
-  for (const effect of effects) {
+  for (const effect of G.effects) {
     const progress = effect.age / effect.duration;
     const index = Math.min(
-      sprites.explosion.length - 1,
-      Math.floor(progress * sprites.explosion.length),
+      G.sprites.explosion.length - 1,
+      Math.floor(progress * G.sprites.explosion.length),
     );
     const scale = 0.75 + Math.sin(progress * Math.PI) * 0.45;
     drawSprite(
-      sprites.explosion[index],
+      G.sprites.explosion[index],
       effect.x,
       effect.y,
       effect.size * scale,
@@ -1687,90 +1561,90 @@ function drawEffects() {
     );
   }
 
-  for (const particle of particles) {
-    ctx.globalAlpha = clamp(particle.life / particle.maxLife, 0, 1);
-    ctx.fillStyle = particle.color;
-    ctx.beginPath();
-    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-    ctx.fill();
+  for (const particle of G.particles) {
+    G.ctx.globalAlpha = clamp(particle.life / particle.maxLife, 0, 1);
+    G.ctx.fillStyle = particle.color;
+    G.ctx.beginPath();
+    G.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+    G.ctx.fill();
   }
-  ctx.globalAlpha = 1;
+  G.ctx.globalAlpha = 1;
 }
 
 function drawBanner() {
-  if (state.banner <= 0) return;
-  const t = state.banner;
+  if (G.state.banner <= 0) return;
+  const t = G.state.banner;
   const alpha = Math.min(1, (2.3 - t) * 4, t * 2);
-  ctx.save();
-  ctx.globalAlpha = alpha;
+  G.ctx.save();
+  G.ctx.globalAlpha = alpha;
   const width = 510;
   const y = H * 0.47;
-  const gradient = ctx.createLinearGradient(W / 2 - width / 2, 0, W / 2 + width / 2, 0);
+  const gradient = G.ctx.createLinearGradient(W / 2 - width / 2, 0, W / 2 + width / 2, 0);
   gradient.addColorStop(0, "rgba(3,10,13,0)");
   gradient.addColorStop(0.16, "rgba(3,10,13,0.76)");
   gradient.addColorStop(0.84, "rgba(3,10,13,0.76)");
   gradient.addColorStop(1, "rgba(3,10,13,0)");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(W / 2 - width / 2, y - 43, width, 86);
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillStyle = "#d8f23b";
-  ctx.font = '400 37px "Black Ops One", Impact, sans-serif';
-  ctx.fillText(state.bannerText, W / 2, y + 2);
-  ctx.restore();
+  G.ctx.fillStyle = gradient;
+  G.ctx.fillRect(W / 2 - width / 2, y - 43, width, 86);
+  G.ctx.textAlign = "center";
+  G.ctx.textBaseline = "middle";
+  G.ctx.fillStyle = "#d8f23b";
+  G.ctx.font = '400 37px "Black Ops One", Impact, sans-serif';
+  G.ctx.fillText(G.state.bannerText, W / 2, y + 2);
+  G.ctx.restore();
 }
 
 function render() {
-  ctx.clearRect(0, 0, W, H);
-  if (!sheet.complete || !sprites.player) {
-    ctx.fillStyle = "#0a1820";
-    ctx.fillRect(0, 0, W, H);
+  G.ctx.clearRect(0, 0, W, H);
+  if (!G.sheet.complete || !G.sprites.player) {
+    G.ctx.fillStyle = "#0a1820";
+    G.ctx.fillRect(0, 0, W, H);
     return;
   }
 
-  if (mode === "menu" || mode === "loading") {
+  if (G.mode === "menu" || G.mode === "loading") {
     drawMenuBackdrop();
     return;
   }
 
-  ctx.save();
-  if (state.shake > 0) ctx.translate(rand(-state.shake, state.shake), rand(-state.shake, state.shake));
-  drawBackground(state.background);
+  G.ctx.save();
+  if (G.state.shake > 0) G.ctx.translate(rand(-G.state.shake, G.state.shake), rand(-G.state.shake, G.state.shake));
+  drawBackground(G.state.background);
   drawEntities();
   drawEffects();
   drawHud();
   drawBanner();
-  ctx.restore();
+  G.ctx.restore();
 
-  if (state.flash > 0) {
-    ctx.fillStyle = `rgba(255,255,255,${state.flash * 1.7})`;
-    ctx.fillRect(0, 0, W, H);
+  if (G.state.flash > 0) {
+    G.ctx.fillStyle = `rgba(255,255,255,${G.state.flash * 1.7})`;
+    G.ctx.fillRect(0, 0, W, H);
   }
 }
 
 function loop(time) {
-  const dt = Math.min(0.034, (time - lastTime) / 1000 || 0);
-  lastTime = time;
-  if (mode === "playing") updateGame(dt);
+  const dt = Math.min(0.034, (time - G.lastTime) / 1000 || 0);
+  G.lastTime = time;
+  if (G.mode === "playing") updateGame(dt);
   render();
   requestAnimationFrame(loop);
 }
 
 function updatePointer(event) {
-  const rect = canvas.getBoundingClientRect();
-  pointer.x = ((event.clientX - rect.left) / rect.width) * W;
-  pointer.y = ((event.clientY - rect.top) / rect.height) * H;
+  const rect = G.canvas.getBoundingClientRect();
+  G.pointer.x = ((event.clientX - rect.left) / rect.width) * W;
+  G.pointer.y = ((event.clientY - rect.top) / rect.height) * H;
 }
 
 window.addEventListener("keydown", (event) => {
   if (event.code === "Space") {
-    if (mode === "playing") {
+    if (G.mode === "playing") {
       // Solo en partida se aísla Espacio: fuera de ella los botones del
       // menú, la tienda y el fin de partida deben responder a la tecla.
       event.preventDefault();
       event.stopImmediatePropagation();
     }
-    keys.add("Space");
+    G.keys.add("Space");
     return;
   }
   if (
@@ -1778,110 +1652,110 @@ window.addEventListener("keydown", (event) => {
   ) {
     event.preventDefault();
   }
-  keys.add(event.code);
+  G.keys.add(event.code);
   if ((event.code === "KeyP" || event.code === "Escape") && !event.repeat) togglePause();
-  if (event.code === "Enter" && mode === "menu") startGame();
+  if (event.code === "Enter" && G.mode === "menu") startGame();
 }, true);
 
 window.addEventListener("keyup", (event) => {
   if (event.code === "Space") event.preventDefault();
-  keys.delete(event.code);
+  G.keys.delete(event.code);
 }, true);
 // Autopausa: si la pestaña o la ventana pierden el foco en mitad de una
 // oleada, la partida se pausa en lugar de seguir corriendo sin defensa.
 const autopause = () => {
-  keys.clear();
-  pointer.active = false;
-  if (mode === "playing") togglePause();
+  G.keys.clear();
+  G.pointer.active = false;
+  if (G.mode === "playing") togglePause();
 };
 window.addEventListener("blur", autopause);
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) autopause();
 });
 
-canvas.addEventListener("pointerdown", (event) => {
-  if (mode !== "playing") return;
-  pointer.active = true;
+G.canvas.addEventListener("pointerdown", (event) => {
+  if (G.mode !== "playing") return;
+  G.pointer.active = true;
   updatePointer(event);
-  canvas.setPointerCapture?.(event.pointerId);
+  G.canvas.setPointerCapture?.(event.pointerId);
   unlockAudio();
 });
-canvas.addEventListener("pointermove", (event) => {
-  if (pointer.active) updatePointer(event);
+G.canvas.addEventListener("pointermove", (event) => {
+  if (G.pointer.active) updatePointer(event);
 });
-canvas.addEventListener("pointerup", () => {
-  pointer.active = false;
+G.canvas.addEventListener("pointerup", () => {
+  G.pointer.active = false;
 });
-canvas.addEventListener("pointercancel", () => {
-  pointer.active = false;
+G.canvas.addEventListener("pointercancel", () => {
+  G.pointer.active = false;
 });
 
-ui.play.addEventListener("click", startGame);
-ui.restart.addEventListener("click", startGame);
-ui.resume.addEventListener("click", togglePause);
-ui.pauseButton.addEventListener("click", togglePause);
-ui.soundButton.addEventListener("click", toggleSound);
-ui.continueButton.addEventListener("click", continueFromShop);
-ui.helicopterContinue.addEventListener("click", continueFromHelicopter);
-for (const button of ui.difficultyButtons) {
+G.ui.play.addEventListener("click", startGame);
+G.ui.restart.addEventListener("click", startGame);
+G.ui.resume.addEventListener("click", togglePause);
+G.ui.pauseButton.addEventListener("click", togglePause);
+G.ui.soundButton.addEventListener("click", toggleSound);
+G.ui.continueButton.addEventListener("click", continueFromShop);
+G.ui.helicopterContinue.addEventListener("click", continueFromHelicopter);
+for (const button of G.ui.difficultyButtons) {
   button.addEventListener("click", () => selectDifficulty(button.dataset.difficulty));
 }
-for (const button of [...ui.helicopterButtons, ...ui.changeHelicopterButtons]) {
+for (const button of [...G.ui.helicopterButtons, ...G.ui.changeHelicopterButtons]) {
   button.addEventListener("click", () => selectHelicopter(button.dataset.helicopter));
 }
-for (const button of ui.shopItemButtons) {
+for (const button of G.ui.shopItemButtons) {
   button.addEventListener("click", () => buyShopItem(button.dataset.shopItem));
 }
-selectDifficulty(selectedDifficulty);
-selectHelicopter(selectedHelicopter);
+selectDifficulty(G.selectedDifficulty);
+selectHelicopter(G.selectedHelicopter);
 
 function finishLoading() {
   if (!fontsReady || !airshipReady || !gondolaReady || helicopterVariantsReady < 2) return;
-  sprites.airshipGondola = gondolaSheet;
-  sprites.playerVariants = {
-    v1: helicopterSheets.v1,
-    v2: helicopterSheets.v2,
+  G.sprites.airshipGondola = G.gondolaSheet;
+  G.sprites.playerVariants = {
+    v1: G.helicopterSheets.v1,
+    v2: G.helicopterSheets.v2,
   };
   resetGame();
   setMode("menu");
 }
 
-sheet.addEventListener("load", () => {
+G.sheet.addEventListener("load", () => {
   prepareSprites();
-  airshipSheet.src = "assets/boss-globo-sprites.webp";
-  helicopterSheets.v1.src = "assets/helicopter-player-v1.webp";
-  helicopterSheets.v2.src = "assets/helicopter-player-v2.webp";
+  G.airshipSheet.src = "assets/boss-globo-sprites.webp";
+  G.helicopterSheets.v1.src = "assets/helicopter-player-v1.webp";
+  G.helicopterSheets.v2.src = "assets/helicopter-player-v2.webp";
 });
-airshipSheet.addEventListener("load", () => {
+G.airshipSheet.addEventListener("load", () => {
   prepareAirshipSprites();
   airshipReady = true;
-  gondolaSheet.src = "assets/airship-gondola.webp";
+  G.gondolaSheet.src = "assets/airship-gondola.webp";
   finishLoading();
 });
-gondolaSheet.addEventListener("load", () => {
+G.gondolaSheet.addEventListener("load", () => {
   gondolaReady = true;
   finishLoading();
 });
-for (const helicopterSheet of Object.values(helicopterSheets)) {
+for (const helicopterSheet of Object.values(G.helicopterSheets)) {
   helicopterSheet.addEventListener("load", () => {
     helicopterVariantsReady += 1;
     finishLoading();
   });
 }
 const showSpriteLoadError = () => {
-  ui.loading.innerHTML =
+  G.ui.loading.innerHTML =
     "<p>No se pudo cargar la lámina de sprites. Comprueba la carpeta assets.</p>";
 };
-sheet.addEventListener("error", showSpriteLoadError);
-airshipSheet.addEventListener("error", showSpriteLoadError);
-gondolaSheet.addEventListener("error", showSpriteLoadError);
-for (const helicopterSheet of Object.values(helicopterSheets)) {
+G.sheet.addEventListener("error", showSpriteLoadError);
+G.airshipSheet.addEventListener("error", showSpriteLoadError);
+G.gondolaSheet.addEventListener("error", showSpriteLoadError);
+for (const helicopterSheet of Object.values(G.helicopterSheets)) {
   helicopterSheet.addEventListener("error", showSpriteLoadError);
 }
-sheet.src = "assets/juego-nacho.webp";
+G.sheet.src = "assets/juego-nacho.webp";
 
 // Cargar las fuentes del HUD antes de dar la carga por terminada, para que
-// el canvas nunca mida texto con la fuente de sustitución.
+// el G.canvas nunca mida texto con la fuente de sustitución.
 const fontLoads = [
   document.fonts.load('400 26px "Black Ops One"'),
   document.fonts.load("500 16px Inter"),
