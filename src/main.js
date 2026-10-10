@@ -4,8 +4,8 @@ import {
   SHIELD_DURATION, SHIELD_RADIUS, MAX_PARTICLES,
 } from "./config.js";
 import { G, setMode, selectDifficulty, selectHelicopter } from "./state.js";
-import { render } from "src/render.js";
-import { prepareSprites, prepareAirshipSprites, bakedGlow } from "src/sprites.js";
+import { render } from "./render.js";
+import { prepareSprites, prepareAirshipSprites, bakedGlow } from "./sprites.js";
 import { rand, clamp, lerp, overlaps, isBossEnemy } from "./utils.js";
 import { unlockAudio, tone, toggleSound } from "./audio.js";
 import { getHighScore, saveHighScore } from "./records.js";

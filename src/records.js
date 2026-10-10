@@ -13,7 +13,7 @@ export function getHighScore(difficultyId) {
   }
 }
 
-export function saveHighScore(score, difficultyId = G.selectedDifficulty) {
+export function saveHighScore(score, difficultyId) {
   try {
     const clave = `operacion-nacho-record-${difficultyId}`;
     if (score > Number(localStorage.getItem(clave)) || 0) {
