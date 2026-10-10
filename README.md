@@ -7,7 +7,11 @@ el fondo se eliminó una sola vez, offline).
 El boss del globo aerostático y sus cuatro miniglobos usan la lámina transparente
 independiente `assets/boss-globo-sprites.webp`.
 
-## Ejecutarlo
+## Jugar online
+
+<https://tigreton.github.io/nacho-lanzamisiles-3000/>
+
+## Ejecutarlo en local
 
 En macOS, haz doble clic en `JUGAR.command`. En Windows, doble clic en
 `JUGAR.bat` (requiere Python instalado y en el PATH).
