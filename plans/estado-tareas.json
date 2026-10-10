@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 18:32",
+    "ultimaActualizacion": "2026-10-10 18:40",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -598,9 +598,10 @@
       "prioridad": "P1",
       "titulo": "Extraer configuración a config.js",
       "detalle": "Dificultades, helicópteros, tienda, crops y constantes de gameplay; adiós números mágicos",
-      "estado": "pendiente",
+      "estado": "en_curso",
       "creada": "2026-10-10",
-      "regla": "fases-0-a-4"
+      "regla": "fases-0-a-4",
+      "actualizada": "2026-10-10 18:40"
     },
     {
       "id": "5.2",

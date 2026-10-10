@@ -379,3 +379,6 @@ si es una decisión tomada a mitad de camino).
 - **Estado:** sin cambio (completada)
 - **Nota:** Cierre pendiente de fase 1: la tienda se alcanzo en el e2e de fase 4 y el boton de misil explosivo respondio correctamente (rechazo por monedas insuficientes); la equivalencia del recorte sigue siendo la garantia visual
 
+### [2026-10-10 18:40] 5.1 — Extraer configuración a config.js
+- **Estado:** pendiente → en_curso
+
