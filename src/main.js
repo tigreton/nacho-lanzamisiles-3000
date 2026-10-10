@@ -4,6 +4,7 @@ import {
   SHIELD_DURATION, SHIELD_RADIUS, MAX_PARTICLES,
 } from "./config.js";
 import { G, setMode, selectDifficulty, selectHelicopter } from "./state.js";
+import { rand, clamp, lerp, overlaps } from "src/utils.js";
 import { getHighScore, saveHighScore } from "./records.js";
 
 
@@ -35,9 +36,6 @@ let helicopterVariantsReady = 0;
 let fontsReady = false;
 
 
-const rand = (min, max) => min + Math.random() * (max - min);
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-const lerp = (a, b, amount) => a + (b - a) * amount;
 
 function applyHelicopterStats(id) {
   const stats = HELICOPTERS[id];
@@ -760,13 +758,6 @@ function endGame() {
   setMode("gameover");
 }
 
-function overlaps(a, b, inset = 0.25) {
-  const aw = a.w * (1 - inset);
-  const ah = a.h * (1 - inset);
-  const bw = b.w * (1 - inset);
-  const bh = b.h * (1 - inset);
-  return Math.abs(a.x - b.x) * 2 < aw + bw && Math.abs(a.y - b.y) * 2 < ah + bh;
-}
 
 function detonateExplosiveBullet(bullet, directHit) {
   const radius = 118;
