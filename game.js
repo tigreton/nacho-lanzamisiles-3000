@@ -3,8 +3,26 @@
 
   const canvas = document.querySelector("#game-canvas");
   const ctx = canvas.getContext("2d");
-  const W = canvas.width;
-  const H = canvas.height;
+  // El mundo del juego vive en coordenadas lógicas fijas; el canvas físico se
+  // dimensiona al tamaño CSS × devicePixelRatio para texto y sprites nítidos.
+  const W = 1200;
+  const H = 675;
+
+  function resizeCanvas() {
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = canvas.getBoundingClientRect();
+    const ancho = Math.max(1, Math.round(rect.width * ratio));
+    const alto = Math.max(1, Math.round(rect.height * ratio));
+    if (canvas.width !== ancho || canvas.height !== alto) {
+      canvas.width = ancho;
+      canvas.height = alto;
+    }
+    // Escalas independientes: si el contenedor no es 16:9 el juego se estira
+    // exactamente igual que cuando el canvas era fijo.
+    ctx.setTransform(ancho / W, 0, 0, alto / H, 0, 0);
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 
   const ui = {
     loading: document.querySelector("#loading-screen"),

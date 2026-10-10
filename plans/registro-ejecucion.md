@@ -318,3 +318,26 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 18:23] 3.5 — Documentar KeyJ como disparo alternativo
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 18:23] 3.4 — Lanzador JUGAR.bat y README multiplataforma
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - JUGAR.bat: comprueba python en PATH, abre el navegador con 1 s de retardo (cmd /c en segundo plano) y deja el servidor en primer plano con mensaje de Ctrl+C; gestiona el puerto 8080 ocupado con mensaje y pause; README con instrucciones macOS (JUGAR.command) y Windows (JUGAR.bat). El cambio del controls-card (ESPACIO o J) se commiteo en 0e75dc7 por tocar el mismo bloque HTML
+- **Archivos:** JUGAR.bat, README.md
+- **Verificación:** bat revisado linea a linea (sintaxis cmd estandar); README muestra ambos sistemas
+- **Commit:** 0082647
+
+### [2026-10-10 18:23] 3.5 — Documentar KeyJ como disparo alternativo
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - KeyJ ya funcionaba (keys.has('KeyJ') en el disparo); ahora esta documentado en el controls-card del menu (ESPACIO o J, commit 0e75dc7) y en el README (controles), mismo commit que 3.4 por compartir archivo
+- **Archivos:** index.html, README.md
+- **Verificación:** grep: 'J' visible en controls-card y README; el disparo con J se probara en el e2e de fase
+- **Commit:** 0082647
+
+### [2026-10-10 18:25] 3.2 — Autopausa al perder foco
+- **Estado:** sin cambio (completada)
+- **Nota:** E2E fase 3: record por dificultad visible y actualizado al cambiar (RÉCORD NORMAL: 12.345 / AÚN SIN RÉCORD EN FÁCIL); Espacio no cancelado en menu (defaultPrevented=false) y si cancelado en partida (true); autopausa por blur durante partida (pause-screen visible); disparo con J verificado por delta de pixeles de balas (0.0000->0.0010); 0 errores de consola. Nota metodologica: la activacion nativa de botones con Espacio no puede probarse con eventos sinteticos (isTrusted=false); se verifico que el handler no la impide
+
+### [2026-10-10 18:25] 4.1 — Canvas adaptativo con DPR
+- **Estado:** pendiente → en_curso
+

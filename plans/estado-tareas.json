@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 18:23",
+    "ultimaActualizacion": "2026-10-10 18:25",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -426,7 +426,7 @@
       "detalle": "visibilitychange + blur → togglePause() si mode === 'playing'",
       "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 18:22",
+      "actualizada": "2026-10-10 18:25",
       "decisiones": [
         "Un solo handler autopause para blur y visibilitychange (el guarda mode==='playing' evita el doble toggle: tras la primera pausa el modo ya no es playing); se conserva la limpieza de teclas y puntero del handler original"
       ],
@@ -434,7 +434,10 @@
         "game.js"
       ],
       "verificacion": "e2e: blur sintetico durante partida pausa el juego (verificacion de fase)",
-      "commit": "7765a7c"
+      "commit": "7765a7c",
+      "notas": [
+        "E2E fase 3: record por dificultad visible y actualizado al cambiar (RÉCORD NORMAL: 12.345 / AÚN SIN RÉCORD EN FÁCIL); Espacio no cancelado en menu (defaultPrevented=false) y si cancelado en partida (true); autopausa por blur durante partida (pause-screen visible); disparo con J verificado por delta de pixeles de balas (0.0000->0.0010); 0 errores de consola. Nota metodologica: la activacion nativa de botones con Espacio no puede probarse con eventos sinteticos (isTrusted=false); se verifico que el handler no la impide"
+      ]
     },
     {
       "id": "3.3",
@@ -460,9 +463,18 @@
       "prioridad": "P2",
       "titulo": "Lanzador JUGAR.bat y README multiplataforma",
       "detalle": "python (sin 3) en Windows; instrucciones macOS y Windows",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 18:23"
+      "actualizada": "2026-10-10 18:23",
+      "decisiones": [
+        "JUGAR.bat: comprueba python en PATH, abre el navegador con 1 s de retardo (cmd /c en segundo plano) y deja el servidor en primer plano con mensaje de Ctrl+C; gestiona el puerto 8080 ocupado con mensaje y pause; README con instrucciones macOS (JUGAR.command) y Windows (JUGAR.bat). El cambio del controls-card (ESPACIO o J) se commiteo en 0e75dc7 por tocar el mismo bloque HTML"
+      ],
+      "archivos": [
+        "JUGAR.bat",
+        "README.md"
+      ],
+      "verificacion": "bat revisado linea a linea (sintaxis cmd estandar); README muestra ambos sistemas",
+      "commit": "0082647"
     },
     {
       "id": "3.5",
@@ -470,9 +482,18 @@
       "prioridad": "P3",
       "titulo": "Documentar KeyJ como disparo alternativo",
       "detalle": "En controls-card del menú y en el README",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 18:23"
+      "actualizada": "2026-10-10 18:23",
+      "decisiones": [
+        "KeyJ ya funcionaba (keys.has('KeyJ') en el disparo); ahora esta documentado en el controls-card del menu (ESPACIO o J, commit 0e75dc7) y en el README (controles), mismo commit que 3.4 por compartir archivo"
+      ],
+      "archivos": [
+        "index.html",
+        "README.md"
+      ],
+      "verificacion": "grep: 'J' visible en controls-card y README; el disparo con J se probara en el e2e de fase",
+      "commit": "0082647"
     },
     {
       "id": "3.6",
@@ -516,8 +537,9 @@
       "prioridad": "P1",
       "titulo": "Canvas adaptativo con DPR",
       "detalle": "Dimensionar el canvas a tamaño CSS × devicePixelRatio y escalar el contexto",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 18:25"
     },
     {
       "id": "4.2",
