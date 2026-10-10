@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 17:04",
+    "ultimaActualizacion": "2026-10-10 17:06",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -303,9 +303,18 @@
       "prioridad": "P1",
       "titulo": "Self-host de fuentes",
       "detalle": "@font-face con Black Ops One e Inter locales; quitar el @import de Google Fonts (style.css:1)",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 17:04"
+      "actualizada": "2026-10-10 17:06",
+      "decisiones": [
+        "Inter es fuente variable: un único woff2 (48 KB) cubre 500/700/900; Black Ops One 400 aparte (31 KB). Se declaran los 3 pesos de Inter apuntando al mismo archivo (modelo idéntico al CSS de Google). Subsets latin (incluyen acentos y ñ). Ojo con la caché del navegador en verificaciones: el style.css viejo con @import sobrevive a reloads normales sin cache-control"
+      ],
+      "archivos": [
+        "style.css",
+        "assets/fonts/"
+      ],
+      "verificacion": "document.fonts.check true para Black Ops One 400 y Inter 500/900; 0 peticiones a googleapis/gstatic tras refrescar caché; primera regla del CSS activo = @font-face local",
+      "commit": "379abad"
     },
     {
       "id": "2.3",
@@ -313,11 +322,12 @@
       "prioridad": "P1",
       "titulo": "Cargar fuentes antes del HUD",
       "detalle": "document.fonts.load() antes de dar la carga por terminada",
-      "estado": "pendiente",
+      "estado": "en_curso",
       "creada": "2026-10-10",
       "dependencias": [
         "2.2"
-      ]
+      ],
+      "actualizada": "2026-10-10 17:06"
     },
     {
       "id": "2.4",

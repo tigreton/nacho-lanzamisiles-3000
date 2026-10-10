@@ -219,3 +219,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 17:04] 2.2 — Self-host de fuentes
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 17:06] 2.2 — Self-host de fuentes
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Inter es fuente variable: un único woff2 (48 KB) cubre 500/700/900; Black Ops One 400 aparte (31 KB). Se declaran los 3 pesos de Inter apuntando al mismo archivo (modelo idéntico al CSS de Google). Subsets latin (incluyen acentos y ñ). Ojo con la caché del navegador en verificaciones: el style.css viejo con @import sobrevive a reloads normales sin cache-control
+- **Archivos:** style.css, assets/fonts/
+- **Verificación:** document.fonts.check true para Black Ops One 400 y Inter 500/900; 0 peticiones a googleapis/gstatic tras refrescar caché; primera regla del CSS activo = @font-face local
+- **Commit:** 379abad
+
+### [2026-10-10 17:06] 2.3 — Cargar fuentes antes del HUD
+- **Estado:** pendiente → en_curso
+

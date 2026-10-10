@@ -202,6 +202,7 @@
   let airshipReady = false;
   let gondolaReady = false;
   let helicopterVariantsReady = 0;
+  let fontsReady = false;
 
   let player;
   let state;
@@ -1992,7 +1993,7 @@
   selectHelicopter(selectedHelicopter);
 
   function finishLoading() {
-    if (!airshipReady || !gondolaReady || helicopterVariantsReady < 2) return;
+    if (!fontsReady || !airshipReady || !gondolaReady || helicopterVariantsReady < 2) return;
     sprites.airshipGondola = gondolaSheet;
     sprites.playerVariants = {
       v1: helicopterSheets.v1,
@@ -2035,6 +2036,25 @@
     helicopterSheet.addEventListener("error", showSpriteLoadError);
   }
   sheet.src = "assets/juego-nacho.webp";
+
+  // Cargar las fuentes del HUD antes de dar la carga por terminada, para que
+  // el canvas nunca mida texto con la fuente de sustitución.
+  const fontLoads = [
+    document.fonts.load('400 26px "Black Ops One"'),
+    document.fonts.load("500 16px Inter"),
+    document.fonts.load("700 12px Inter"),
+    document.fonts.load("900 11px Inter"),
+  ];
+  Promise.all(fontLoads).then(
+    () => {
+      fontsReady = true;
+      finishLoading();
+    },
+    () => {
+      fontsReady = true; // sin fuentes propias el juego es jugable igualmente
+      finishLoading();
+    }
+  );
 
   requestAnimationFrame(loop);
 })();
