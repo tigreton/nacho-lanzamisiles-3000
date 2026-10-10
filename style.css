@@ -220,6 +220,10 @@ button {
 
 .menu-card {
   width: min(450px, 47vw);
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
 }
 
 .menu-card h1,
@@ -243,7 +247,7 @@ button {
 
 .mission-copy {
   width: min(390px, 100%);
-  margin: 17px 0 23px;
+  margin: 12px 0 16px;
   color: rgba(255, 255, 255, 0.76);
   font-size: clamp(0.8rem, 1.35vw, 1.02rem);
   line-height: 1.55;
@@ -251,7 +255,12 @@ button {
 
 .difficulty-picker {
   width: min(430px, 100%);
-  margin: 0 0 18px;
+  margin: 0 0 12px;
+}
+
+.mode-picker {
+  width: min(430px, 100%);
+  margin: 0 0 12px;
 }
 
 .difficulty-label {
@@ -263,15 +272,17 @@ button {
   letter-spacing: 0.16em;
 }
 
-.difficulty-options {
+.difficulty-options,
+.mode-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 7px;
 }
 
-.difficulty-option {
-  min-height: 52px;
-  padding: 7px 6px 6px;
+.difficulty-option,
+.mode-option {
+  min-height: 46px;
+  padding: 6px;
   border: 1px solid rgba(255, 255, 255, 0.17);
   border-radius: 7px;
   color: rgba(255, 255, 255, 0.62);
@@ -282,17 +293,21 @@ button {
 }
 
 .difficulty-option strong,
-.difficulty-option small {
+.mode-option strong,
+.difficulty-option small,
+.mode-option small {
   display: block;
 }
 
-.difficulty-option strong {
+.difficulty-option strong,
+.mode-option strong {
   color: inherit;
   font-size: 0.7rem;
   letter-spacing: 0.08em;
 }
 
-.difficulty-option small {
+.difficulty-option small,
+.mode-option small {
   margin-top: 4px;
   color: rgba(255, 255, 255, 0.43);
   font-size: 0.58rem;
@@ -300,28 +315,55 @@ button {
 }
 
 .difficulty-option:hover,
+.mode-option:hover,
 .difficulty-option:focus-visible,
-.difficulty-option.is-pad-focus {
+.mode-option:focus-visible,
+.difficulty-option.is-pad-focus,
+.mode-option.is-pad-focus {
   border-color: rgba(200, 239, 41, 0.68);
   color: #fff;
   outline: none;
   transform: translateY(-1px);
 }
 
-.difficulty-option.is-selected {
+.difficulty-option.is-selected,
+.mode-option.is-selected {
   border-color: rgba(200, 239, 41, 0.85);
   color: #ecff9b;
   background: rgba(112, 145, 12, 0.34);
   box-shadow: inset 0 0 0 1px rgba(200, 239, 41, 0.15);
 }
 
-.difficulty-option.is-selected small {
+.difficulty-option.is-selected small,
+.mode-option.is-selected small {
   color: rgba(236, 255, 155, 0.7);
+}
+
+.mode-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.mode-option:disabled:hover {
+  border-color: rgba(255, 255, 255, 0.17);
+  color: rgba(255, 255, 255, 0.62);
+  transform: none;
+}
+
+/* En pantallas 16:9 de poca altura el menú con tres selectores no cabe:
+   se sacrifican primero los textos de ambientación y controles (igual
+   que el corte móvil) y, si aún sobra contenido, la tarjeta desplaza
+   sola en vez de recortar opciones. */
+@media (max-height: 780px) {
+  .mission-copy,
+  .controls-card {
+    display: none;
+  }
 }
 
 .helicopter-picker {
   width: min(430px, 100%);
-  margin: 0 0 18px;
+  margin: 0 0 12px;
 }
 
 .helicopter-options {
@@ -331,7 +373,7 @@ button {
 }
 
 .helicopter-option {
-  min-height: 112px;
+  min-height: 100px;
   padding: 5px 7px 8px;
   border: 1px solid rgba(255, 255, 255, 0.17);
   border-radius: 8px;
@@ -470,7 +512,7 @@ button {
 }
 
 .menu-record {
-  margin: 14px 0 0;
+  margin: 10px 0 0;
   color: var(--acid);
   font-size: 0.72rem;
   font-weight: 800;
@@ -557,7 +599,7 @@ button {
 }
 
 .controls-card {
-  margin-top: 26px;
+  margin-top: 16px;
   display: flex;
   flex-wrap: wrap;
   gap: 12px 20px;
@@ -850,7 +892,8 @@ kbd {
     display: none;
   }
 
-  .difficulty-picker {
+  .difficulty-picker,
+  .mode-picker {
     margin-bottom: 10px;
   }
 
@@ -863,20 +906,24 @@ kbd {
     font-size: 0.54rem;
   }
 
-  .difficulty-options {
+  .difficulty-options,
+  .mode-options {
     gap: 4px;
   }
 
-  .difficulty-option {
+  .difficulty-option,
+  .mode-option {
     min-height: 37px;
     padding: 5px 4px;
   }
 
-  .difficulty-option strong {
+  .difficulty-option strong,
+  .mode-option strong {
     font-size: 0.58rem;
   }
 
-  .difficulty-option small {
+  .difficulty-option small,
+  .mode-option small {
     display: none;
   }
 

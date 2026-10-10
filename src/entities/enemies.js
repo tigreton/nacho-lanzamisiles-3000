@@ -1,9 +1,9 @@
 // Enemigos y jefes: aparicion, disparo, muerte y desprendimientos.
-import { W, H, COMBO_TIMEOUT } from "../config.js";
+import { W, H, COMBO_TIMEOUT, BOSSES, FORTRESS_TURRETS, BOSS_PHASE2_RATIO } from "../config.js";
 import { G, showToast, comboMultiplier } from "../state.js";
-import { rand, clamp, lerp, overlaps, isBossEnemy } from "../utils.js";
+import { rand, clamp, lerp, overlaps, isBossEnemy, isInvulnerableEnemy, bossKindForWave } from "../utils.js";
 import { tone } from "../audio.js";
-import { createBurst, createExplosion } from "./particles.js";
+import { createBurst, createExplosion, createFloater } from "./particles.js";
 import { hurtPlayer } from "./player.js";
 import { detonateExplosiveBullet } from "./bullets.js";
 import { announceWave } from "../systems/waves.js";
@@ -15,7 +15,12 @@ export function spawnEnemy(forcedType) {
   const roll = Math.random();
   let type = forcedType;
   if (!type) {
-    if (G.state.wave >= 3 && roll < 0.25) type = "fighter";
+    // En supervivencia la cacería de cazas crece con las oleadas para que
+    // la presión siga subiendo pasada la oleada 15.
+    const shareCaza = G.state.wave >= 3
+      ? 0.25 + (G.state.gameMode === "supervivencia" ? Math.min(0.2, G.state.wave * 0.006) : 0)
+      : 0;
+    if (roll < shareCaza) type = "fighter";
     else if (G.state.wave >= 2 && roll < 0.58) type = "drone";
     else type = "heli";
   }
@@ -71,31 +76,79 @@ export function spawnEnemy(forcedType) {
 }
 
 
+// En solo jefes no hay oleadas normales: cada jefe escala como su
+// equivalente de campaña (jefe 1 = oleada 4, jefe 2 = oleada 8…) para
+// conservar la curva de dificultad.
+function waveEfectiva() {
+  return G.state.gameMode === "jefes" ? G.state.wave * 4 : G.state.wave;
+}
+
+
 export function spawnBoss() {
   const difficulty = G.state.difficulty;
-  const airship = G.state.wave % 8 === 0;
-  const hp = Math.ceil((65 + G.state.wave * 8) * difficulty.bossHpMultiplier);
-  G.enemies.push({
-    type: airship ? "airship" : "boss",
-    x: W + (airship ? 230 : 260),
-    y: airship ? H * 0.32 : H * 0.5,
-    w: airship ? 350 : 350,
-    h: airship ? 342 : 182,
+  const kind = bossKindForWave(G.state.wave, G.state.gameMode);
+  const spec = BOSSES[kind];
+  const hp = Math.ceil((65 + waveEfectiva() * 8) * difficulty.bossHpMultiplier);
+  const boss = {
+    type: kind,
+    x: W + spec.spawnX,
+    y: H * spec.yRatio,
+    baseY: H * spec.yRatio,
+    w: spec.w,
+    h: spec.h,
     hp,
     maxHp: hp,
-    vx: (airship ? 52 : 68) * difficulty.enemySpeedMultiplier,
+    vx: spec.vx * difficulty.enemySpeedMultiplier,
     age: 0,
     phase: 0,
-    fireTimer: airship ? 1.8 : 1.1,
+    phase2: false,
+    fireTimer: spec.fireTimer,
+    bobAmp: spec.bobAmp,
+    bobFreq: spec.bobFreq,
     dead: false,
     flash: 0,
-    score: airship ? 6500 : 5000,
-    targetX: W - (airship ? 285 : 220),
-  });
+    score: spec.score,
+    targetX: W - spec.targetX,
+  };
+  G.enemies.push(boss);
+  if (kind === "fortress") spawnFortressTurrets(boss);
   G.state.bossSpawned = true;
   G.state.bossActive = true;
-  announceWave(airship ? "¡DIRIGIBLE DE GLOBOS!" : "¡ACORAZADO ENEMIGO!");
-  tone(airship ? 170 : 92, 0.55, "sawtooth", 0.05, airship ? 80 : -28);
+  announceWave(spec.announce);
+  tone(spec.toneFreq, 0.55, "sawtooth", 0.05, spec.toneSlide);
+}
+
+
+// La fortaleza no dispara: cuelgan de su casco torretas destructibles y
+// el casco rebota todo mientras quede alguna en pie.
+function spawnFortressTurrets(boss) {
+  boss.turretSockets = FORTRESS_TURRETS.map((socket) => ({ ...socket, alive: true }));
+  boss.turretsLeft = boss.turretSockets.length;
+  const hp = Math.max(1, Math.ceil(14 * G.state.difficulty.enemyHpMultiplier));
+  boss.turretSockets.forEach((socket, index) => {
+    G.enemies.push({
+      type: "turret",
+      parent: boss,
+      socketIndex: index,
+      turretKind: socket.kind,
+      offsetX: socket.offsetX,
+      offsetY: socket.offsetY,
+      x: boss.x + socket.offsetX,
+      y: boss.y + socket.offsetY,
+      w: 64,
+      h: 56,
+      hp,
+      maxHp: hp,
+      vx: 0,
+      age: rand(0, 0.8),
+      phase: rand(0, Math.PI * 2),
+      fireTimer: rand(0.9, 2.1) * G.state.difficulty.enemyFireIntervalMultiplier,
+      dead: false,
+      flash: 0,
+      score: 900,
+    });
+  });
+  showToast("¡DERRIBA LAS 4 TORRETAS!", "#ff8a5c", 2.4);
 }
 
 
@@ -110,7 +163,7 @@ function spawnBalloon(airship, offsetY = 0) {
     h: 102,
     hp,
     maxHp: hp,
-    vx: (145 + G.state.wave * 4) * difficulty.enemySpeedMultiplier,
+    vx: (145 + waveEfectiva() * 4) * difficulty.enemySpeedMultiplier,
     vy: rand(-14, 14),
     age: rand(0, 0.8),
     phase: rand(0, Math.PI * 2),
@@ -199,16 +252,28 @@ function detonateAirshipGondola(gondola) {
 function shootEnemy(enemy) {
   const difficulty = G.state.difficulty;
   if (enemy.type === "airship") {
-    spawnBalloon(enemy, -30);
-    spawnBalloon(enemy, 30);
-    enemy.fireTimer = rand(1.7, 2.45) * difficulty.enemyFireIntervalMultiplier;
+    // En fase final suelta globos en tandas de tres y más a menudo.
+    if (enemy.phase2) {
+      spawnBalloon(enemy, -32);
+      spawnBalloon(enemy, 0);
+      spawnBalloon(enemy, 32);
+      enemy.fireTimer = rand(1.25, 1.8) * difficulty.enemyFireIntervalMultiplier;
+    } else {
+      spawnBalloon(enemy, -30);
+      spawnBalloon(enemy, 30);
+      enemy.fireTimer = rand(1.7, 2.45) * difficulty.enemyFireIntervalMultiplier;
+    }
     tone(280, 0.16, "triangle", 0.022, -80);
     return;
   }
   if (enemy.type === "boss") {
-    const angles = [-0.34, -0.17, 0.17, 0.34];
+    const angles = enemy.phase2
+      ? [-0.5, -0.3, -0.12, 0.12, 0.3, 0.5]
+      : [-0.34, -0.17, 0.17, 0.34];
     angles.forEach((angle) => {
-      const speed = (230 + G.state.wave * 3) * difficulty.enemySpeedMultiplier;
+      const speed = (230 + waveEfectiva() * 3) *
+        (enemy.phase2 ? 1.12 : 1) *
+        difficulty.enemySpeedMultiplier;
       G.enemyBullets.push({
         x: enemy.x - enemy.w * 0.38,
         y: enemy.y + 12,
@@ -220,8 +285,13 @@ function shootEnemy(enemy) {
         age: 0,
       });
     });
-    enemy.fireTimer = rand(1.1, 1.55) * difficulty.enemyFireIntervalMultiplier;
+    enemy.fireTimer = rand(enemy.phase2 ? 0.76 : 1.1, enemy.phase2 ? 1.08 : 1.55) *
+      difficulty.enemyFireIntervalMultiplier;
     tone(125, 0.12, "sawtooth", 0.018, -30);
+    return;
+  }
+  if (enemy.type === "turret") {
+    shootTurret(enemy, difficulty);
     return;
   }
 
@@ -241,6 +311,49 @@ function shootEnemy(enemy) {
   });
   enemy.fireTimer =
     rand(1.5, 2.8) * difficulty.enemyFireIntervalMultiplier * Math.max(0.55, 1 - G.state.wave * 0.025);
+}
+
+
+// Torretas de la fortaleza: las de abanico barren un arco fijo y las de
+// puntería siguen al helicóptero. Cuando la fortaleza entra en fase final
+// disparan más rápido (y el abanico gana un proyectil).
+function shootTurret(enemy, difficulty) {
+  const furiosa = enemy.parent?.phase2;
+  if (enemy.turretKind === "spread") {
+    const angles = furiosa ? [-0.42, -0.15, 0.15, 0.42] : [-0.31, 0, 0.31];
+    const speed = 240 * difficulty.enemySpeedMultiplier;
+    angles.forEach((angle) => {
+      G.enemyBullets.push({
+        x: enemy.x - 26,
+        y: enemy.y,
+        vx: -Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        w: 29,
+        h: 29,
+        damage: 1,
+        age: 0,
+      });
+    });
+    enemy.fireTimer = rand(1.9, 2.4) * difficulty.enemyFireIntervalMultiplier * (furiosa ? 0.62 : 1);
+    tone(150, 0.1, "square", 0.016, -30);
+  } else {
+    const dx = G.player.x - enemy.x;
+    const dy = G.player.y - enemy.y;
+    const length = Math.hypot(dx, dy) || 1;
+    const speed = 330 * difficulty.enemySpeedMultiplier;
+    G.enemyBullets.push({
+      x: enemy.x - 26,
+      y: enemy.y,
+      vx: (dx / length) * speed,
+      vy: (dy / length) * speed,
+      w: 27,
+      h: 27,
+      damage: 1,
+      age: 0,
+    });
+    enemy.fireTimer = rand(1.25, 1.75) * difficulty.enemyFireIntervalMultiplier * (furiosa ? 0.6 : 1);
+    tone(210, 0.08, "square", 0.016, -50);
+  }
 }
 
 
@@ -296,11 +409,34 @@ function dropReward(enemy) {
 }
 
 
+// Cada torreta derribada es un mini-objetivo: castiga el casco de la
+// fortaleza a partes iguales y anuncia cuántas quedan. Cuando no queda
+// ninguna, la fortaleza entera cae con ella.
+function derribarTorreta(turret) {
+  createExplosion(turret.x, turret.y, 96);
+  createFloater(turret.x, turret.y - 44, "¡TORRETA DERRIBADA!", "#ffd63c");
+  tone(300, 0.14, "square", 0.028, 120);
+  const boss = turret.parent;
+  if (!boss || boss.dead) return;
+  boss.turretSockets[turret.socketIndex].alive = false;
+  boss.turretsLeft = boss.turretSockets.filter((socket) => socket.alive).length;
+  // Con floor, caer a la mitad de las torretas deja el casco en la mitad
+  // de vida o menos: la furia arranca exactamente al 50% del recorrido.
+  boss.hp = Math.min(boss.hp, Math.floor((boss.maxHp * boss.turretsLeft) / boss.turretSockets.length));
+  boss.flash = 0.12;
+  if (boss.turretsLeft > 0) {
+    showToast(`¡QUEDAN ${boss.turretsLeft} TORRETAS!`, "#ffb02e", 1.2);
+  }
+  if (boss.hp <= 0) killEnemy(boss);
+}
+
+
 export function killEnemy(enemy) {
   if (enemy.dead) return;
   enemy.dead = true;
   if (enemy.type === "balloon") releaseBalloonBasket(enemy);
   if (enemy.type === "airship") releaseAirshipGondola(enemy);
+  if (enemy.type === "turret") derribarTorreta(enemy);
 
   // Cada baja seguida alimenta el combo: sube el multiplicador de puntos y
   // se anuncia la racha cada 5 derribos.
@@ -321,8 +457,8 @@ export function killEnemy(enemy) {
     G.state.bossActive = false;
     G.state.bossClearTimer = 3.3;
     G.state.flash = 0.35;
-    announceWave(enemy.type === "airship" ? "¡DIRIGIBLE DERRIBADO!" : "¡JEFE DERRIBADO!");
-    tone(enemy.type === "airship" ? 180 : 120, 0.42, "sawtooth", 0.045, 420);
+    announceWave(BOSSES[enemy.type].defeatedText);
+    tone(enemy.type === "airship" ? 180 : enemy.type === "fortress" ? 90 : 120, 0.42, "sawtooth", 0.045, 420);
   } else {
     tone(105, 0.12, "sawtooth", 0.018, -40);
   }
@@ -336,11 +472,28 @@ export function updateEnemies(dt) {
     enemy.flash = Math.max(0, enemy.flash - dt);
     enemy.fireTimer -= dt;
 
+    // Fase final: al quedararse a la mitad de vida el jefe cambia de
+    // patrón, aprieta el ritmo y se mueve con más brío.
+    if (
+      isBossEnemy(enemy) &&
+      !enemy.phase2 &&
+      enemy.hp <= enemy.maxHp * BOSS_PHASE2_RATIO
+    ) {
+      enemy.phase2 = true;
+      enemy.flash = Math.max(enemy.flash, 0.3);
+      G.state.shake = Math.max(G.state.shake, 9);
+      announceWave("¡FASE FINAL! ¡EL JEFE SE ENFURECE!");
+      tone(60, 0.6, "sawtooth", 0.05, 30);
+    }
+
     if (isBossEnemy(enemy)) {
       if (enemy.x > enemy.targetX) enemy.x -= enemy.vx * dt;
-      enemy.y = (enemy.type === "airship" ? H * 0.32 : H * 0.5) +
-        Math.sin(enemy.age * (enemy.type === "airship" ? 0.65 : 0.9)) *
-        (enemy.type === "airship" ? 92 : 145);
+      enemy.y = enemy.baseY +
+        Math.sin(enemy.age * enemy.bobFreq * (enemy.phase2 ? 1.28 : 1)) * enemy.bobAmp;
+    } else if (enemy.type === "turret") {
+      // Las torretas van soldadas al casco de la fortaleza.
+      enemy.x = enemy.parent.x + enemy.offsetX;
+      enemy.y = enemy.parent.y + enemy.offsetY;
     } else if (enemy.type === "balloon") {
       enemy.x -= enemy.vx * dt;
       enemy.y += enemy.vy * dt;
@@ -371,19 +524,40 @@ export function updateEnemies(dt) {
   }
 
   for (const bullet of G.playerBullets) {
+    // El casco de la fortaleza rebota los disparos mientras le queden
+    // torretas… pero sin frenar la bala: como las torretas se comprueban
+    // después en la lista, un disparo dirigido a una torreta que también
+    // roza el casco se lleva puesta la torreta. Solo rebota (chispa) si
+    // al final no ha tocado ninguna.
+    let rebotePendiente = false;
     for (const enemy of G.enemies) {
       const hitboxInset = isBossEnemy(enemy) ? 0.25 : enemy.type === "balloon" ? 0.18 : 0.16;
-      if (!bullet.dead && !enemy.dead && overlaps(bullet, enemy, hitboxInset)) {
-        bullet.dead = true;
+      if (bullet.dead || enemy.dead || !overlaps(bullet, enemy, hitboxInset)) continue;
+      if (isInvulnerableEnemy(enemy)) {
         if (bullet.explosive) {
+          // El explosivo sí estalla contra el casco: la onda alcanza a
+          // las torretas cercanas aunque el casco no sufra.
+          bullet.dead = true;
           detonateExplosiveBullet(bullet, enemy);
         } else {
-          enemy.hp -= bullet.damage;
-          enemy.flash = 0.07;
-          createBurst(bullet.x, bullet.y, "#bdfcff", 4, 90);
-          if (enemy.hp <= 0) killEnemy(enemy);
+          rebotePendiente = true;
         }
+        continue;
       }
+      bullet.dead = true;
+      if (bullet.explosive) {
+        detonateExplosiveBullet(bullet, enemy);
+      } else {
+        enemy.hp -= bullet.damage;
+        enemy.flash = 0.07;
+        createBurst(bullet.x, bullet.y, "#bdfcff", 4, 90);
+        if (enemy.hp <= 0) killEnemy(enemy);
+      }
+    }
+    if (!bullet.dead && rebotePendiente) {
+      bullet.dead = true;
+      createBurst(bullet.x, bullet.y, "#c9d6dc", 5, 95);
+      tone(990, 0.03, "square", 0.009, 60);
     }
   }
 

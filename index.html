@@ -85,6 +85,23 @@
                   </button>
                 </div>
               </div>
+              <div class="mode-picker" role="group" aria-label="Elegir modo de juego">
+                <span class="difficulty-label">MODO</span>
+                <div class="mode-options">
+                  <button class="mode-option is-selected" type="button" data-mode="campana" aria-pressed="true">
+                    <strong>CAMPAÑA</strong>
+                    <small>Jefes cada 4 oleadas</small>
+                  </button>
+                  <button class="mode-option" type="button" data-mode="supervivencia" aria-pressed="false">
+                    <strong>SUPERVIVENCIA</strong>
+                    <small>Oleadas sin fin</small>
+                  </button>
+                  <button class="mode-option" type="button" data-mode="jefes" aria-pressed="false" disabled>
+                    <strong>SOLO JEFES</strong>
+                    <small>Derriba el dirigible para desbloquearlo</small>
+                  </button>
+                </div>
+              </div>
               <div class="helicopter-picker" role="group" aria-label="Elegir helicóptero">
                 <span class="difficulty-label">HELICÓPTERO</span>
                 <div class="helicopter-options">
@@ -188,11 +205,14 @@
               <span class="eyebrow">MANUAL DE VUELO</span>
               <p class="howto-copy">
                 Derriba enemigos, recoge monedas y mejora tu helicóptero en la
-                armería de cada oleada. Los jefes llegan cada 4 oleadas.
-                Encadena bajas para multiplicar los puntos y roza los
-                proyectiles sin tocarlos para ganar esquivas de milagro. Con
-                mando: cruceta o stick para elegir, A para pulsar y B para
-                volver.
+                armería de cada oleada. Tres jefes rotan cada 4 oleadas:
+                acorazado, dirigible de globos y fortaleza voladora (derríbale
+                las torretas para tumbarla). Elige modo en el menú: campaña,
+                supervivencia sin fin o solo jefes, que se desbloquea al
+                derribar tu primer dirigible. Encadena bajas para multiplicar
+                los puntos y roza los proyectiles sin tocarlos para ganar
+                esquivas de milagro. Con mando: cruceta o stick para elegir,
+                A para pulsar y B para volver.
               </p>
               <button id="howto-back" class="primary-button" type="button">VOLVER</button>
             </div>
@@ -206,6 +226,7 @@
               <ol id="result-scores" class="result-scores" aria-label="Mejores puntuaciones de la dificultad"></ol>
               <p id="result-achievements" class="result-achievements"></p>
               <button id="restart-button" class="primary-button" type="button">VOLVER A JUGAR</button>
+              <button id="result-menu-button" class="secondary-button" type="button">MENÚ</button>
             </div>
           </div>
 

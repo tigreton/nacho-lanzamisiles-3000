@@ -1,7 +1,7 @@
 // Proyectiles: trayectorias, rebotes del escudo y balas explosivas.
 import { W, H, SHIELD_RADIUS, NEAR_MISS_RADIUS, NEAR_MISS_POINTS } from "../config.js";
 import { G } from "../state.js";
-import { clamp, overlaps } from "../utils.js";
+import { clamp, overlaps, isInvulnerableEnemy } from "../utils.js";
 import { tone } from "../audio.js";
 import { createBurst, createExplosion, createFloater } from "./particles.js";
 import { killEnemy } from "./enemies.js";
@@ -16,7 +16,7 @@ let ultimoTonoEsquiva = -1;
 export function detonateExplosiveBullet(bullet, directHit) {
   const radius = 118;
   for (const enemy of G.enemies) {
-    if (enemy.dead) continue;
+    if (enemy.dead || isInvulnerableEnemy(enemy)) continue;
     const distance = Math.hypot(enemy.x - bullet.x, enemy.y - bullet.y);
     if (enemy === directHit || distance <= radius) {
       enemy.hp -= enemy === directHit ? bullet.damage : 1;
@@ -102,10 +102,14 @@ export function updateProjectiles(dt) {
       for (const enemy of G.enemies) {
         if (!enemy.dead && overlaps(bullet, enemy, 0.2)) {
           bullet.dead = true;
-          enemy.hp -= bullet.damage;
-          enemy.flash = 0.1;
-          createBurst(bullet.x, bullet.y, "#68d8ff", 7, 125);
-          if (enemy.hp <= 0) killEnemy(enemy);
+          if (isInvulnerableEnemy(enemy)) {
+            createBurst(bullet.x, bullet.y, "#c9d6dc", 5, 95);
+          } else {
+            enemy.hp -= bullet.damage;
+            enemy.flash = 0.1;
+            createBurst(bullet.x, bullet.y, "#68d8ff", 7, 125);
+            if (enemy.hp <= 0) killEnemy(enemy);
+          }
           break;
         }
       }

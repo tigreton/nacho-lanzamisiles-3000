@@ -1,24 +1,27 @@
 // Fin de partida: guardado del record, top 5 y pantalla de informe.
-import { ACHIEVEMENTS } from "../config.js";
+import { ACHIEVEMENTS, GAME_MODES } from "../config.js";
 import { G, setMode } from "../state.js";
 import { getHighScores, getHighScore, saveHighScore, getUnlockedAchievements } from "../records.js";
 
 
 export function endGame() {
   if (G.mode !== "playing") return;
+  const gameMode = G.state.gameMode;
   const isRecord = G.state.score > G.state.highScore;
-  const rank = saveHighScore(G.state.score, G.selectedDifficulty);
+  const rank = saveHighScore(G.state.score, G.selectedDifficulty, gameMode);
   G.ui.resultTitle.textContent = isRecord
     ? "¡NUEVO RÉCORD!"
     : rank > 0
       ? "¡ENTRA EN EL TOP 5!"
       : "MISIÓN TERMINADA";
-  const record = getHighScore(G.selectedDifficulty);
+  const record = getHighScore(G.selectedDifficulty, gameMode);
+  const tramo = gameMode === "jefes" ? `Jefes: ${G.state.wave}` : `Oleada: ${G.state.wave}`;
   G.ui.resultCopy.textContent =
-    `Dificultad: ${G.state.difficulty.label} · Puntuación: ${G.state.score.toLocaleString("es-ES")} · ` +
+    `Modo: ${GAME_MODES[gameMode].label} · Dificultad: ${G.state.difficulty.label} · ${tramo} · ` +
+    `Puntuación: ${G.state.score.toLocaleString("es-ES")} · ` +
     `Récord: ${record.toLocaleString("es-ES")} · Monedas: ${G.state.coins} · Mejor racha: ${G.state.combo.best}`;
 
-  const top = getHighScores(G.selectedDifficulty);
+  const top = getHighScores(G.selectedDifficulty, gameMode);
   G.ui.resultScores.innerHTML = top
     .map((puntos, i) => {
       const actual = i === rank - 1 ? ' class="is-new"' : "";

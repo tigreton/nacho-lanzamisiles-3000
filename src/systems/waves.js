@@ -1,7 +1,7 @@
 // Ritmo de oleadas y orquestacion del update por fotograma.
-import { CROPS } from "../config.js";
+import { CROPS, BOSSES } from "../config.js";
 import { G } from "../state.js";
-import { rand } from "../utils.js";
+import { rand, bossKindForWave } from "../utils.js";
 import { tone } from "../audio.js";
 import { updatePlayer } from "../entities/player.js";
 import { spawnEnemy, spawnBoss, updateEnemies, updateBalloonBaskets, updateAirshipGondolas } from "../entities/enemies.js";
@@ -35,9 +35,23 @@ export function advanceWave() {
   G.state.combo.timer = 0;
   G.state.background = Math.floor((G.state.wave - 1) / 2) % CROPS.backgrounds.length;
   if (G.state.wave >= 10) unlock("veterano");
-  const bossWave = G.state.wave % 4 === 0;
-  const airshipWave = G.state.wave % 8 === 0;
-  announceWave(bossWave ? `${airshipWave ? "DIRIGIBLE" : "JEFE"} · OLEADA ${G.state.wave}` : `OLEADA ${G.state.wave}`);
+  if (G.state.gameMode === "supervivencia" && G.state.wave >= 12) unlock("resistente");
+  announceWave(textoOleada());
+}
+
+
+function textoOleada() {
+  const wave = G.state.wave;
+  if (G.state.gameMode === "jefes") {
+    return `${BOSSES[bossKindForWave(wave, "jefes")].label} · JEFE ${wave}`;
+  }
+  if (G.state.gameMode === "supervivencia") {
+    return `SUPERVIVENCIA · OLEADA ${wave}`;
+  }
+  if (wave % 4 === 0) {
+    return `${BOSSES[bossKindForWave(wave)].label} · OLEADA ${wave}`;
+  }
+  return `OLEADA ${wave}`;
 }
 
 
@@ -76,7 +90,13 @@ export function updateGame(dt) {
   updatePickups(dt);
   updateEffects(dt);
 
-  if (G.state.wave % 4 === 0) {
+  // En solo jefes toda oleada es un jefe; en supervivencia no hay jefes
+  // fijos y la dificultad escala sin techo; la campaña mantiene el ciclo
+  // de jefe cada 4 oleadas.
+  const esOleadaDeJefe =
+    G.state.gameMode === "jefes" ||
+    (G.state.gameMode === "campana" && G.state.wave % 4 === 0);
+  if (esOleadaDeJefe) {
     if (!G.state.bossSpawned) spawnBoss();
     else if (!G.state.bossActive) {
       G.state.bossClearTimer -= dt;
@@ -94,17 +114,19 @@ export function updateGame(dt) {
     if (
       G.state.wave >= 2 &&
       G.state.wave % 2 === 0 &&
-      G.state.wave % 4 !== 0 &&
       !G.state.airbaseSpawned &&
       G.state.waveTime > 6
     ) {
       spawnAirbase();
     }
+    // La supervivencia no tiene techo: los enemigos siguen entrando más
+    // rápido pasada la oleada 15, donde la campaña ya no aprieta más.
+    const sueloIntervalo = G.state.gameMode === "supervivencia" ? 0.3 : 0.48;
     G.state.spawnTimer -= dt;
     if (G.state.spawnTimer <= 0) {
       spawnEnemy();
       G.state.spawnTimer =
-        Math.max(0.48, 1.28 - G.state.wave * 0.055) *
+        Math.max(sueloIntervalo, 1.28 - G.state.wave * 0.055) *
         G.state.difficulty.spawnIntervalMultiplier *
         rand(0.78, 1.24);
     }

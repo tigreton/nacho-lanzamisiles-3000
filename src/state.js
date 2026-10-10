@@ -1,6 +1,6 @@
 // Estado compartido del juego: las mutables viven en la bolsa G para que
 // los módulos puedan leerlas y reasignarlas sin ciclos de importación.
-import { W, H, DIFFICULTIES, HELICOPTERS, ACHIEVEMENTS, COMBO_KILLS_PER_STEP, MAX_COMBO_MULTIPLIER } from "./config.js";
+import { W, H, DIFFICULTIES, HELICOPTERS, GAME_MODES, ACHIEVEMENTS, COMBO_KILLS_PER_STEP, MAX_COMBO_MULTIPLIER } from "./config.js";
 import { getHighScores, getUnlockedAchievements } from "./records.js";
 
 const canvas = document.querySelector("#game-canvas");
@@ -28,8 +28,10 @@ export const G = {
   resultCopy: document.querySelector("#result-copy"),
   resultScores: document.querySelector("#result-scores"),
   resultAchievements: document.querySelector("#result-achievements"),
+  resultMenuButton: document.querySelector("#result-menu-button"),
   menuRecord: document.querySelector("#menu-record"),
   difficultyButtons: [...document.querySelectorAll(".difficulty-option")],
+  modeButtons: [...document.querySelectorAll(".mode-option")],
   helicopterButtons: [...document.querySelectorAll("#menu-screen .helicopter-option")],
   changeHelicopterButtons: [...document.querySelectorAll("#helicopter-screen .helicopter-option")],
   helicopterContinue: document.querySelector("#helicopter-continue"),
@@ -50,6 +52,7 @@ export const G = {
   mode: "loading",
   lastTime: performance.now(),
   selectedDifficulty: "normal",
+  selectedMode: "campana",
   selectedHelicopter: "v1",
   player: undefined,
   state: undefined,
@@ -88,17 +91,47 @@ export function setMode(nextMode) {
 }
 
 function updateMenuRecord() {
+  refreshModeAvailability();
   const etiqueta = DIFFICULTIES[G.selectedDifficulty].label;
-  const top = getHighScores(G.selectedDifficulty);
+  const etiquetaModo = GAME_MODES[G.selectedMode].label;
+  const top = getHighScores(G.selectedDifficulty, G.selectedMode);
+  const titulo = G.selectedMode === "campana" ? etiqueta : `${etiquetaModo} · ${etiqueta}`;
   const filas = top.length
     ? `<ol class="menu-top">${top
         .map((puntos, i) => `<li><span>${i + 1}</span><strong>${puntos.toLocaleString("es-ES")}</strong></li>`)
         .join("")}</ol>`
-    : `<p class="menu-top-empty">AÚN SIN RÉCORD EN ${etiqueta}</p>`;
+    : `<p class="menu-top-empty">AÚN SIN RÉCORD EN ${titulo}</p>`;
   const totalLogros = Object.keys(ACHIEVEMENTS).length;
   const logros = getUnlockedAchievements().size;
   G.ui.menuRecord.innerHTML =
-    `<p class="menu-record-title">TOP 5 · ${etiqueta}</p>${filas}<p class="menu-logros">★ LOGROS ${logros}/${totalLogros}</p>`;
+    `<p class="menu-record-title">TOP 5 · ${titulo}</p>${filas}<p class="menu-logros">★ LOGROS ${logros}/${totalLogros}</p>`;
+}
+
+
+// El modo solo jefes se desbloquea con el logro del primer dirigible:
+// hasta entonces el botón queda deshabilitado y explica cómo abrirlo.
+function refreshModeAvailability() {
+  const desbloqueado = modoJefesDesbloqueado();
+  for (const button of G.ui.modeButtons) {
+    if (button.dataset.mode !== "jefes") continue;
+    button.disabled = !desbloqueado;
+    button.querySelector("small").textContent = desbloqueado
+      ? GAME_MODES.jefes.hint
+      : GAME_MODES.jefes.lockedHint;
+  }
+  if (!desbloqueado && G.selectedMode === "jefes") {
+    G.selectedMode = "campana";
+    for (const button of G.ui.modeButtons) {
+      const selected = button.dataset.mode === G.selectedMode;
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    }
+  }
+}
+
+
+function modoJefesDesbloqueado() {
+  return getUnlockedAchievements().has(GAME_MODES.jefes.unlockAchievement);
 }
 
 export function selectDifficulty(id) {
@@ -106,6 +139,19 @@ export function selectDifficulty(id) {
   G.selectedDifficulty = id;
   for (const button of G.ui.difficultyButtons) {
     const selected = button.dataset.difficulty === id;
+    button.classList.toggle("is-selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  }
+  updateMenuRecord();
+}
+
+
+export function selectMode(id) {
+  if (!GAME_MODES[id]) return;
+  if (id === "jefes" && !modoJefesDesbloqueado()) return;
+  G.selectedMode = id;
+  for (const button of G.ui.modeButtons) {
+    const selected = button.dataset.mode === id;
     button.classList.toggle("is-selected", selected);
     button.setAttribute("aria-pressed", String(selected));
   }

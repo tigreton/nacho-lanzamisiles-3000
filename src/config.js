@@ -72,6 +72,94 @@ export const SHOP_ITEMS = {
 };
 
 
+// Modos de juego: la campaña clásica, la supervivencia sin fin y el modo
+// solo jefes, que se desbloquea con el logro del primer dirigible.
+export const GAME_MODES = {
+  campana: { label: "CAMPAÑA", hint: "Jefes cada 4 oleadas" },
+  supervivencia: { label: "SUPERVIVENCIA", hint: "Oleadas sin fin · récord propio" },
+  jefes: {
+    label: "SOLO JEFES",
+    hint: "Jefes seguidos con armería entre medias",
+    unlockAchievement: "cazadirigibles",
+    lockedHint: "Derriba el dirigible para desbloquearlo",
+  },
+};
+
+
+// Jefes: rotan cada 4 oleadas en campaña (oleada 4 acorazado, 8 dirigible,
+// 12 fortaleza y vuelta a empezar) y en cadena en el modo solo jefes.
+// La fortaleza no dispara: las torretas ponen la potencia de fuego y el
+// casco aguanta hasta que caen todas (cada torreta derribada lo castiga).
+export const BOSSES = {
+  boss: {
+    label: "ACORAZADO",
+    announce: "¡ACORAZADO ENEMIGO!",
+    barLabel: "ACORAZADO 3000",
+    defeatedText: "¡JEFE DERRIBADO!",
+    score: 5000,
+    w: 350,
+    h: 182,
+    vx: 68,
+    yRatio: 0.5,
+    bobAmp: 145,
+    bobFreq: 0.9,
+    spawnX: 260,
+    targetX: 220,
+    fireTimer: 1.1,
+    toneFreq: 92,
+    toneSlide: -28,
+  },
+  airship: {
+    label: "DIRIGIBLE",
+    announce: "¡DIRIGIBLE DE GLOBOS!",
+    barLabel: "DIRIGIBLE DE GLOBOS",
+    defeatedText: "¡DIRIGIBLE DERRIBADO!",
+    score: 6500,
+    w: 350,
+    h: 342,
+    vx: 52,
+    yRatio: 0.32,
+    bobAmp: 92,
+    bobFreq: 0.65,
+    spawnX: 230,
+    targetX: 285,
+    fireTimer: 1.8,
+    toneFreq: 170,
+    toneSlide: 80,
+  },
+  fortress: {
+    label: "FORTALEZA",
+    announce: "¡FORTALEZA VOLADORA!",
+    barLabel: "FORTALEZA VOLADORA",
+    defeatedText: "¡FORTALEZA DERRIBADA!",
+    score: 7000,
+    w: 440,
+    h: 264,
+    vx: 44,
+    yRatio: 0.5,
+    bobAmp: 62,
+    bobFreq: 0.5,
+    spawnX: 320,
+    targetX: 310,
+    fireTimer: Infinity,
+    toneFreq: 58,
+    toneSlide: -20,
+  },
+};
+
+// Anclajes de las torretas sobre el casco de la fortaleza (offsets lógicos
+// desde su centro). "spread" dispara abanicos; "aimed" dispara a puntería.
+export const FORTRESS_TURRETS = [
+  { offsetX: -170, offsetY: -74, kind: "spread" },
+  { offsetX: -170, offsetY: 74, kind: "aimed" },
+  { offsetX: 55, offsetY: -74, kind: "aimed" },
+  { offsetX: 55, offsetY: 74, kind: "spread" },
+];
+
+// Al 50% de vida el jefe cambia de patrón y se vuelve más agresivo.
+export const BOSS_PHASE2_RATIO = 0.5;
+
+
 // Combo: cada 4 bajas seguidas el multiplicador de puntos sube 1 (hasta x8).
 // Se pierde al recibir daño o si pasan COMBO_TIMEOUT segundos sin matar.
 export const COMBO_TIMEOUT = 3;
@@ -87,11 +175,13 @@ export const NEAR_MISS_POINTS = 30;
 export const ACHIEVEMENTS = {
   "primer-jefe": { label: "MATAJEFES", description: "Derriba tu primer acorazado" },
   cazadirigibles: { label: "CAZADIRIGIBLES", description: "Derriba el dirigible de globos" },
+  "caza-fortalezas": { label: "CAZAFORTALEZAS", description: "Derriba la fortaleza voladora" },
   intocable: { label: "INTOCABLE", description: "Completa una oleada sin recibir daño" },
   "cien-bajas": { label: "CENTENAR", description: "Acumula 100 bajas en total" },
   imparable: { label: "IMPARABLE", description: "Encadena 15 bajas seguidas" },
   esquivador: { label: "AL LÍMITE", description: "Acumula 25 esquivas de milagro" },
   veterano: { label: "VETERANO", description: "Alcanza la oleada 10" },
+  resistente: { label: "A PRUEBA DE TODO", description: "Alcanza la oleada 12 en supervivencia" },
 };
 
 

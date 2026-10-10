@@ -9,10 +9,12 @@ import { advanceWave } from "./waves.js";
 export function updateShopUI() {
   if (!G.state || !G.player) return;
   const nextWave = G.state.wave + 1;
+  const esModoJefes = G.state.gameMode === "jefes";
+  const termino = esModoJefes ? "JEFE" : "OLEADA";
   G.ui.shopCoins.textContent = `${G.state.coins} MONEDAS`;
-  G.ui.shopWave.textContent = `PREPARANDO OLEADA ${nextWave}`;
-  G.ui.shopSummary.textContent = `OLEADA ${G.state.wave} SUPERADA · Dificultad ${G.state.difficulty.label}`;
-  G.ui.continueButton.textContent = `CONTINUAR · OLEADA ${nextWave}`;
+  G.ui.shopWave.textContent = `PREPARANDO ${termino} ${nextWave}`;
+  G.ui.shopSummary.textContent = `${termino} ${G.state.wave} ${esModoJefes ? "SUPERADO" : "SUPERADA"} · Dificultad ${G.state.difficulty.label}`;
+  G.ui.continueButton.textContent = `CONTINUAR · ${termino} ${nextWave}`;
 
   for (const button of G.ui.shopItemButtons) {
     const itemId = button.dataset.shopItem;

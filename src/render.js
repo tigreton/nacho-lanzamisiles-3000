@@ -1,5 +1,5 @@
 // Renderizado: fondo, entidades, HUD y banners sobre el canvas logico.
-import { W, H, CROPS, SHIELD_RADIUS, COMBO_TIMEOUT } from "./config.js";
+import { W, H, CROPS, SHIELD_RADIUS, COMBO_TIMEOUT, BOSSES } from "./config.js";
 import { G, comboMultiplier } from "./state.js";
 import { rand, clamp, isBossEnemy } from "./utils.js";
 import { bakedGlow } from "./sprites.js";
@@ -27,9 +27,182 @@ function drawSprite(image, x, y, width, height, options = {}) {
 function drawAirshipSprite(enemy) {
   drawSprite(G.sprites.airshipBoss, enemy.x, enemy.y, enemy.w, enemy.h, {
     rotate: Math.sin(enemy.age * 0.65) * 0.018,
-    glow: "rgba(255, 72, 20, 0.22)",
+    glow: enemy.phase2 ? "rgba(255, 72, 20, 0.42)" : "rgba(255, 72, 20, 0.22)",
     blur: 16,
   });
+}
+
+
+// La fortaleza se dibuja con primitivas de canvas: casco angular con
+// proa blindada, puente a popa y los anclajes de sus torretas.
+function drawFortress(fortress) {
+  G.ctx.save();
+  G.ctx.translate(fortress.x, fortress.y);
+  G.ctx.rotate(Math.sin(fortress.age * 0.7) * 0.012);
+  G.ctx.shadowColor = fortress.phase2 ? "rgba(255, 45, 10, 0.55)" : "rgba(255, 60, 20, 0.38)";
+  G.ctx.shadowBlur = 22;
+
+  const casco = G.ctx.createLinearGradient(0, -132, 0, 132);
+  casco.addColorStop(0, "#54646d");
+  casco.addColorStop(0.5, "#39464d");
+  casco.addColorStop(1, "#202a2f");
+  G.ctx.fillStyle = casco;
+  G.ctx.strokeStyle = "#0c1114";
+  G.ctx.lineWidth = 5;
+  G.ctx.beginPath();
+  G.ctx.moveTo(-220, -34);
+  G.ctx.lineTo(-166, -132);
+  G.ctx.lineTo(96, -132);
+  G.ctx.lineTo(220, -58);
+  G.ctx.lineTo(220, 58);
+  G.ctx.lineTo(96, 132);
+  G.ctx.lineTo(-166, 132);
+  G.ctx.lineTo(-220, 34);
+  G.ctx.closePath();
+  G.ctx.fill();
+  G.ctx.stroke();
+  G.ctx.shadowBlur = 0;
+
+  // Proa reforzada: el espolón que rebota los disparos.
+  G.ctx.fillStyle = "#2b363c";
+  G.ctx.strokeStyle = "#151c1f";
+  G.ctx.lineWidth = 3;
+  G.ctx.beginPath();
+  G.ctx.moveTo(-220, -34);
+  G.ctx.lineTo(-166, -132);
+  G.ctx.lineTo(-118, -132);
+  G.ctx.lineTo(-118, 132);
+  G.ctx.lineTo(-166, 132);
+  G.ctx.lineTo(-220, 34);
+  G.ctx.closePath();
+  G.ctx.fill();
+  G.ctx.stroke();
+
+  // Placas del blindaje.
+  G.ctx.strokeStyle = "rgba(12, 18, 21, 0.6)";
+  G.ctx.lineWidth = 2.5;
+  for (const y of [-78, 0, 78]) {
+    G.ctx.beginPath();
+    G.ctx.moveTo(-114, y);
+    G.ctx.lineTo(116, y);
+    G.ctx.stroke();
+  }
+
+  // Puente de mando a popa; las ventanas se encienden en la fase final.
+  G.ctx.fillStyle = "#333f45";
+  G.ctx.strokeStyle = "#0c1114";
+  G.ctx.lineWidth = 3;
+  G.ctx.beginPath();
+  G.ctx.moveTo(120, -96);
+  G.ctx.lineTo(196, -70);
+  G.ctx.lineTo(196, 70);
+  G.ctx.lineTo(120, 96);
+  G.ctx.closePath();
+  G.ctx.fill();
+  G.ctx.stroke();
+  G.ctx.fillStyle = fortress.phase2 ? "#ff3b18" : "#ffb02e";
+  for (const y of [-46, 0, 46]) {
+    G.ctx.fillRect(148, y - 7, 30, 14);
+  }
+
+  // Motores de popa respirando.
+  const pulso = 0.6 + Math.sin(fortress.age * 9) * 0.25;
+  for (const y of [-84, 84]) {
+    G.ctx.fillStyle = "#1a2226";
+    G.ctx.beginPath();
+    G.ctx.roundRect(196, y - 22, 26, 44, 6);
+    G.ctx.fill();
+    G.ctx.fillStyle = `rgba(255, 138, 24, ${pulso})`;
+    G.ctx.beginPath();
+    G.ctx.arc(209, y, 8, 0, Math.PI * 2);
+    G.ctx.fill();
+  }
+
+  // Anclajes de las torretas: aro de montura mientras viven, cráter con
+  // brasas cuando el jugador las ha derribado.
+  for (const socket of fortress.turretSockets) {
+    if (socket.alive) {
+      G.ctx.fillStyle = "#46565e";
+      G.ctx.strokeStyle = "#11181b";
+      G.ctx.lineWidth = 4;
+      G.ctx.beginPath();
+      G.ctx.arc(socket.offsetX, socket.offsetY, 24, 0, Math.PI * 2);
+      G.ctx.fill();
+      G.ctx.stroke();
+    } else {
+      G.ctx.fillStyle = "#12181b";
+      G.ctx.beginPath();
+      G.ctx.arc(socket.offsetX, socket.offsetY, 22, 0, Math.PI * 2);
+      G.ctx.fill();
+      G.ctx.fillStyle = `rgba(255, 96, 24, ${0.35 + Math.sin(fortress.age * 6 + socket.offsetX) * 0.2})`;
+      G.ctx.beginPath();
+      G.ctx.arc(socket.offsetX, socket.offsetY, 9, 0, Math.PI * 2);
+      G.ctx.fill();
+    }
+  }
+  G.ctx.restore();
+}
+
+
+// Torreta de la fortaleza: cúpula soldada al casco y cañones que siguen
+// al helicóptero. Avisa con un fogonazo cuando está a punto de disparar.
+function drawTurret(turret) {
+  G.ctx.save();
+  G.ctx.translate(turret.x, turret.y);
+
+  const domo = G.ctx.createLinearGradient(0, -20, 0, 22);
+  domo.addColorStop(0, "#5d707a");
+  domo.addColorStop(1, "#2c383e");
+  G.ctx.fillStyle = domo;
+  G.ctx.strokeStyle = "#0d1316";
+  G.ctx.lineWidth = 3;
+  G.ctx.beginPath();
+  G.ctx.arc(0, 4, 20, Math.PI, Math.PI * 2);
+  G.ctx.closePath();
+  G.ctx.fill();
+  G.ctx.stroke();
+
+  const angulo = Math.atan2(G.player.y - turret.y, G.player.x - turret.x);
+  G.ctx.rotate(angulo);
+  G.ctx.fillStyle = "#4b5b63";
+  G.ctx.strokeStyle = "#0d1316";
+  G.ctx.lineWidth = 2;
+  if (turret.turretKind === "spread") {
+    for (const lado of [-7, 7]) {
+      G.ctx.beginPath();
+      G.ctx.roundRect(6, lado - 4, 34, 8, 3);
+      G.ctx.fill();
+      G.ctx.stroke();
+    }
+  } else {
+    G.ctx.beginPath();
+    G.ctx.roundRect(6, -5, 42, 10, 3);
+    G.ctx.fill();
+    G.ctx.stroke();
+  }
+  if (turret.fireTimer < 0.32) {
+    const aviso = 1 - turret.fireTimer / 0.32;
+    G.ctx.fillStyle = turret.parent?.phase2 ? "#ff3013" : "#ff8a18";
+    G.ctx.globalAlpha = 0.35 + aviso * 0.6;
+    G.ctx.beginPath();
+    G.ctx.arc(turret.turretKind === "spread" ? 42 : 50, 0, 5 + aviso * 4, 0, Math.PI * 2);
+    G.ctx.fill();
+  }
+  G.ctx.restore();
+
+  // Barra de daño propia: cada torreta es un mini-objetivo y conviene
+  // ver lo que le queda.
+  if (turret.hp < turret.maxHp) {
+    const ancho = 46;
+    const x = turret.x - ancho / 2;
+    const y = turret.y - 34;
+    G.ctx.fillStyle = "rgba(4, 9, 12, 0.8)";
+    G.ctx.fillRect(x - 2, y - 2, ancho + 4, 8);
+    G.ctx.fillStyle = "rgba(255,255,255,0.2)";
+    G.ctx.fillRect(x, y, ancho, 4);
+    G.ctx.fillStyle = "#ffb02e";
+    G.ctx.fillRect(x, y, ancho * clamp(turret.hp / turret.maxHp, 0, 1), 4);
+  }
 }
 
 
@@ -144,7 +317,7 @@ function drawHud() {
   G.ctx.textAlign = "center";
   G.ctx.fillStyle = "rgba(255,255,255,0.62)";
   G.ctx.font = '900 10px Inter, sans-serif';
-  G.ctx.fillText("OLEADA", W / 2, 34);
+  G.ctx.fillText(G.state.gameMode === "jefes" ? "JEFE" : "OLEADA", W / 2, 34);
   G.ctx.fillStyle = "#ffffff";
   G.ctx.font = '400 26px "Black Ops One", Impact, sans-serif';
   G.ctx.fillText(String(G.state.wave).padStart(2, "0"), W / 2, 57);
@@ -197,12 +370,18 @@ function drawHud() {
     G.ctx.fillStyle = "rgba(255,255,255,0.13)";
     G.ctx.fill();
     roundedRect(x, y, barWidth * clamp(boss.hp / boss.maxHp, 0, 1), 14, 5);
-    G.ctx.fillStyle = "#ff4d21";
+    G.ctx.fillStyle = boss.phase2 ? "#ff2a12" : "#ff4d21";
     G.ctx.fill();
+    // Marca del 50%: el umbral donde el jefe entra en fase final.
+    G.ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+    G.ctx.fillRect(x + barWidth * 0.5 - 1, y, 2, 14);
+    let etiqueta = BOSSES[boss.type].barLabel;
+    if (boss.type === "fortress") etiqueta += ` · TORRETAS ${boss.turretsLeft}`;
+    if (boss.phase2) etiqueta += " · ¡FURIA!";
     G.ctx.textAlign = "center";
-    G.ctx.fillStyle = "#fff";
+    G.ctx.fillStyle = boss.phase2 ? "#ffb3a3" : "#fff";
     G.ctx.font = '900 10px Inter, sans-serif';
-    G.ctx.fillText(boss.type === "airship" ? "DIRIGIBLE DE GLOBOS" : "ACORAZADO 3000", W / 2, y - 13);
+    G.ctx.fillText(etiqueta, W / 2, y - 13);
   }
   G.ctx.restore();
 }
@@ -422,9 +601,15 @@ function drawEntities() {
     if (enemy.type === "boss") {
       drawSprite(G.sprites.boss, enemy.x, enemy.y, enemy.w, enemy.h, {
         rotate: Math.sin(enemy.age * 1.4) * 0.015,
+        glow: enemy.phase2 ? "rgba(255, 45, 10, 0.45)" : undefined,
+        blur: 18,
       });
     } else if (enemy.type === "airship") {
       drawAirshipSprite(enemy);
+    } else if (enemy.type === "fortress") {
+      drawFortress(enemy);
+    } else if (enemy.type === "turret") {
+      drawTurret(enemy);
     } else if (enemy.type === "balloon") {
       drawBalloonSprite(enemy);
     } else if (enemy.type === "drone") {
@@ -598,8 +783,9 @@ function drawHowTo() {
   G.ctx.fillText("WASD / flechas mover · ESPACIO / J disparar · P / ESC pausa · ratón y táctil arrastrando", W / 2, 572);
   G.ctx.fillText("Mando: stick mueve · A dispara · Start pausa", W / 2, 598);
   G.ctx.fillStyle = "#d8f23b";
-  G.ctx.fillText("Sobrevive a las oleadas · Jefes cada 4 · Dirigible cada 8", W / 2, 622);
-  G.ctx.fillText("Bajas seguidas = multiplicador · Rozar proyectiles = puntos de esquiva", W / 2, 648);
+  G.ctx.fillText("Campaña: tres jefes rotan cada 4 oleadas · Supervivencia sin fin · Solo jefes", W / 2, 614);
+  G.ctx.fillText("Los jefes se enfurecen al 50% de vida · A la fortaleza, derríbale las torretas", W / 2, 638);
+  G.ctx.fillText("Bajas seguidas = multiplicador · Rozar proyectiles = puntos de esquiva", W / 2, 662);
 }
 
 export function render() {
