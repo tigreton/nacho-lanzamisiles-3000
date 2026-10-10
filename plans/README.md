@@ -14,6 +14,7 @@ Guía rápida para retomar el trabajo en cualquier momento. Lectura: 2 minutos.
 | [registro-qa.md](registro-qa.md) | Diario cronológico del plan QA |
 | [herramientas/tareas.js](herramientas/tareas.js) | CLI que gestiona todo (Node, sin dependencias) |
 | `herramientas/auditar-sprites.py`, `reencuadrar-sprites.py`, `mejorar-sprites.py` | Auditoría y mejora offline de sprites (Python + Pillow): márgenes, solapes entre crops y recorte de las láminas que se dibujan enteras |
+| `herramientas/procesar-sprites-ia.py` | Procesa los diseños generados con IA (`.qa-tmp/ia-raw/`) a láminas WebP transparentes en `assets/`: quitado de fondo, recorte apretado y ratio exacta del rect de dibujo |
 | `../src/` | El juego en módulos ES: `main.js` (orquestación), `config.js`, `state.js` (bolsa `G`), `utils.js`, `records.js`, `audio.js`, `sprites.js`, `render.js`, `input.js`, `entities/`, `systems/` |
 | `../index.html`, `../style.css`, `../assets/` | Página, estilos y WebP/fuentes locales |
 | `../package.json`, `../eslint.config.mjs` | Linter: `npm run lint` |

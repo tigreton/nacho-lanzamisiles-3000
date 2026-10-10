@@ -50,6 +50,25 @@ let airshipReady = false;
 let gondolaReady = false;
 let helicopterVariantsReady = 0;
 let fontsReady = false;
+let iaSheetsReady = 0;
+// Nombres de las láminas IA (assets/ia-<nombre>.webp, con guiones para las
+// variantes de torreta).
+const IA_LAMINAS = [
+  "kamikaze",
+  "gunship",
+  "ally",
+  "homing",
+  "charged",
+  "fortress",
+  "turretAim",
+  "turretSpread",
+  "basket",
+  "airbase",
+  "shield",
+];
+for (const nombre of IA_LAMINAS) {
+  G.iaSheets[nombre].src = `assets/ia-${nombre.replace(/([A-Z])/g, "-$1").toLowerCase()}.webp`;
+}
 
 
 
@@ -265,7 +284,7 @@ selectMode(G.selectedMode);
 selectHelicopter(G.selectedHelicopter);
 
 function finishLoading() {
-  if (!fontsReady || !airshipReady || !gondolaReady || helicopterVariantsReady < 2) return;
+  if (!fontsReady || !airshipReady || !gondolaReady || helicopterVariantsReady < 2 || iaSheetsReady < IA_LAMINAS.length) return;
   G.sprites.airshipGondola = G.gondolaSheet;
   G.sprites.playerVariants = {
     v1: G.helicopterSheets.v1,
@@ -306,6 +325,15 @@ G.airshipSheet.addEventListener("error", showSpriteLoadError);
 G.gondolaSheet.addEventListener("error", showSpriteLoadError);
 for (const helicopterSheet of Object.values(G.helicopterSheets)) {
   helicopterSheet.addEventListener("error", showSpriteLoadError);
+}
+// Láminas IA: se cargan como sprites individuales (ia<Nombre> en G.sprites).
+for (const nombre of IA_LAMINAS) {
+  G.iaSheets[nombre].addEventListener("load", () => {
+    G.sprites[`ia${nombre[0].toUpperCase()}${nombre.slice(1)}`] = G.iaSheets[nombre];
+    iaSheetsReady += 1;
+    finishLoading();
+  });
+  G.iaSheets[nombre].addEventListener("error", showSpriteLoadError);
 }
 G.sheet.src = "assets/juego-nacho.webp";
 

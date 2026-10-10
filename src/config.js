@@ -90,13 +90,13 @@ export const SQUAD_DISPERSE_X = 430;
 export const SQUAD_BONUS_COINS = 5;
 export const SQUAD_BONUS_SCORE = 800;
 
-// Blindado: la placa frontal (GUNSHIP_ARMOR, misma geometría que se dibuja)
-// repele los disparos normales. La cúpula roja del morro (punto débil, daño
-// doble) queda por encima de la placa y en el borde de ataque, de modo que un
+// Blindado: la placa frontal (GUNSHIP_ARMOR, misma zona que se ve en la
+// lámina IA) repele los disparos normales. La cúpula roja superior
+// (punto débil, daño doble) queda por encima de la placa, de modo que un
 // disparo que llegue alto la toca antes que el casco. Quien pase por encima
 // o por detrás daña con normalidad. Teledirigidos y explosivos ignoran toda
 // la coraza.
-export const GUNSHIP_WEAKPOINT = { offsetX: -0.3, offsetY: -0.38, radius: 0.18 };
+export const GUNSHIP_WEAKPOINT = { offsetX: -0.1, offsetY: -0.4, radius: 0.18 };
 export const GUNSHIP_ARMOR = { x1: -0.5, x2: -0.02, y1: -0.3, y2: 0.42 };
 
 // Carga de disparo: mantener pulsado el disparo carga hasta CHARGE_TIME

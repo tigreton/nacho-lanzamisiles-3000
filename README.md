@@ -7,6 +7,26 @@ el fondo se eliminó una sola vez, offline).
 El boss del globo aerostático y sus cuatro miniglobos usan la lámina transparente
 independiente `assets/boss-globo-sprites.webp`.
 
+## Diseños generados con IA
+
+Las entidades añadidas después del arte original (las que antes se dibujaban
+con primitivas de canvas o reutilizando sprites prestados) tienen ahora diseños
+propios generados con IA, procesados offline a láminas WebP transparentes con
+`plans/herramientas/procesar-sprites-ia.py`:
+
+- `assets/ia-kamikaze.webp`: dron kamikaze de ojo rojo con carga explosiva.
+- `assets/ia-gunship.webp`: helicóptero blindado con placa frontal remachada y
+  cúpula roja (el punto débil de daño doble).
+- `assets/ia-ally.webp`: dron aliado de escolta, blanco y cian.
+- `assets/ia-homing.webp` y `assets/ia-charged.webp`: misil teledirigido y misil
+  de disparo cargado.
+- `assets/ia-fortress.webp`: la fortaleza voladora (tercer jefe).
+- `assets/ia-turret-aim.webp` y `assets/ia-turret-spread.webp`: torretas de
+  puntería y de abanico de la fortaleza.
+- `assets/ia-basket.webp`: cesta desprendida del globo, con cuerdas rotas.
+- `assets/ia-airbase.webp`: base aérea volante con pista de aterrizaje.
+- `assets/ia-shield.webp`: burbuja del escudo reflector.
+
 ## Jugar online
 
 <https://tigreton.github.io/nacho-lanzamisiles-3000/>

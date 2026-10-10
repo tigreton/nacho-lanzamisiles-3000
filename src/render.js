@@ -7,7 +7,6 @@ import {
   COMBO_TIMEOUT,
   CHARGE_TIME,
   GUNSHIP_WEAKPOINT,
-  GUNSHIP_ARMOR,
   BOSSES,
 } from "./config.js";
 import { G, comboMultiplier } from "./state.js";
@@ -34,33 +33,8 @@ function drawSprite(image, x, y, width, height, options = {}) {
 }
 
 
-function drawGunshipArmor(enemy) {
-  G.ctx.save();
-  G.ctx.translate(enemy.x, enemy.y);
-  G.ctx.rotate(Math.sin(enemy.age * 2.2 + enemy.phase) * 0.02);
-
-  // Coraza frontal: placa metálica con remaches. Usa la misma geometría que
-  // la hitbox de hitsGunshipArmor para que lo que se ve sea lo que repite.
-  G.ctx.fillStyle = "#3a4a52";
-  G.ctx.strokeStyle = "#16211f";
-  G.ctx.lineWidth = 4;
-  G.ctx.beginPath();
-  G.ctx.moveTo(enemy.w * GUNSHIP_ARMOR.x1, enemy.h * GUNSHIP_ARMOR.y1);
-  G.ctx.lineTo(enemy.w * GUNSHIP_ARMOR.x2, enemy.h * GUNSHIP_ARMOR.y1 - 6);
-  G.ctx.lineTo(enemy.w * GUNSHIP_ARMOR.x2, enemy.h * GUNSHIP_ARMOR.y2);
-  G.ctx.lineTo(enemy.w * GUNSHIP_ARMOR.x1, enemy.h * GUNSHIP_ARMOR.y2 + 5);
-  G.ctx.closePath();
-  G.ctx.fill();
-  G.ctx.stroke();
-  G.ctx.fillStyle = "#93a7ad";
-  for (const [nx, ny] of [[-0.36, -0.12], [-0.2, -0.12], [-0.36, 0.24], [-0.2, 0.24]]) {
-    G.ctx.beginPath();
-    G.ctx.arc(enemy.w * nx, enemy.h * ny, 3, 0, Math.PI * 2);
-    G.ctx.fill();
-  }
-  G.ctx.restore();
-
-  // Punto débil: cúpula roja pulsante arriba y atrás, donde los impactos
+function drawGunshipWeakpoint(enemy) {
+  // Punto débil: cúpula roja pulsante sobre el morro, donde los impactos
   // hacen daño doble (coincide con el círculo de hitsGunshipWeakpoint).
   const weakX = enemy.x + enemy.w * GUNSHIP_WEAKPOINT.offsetX;
   const weakY = enemy.y + enemy.h * GUNSHIP_WEAKPOINT.offsetY;
@@ -89,93 +63,18 @@ function drawAirshipSprite(enemy) {
 }
 
 
-// La fortaleza se dibuja con primitivas de canvas: casco angular con
-// proa blindada, puente a popa y los anclajes de sus torretas.
+// La fortaleza usa la lámina IA assets/ia-fortress.webp; sobre el casco se
+// dibujan solo los anclajes de sus torretas (montura viva, cráter derribada).
 function drawFortress(fortress) {
+  drawSprite(G.sprites.iaFortress, fortress.x, fortress.y, fortress.w, fortress.h, {
+    rotate: Math.sin(fortress.age * 0.7) * 0.012,
+    glow: fortress.phase2 ? "rgba(255, 45, 10, 0.5)" : "rgba(255, 60, 20, 0.3)",
+    blur: 20,
+  });
+
   G.ctx.save();
   G.ctx.translate(fortress.x, fortress.y);
   G.ctx.rotate(Math.sin(fortress.age * 0.7) * 0.012);
-  G.ctx.shadowColor = fortress.phase2 ? "rgba(255, 45, 10, 0.55)" : "rgba(255, 60, 20, 0.38)";
-  G.ctx.shadowBlur = 22;
-
-  const casco = G.ctx.createLinearGradient(0, -132, 0, 132);
-  casco.addColorStop(0, "#54646d");
-  casco.addColorStop(0.5, "#39464d");
-  casco.addColorStop(1, "#202a2f");
-  G.ctx.fillStyle = casco;
-  G.ctx.strokeStyle = "#0c1114";
-  G.ctx.lineWidth = 5;
-  G.ctx.beginPath();
-  G.ctx.moveTo(-220, -34);
-  G.ctx.lineTo(-166, -132);
-  G.ctx.lineTo(96, -132);
-  G.ctx.lineTo(220, -58);
-  G.ctx.lineTo(220, 58);
-  G.ctx.lineTo(96, 132);
-  G.ctx.lineTo(-166, 132);
-  G.ctx.lineTo(-220, 34);
-  G.ctx.closePath();
-  G.ctx.fill();
-  G.ctx.stroke();
-  G.ctx.shadowBlur = 0;
-
-  // Proa reforzada: el espolón que rebota los disparos.
-  G.ctx.fillStyle = "#2b363c";
-  G.ctx.strokeStyle = "#151c1f";
-  G.ctx.lineWidth = 3;
-  G.ctx.beginPath();
-  G.ctx.moveTo(-220, -34);
-  G.ctx.lineTo(-166, -132);
-  G.ctx.lineTo(-118, -132);
-  G.ctx.lineTo(-118, 132);
-  G.ctx.lineTo(-166, 132);
-  G.ctx.lineTo(-220, 34);
-  G.ctx.closePath();
-  G.ctx.fill();
-  G.ctx.stroke();
-
-  // Placas del blindaje.
-  G.ctx.strokeStyle = "rgba(12, 18, 21, 0.6)";
-  G.ctx.lineWidth = 2.5;
-  for (const y of [-78, 0, 78]) {
-    G.ctx.beginPath();
-    G.ctx.moveTo(-114, y);
-    G.ctx.lineTo(116, y);
-    G.ctx.stroke();
-  }
-
-  // Puente de mando a popa; las ventanas se encienden en la fase final.
-  G.ctx.fillStyle = "#333f45";
-  G.ctx.strokeStyle = "#0c1114";
-  G.ctx.lineWidth = 3;
-  G.ctx.beginPath();
-  G.ctx.moveTo(120, -96);
-  G.ctx.lineTo(196, -70);
-  G.ctx.lineTo(196, 70);
-  G.ctx.lineTo(120, 96);
-  G.ctx.closePath();
-  G.ctx.fill();
-  G.ctx.stroke();
-  G.ctx.fillStyle = fortress.phase2 ? "#ff3b18" : "#ffb02e";
-  for (const y of [-46, 0, 46]) {
-    G.ctx.fillRect(148, y - 7, 30, 14);
-  }
-
-  // Motores de popa respirando.
-  const pulso = 0.6 + Math.sin(fortress.age * 9) * 0.25;
-  for (const y of [-84, 84]) {
-    G.ctx.fillStyle = "#1a2226";
-    G.ctx.beginPath();
-    G.ctx.roundRect(196, y - 22, 26, 44, 6);
-    G.ctx.fill();
-    G.ctx.fillStyle = `rgba(255, 138, 24, ${pulso})`;
-    G.ctx.beginPath();
-    G.ctx.arc(209, y, 8, 0, Math.PI * 2);
-    G.ctx.fill();
-  }
-
-  // Anclajes de las torretas: aro de montura mientras viven, cráter con
-  // brasas cuando el jugador las ha derribado.
   for (const socket of fortress.turretSockets) {
     if (socket.alive) {
       G.ctx.fillStyle = "#46565e";
@@ -200,51 +99,25 @@ function drawFortress(fortress) {
 }
 
 
-// Torreta de la fortaleza: cúpula soldada al casco y cañones que siguen
-// al helicóptero. Avisa con un fogonazo cuando está a punto de disparar.
+// Torreta de la fortaleza: lámina IA que gira siguiendo al helicóptero.
+// Avisa con un fogonazo cuando está a punto de disparar.
 function drawTurret(turret) {
-  G.ctx.save();
-  G.ctx.translate(turret.x, turret.y);
-
-  const domo = G.ctx.createLinearGradient(0, -20, 0, 22);
-  domo.addColorStop(0, "#5d707a");
-  domo.addColorStop(1, "#2c383e");
-  G.ctx.fillStyle = domo;
-  G.ctx.strokeStyle = "#0d1316";
-  G.ctx.lineWidth = 3;
-  G.ctx.beginPath();
-  G.ctx.arc(0, 4, 20, Math.PI, Math.PI * 2);
-  G.ctx.closePath();
-  G.ctx.fill();
-  G.ctx.stroke();
-
   const angulo = Math.atan2(G.player.y - turret.y, G.player.x - turret.x);
-  G.ctx.rotate(angulo);
-  G.ctx.fillStyle = "#4b5b63";
-  G.ctx.strokeStyle = "#0d1316";
-  G.ctx.lineWidth = 2;
-  if (turret.turretKind === "spread") {
-    for (const lado of [-7, 7]) {
-      G.ctx.beginPath();
-      G.ctx.roundRect(6, lado - 4, 34, 8, 3);
-      G.ctx.fill();
-      G.ctx.stroke();
-    }
-  } else {
-    G.ctx.beginPath();
-    G.ctx.roundRect(6, -5, 42, 10, 3);
-    G.ctx.fill();
-    G.ctx.stroke();
-  }
+  const sprite = turret.turretKind === "spread" ? G.sprites.iaTurretSpread : G.sprites.iaTurretAim;
+  drawSprite(sprite, turret.x, turret.y, turret.w, turret.h, { rotate: angulo });
+
   if (turret.fireTimer < 0.32) {
     const aviso = 1 - turret.fireTimer / 0.32;
+    G.ctx.save();
+    G.ctx.translate(turret.x, turret.y);
+    G.ctx.rotate(angulo);
     G.ctx.fillStyle = turret.parent?.phase2 ? "#ff3013" : "#ff8a18";
     G.ctx.globalAlpha = 0.35 + aviso * 0.6;
     G.ctx.beginPath();
-    G.ctx.arc(turret.turretKind === "spread" ? 42 : 50, 0, 5 + aviso * 4, 0, Math.PI * 2);
+    G.ctx.arc(turret.w * 0.72, 0, 5 + aviso * 4, 0, Math.PI * 2);
     G.ctx.fill();
+    G.ctx.restore();
   }
-  G.ctx.restore();
 
   // Barra de daño propia: cada torreta es un mini-objetivo y conviene
   // ver lo que le queda.
@@ -446,54 +319,12 @@ function drawHud() {
 
 
 function drawBalloonBasket(basket) {
-  G.ctx.save();
-  G.ctx.translate(basket.x, basket.y);
-  G.ctx.rotate(clamp(basket.vx / 900, -0.24, 0.24) + Math.sin(basket.age * 7 + basket.phase) * 0.08);
-  G.ctx.shadowColor = "rgba(255, 91, 39, 0.52)";
-  G.ctx.shadowBlur = 10;
-
-  // Broken suspension ropes show that the basket has detached from the balloon.
-  G.ctx.strokeStyle = "rgba(237, 205, 128, 0.9)";
-  G.ctx.lineWidth = 2;
-  G.ctx.beginPath();
-  G.ctx.moveTo(-11, -14);
-  G.ctx.lineTo(-7, -4);
-  G.ctx.moveTo(11, -14);
-  G.ctx.lineTo(7, -4);
-  G.ctx.stroke();
-
-  const basketFill = G.ctx.createLinearGradient(0, -5, 0, 15);
-  basketFill.addColorStop(0, "#d18a3d");
-  basketFill.addColorStop(0.5, "#8a4e2b");
-  basketFill.addColorStop(1, "#42251d");
-  G.ctx.fillStyle = basketFill;
-  G.ctx.strokeStyle = "#211615";
-  G.ctx.lineWidth = 3;
-  G.ctx.beginPath();
-  G.ctx.moveTo(-14, -5);
-  G.ctx.lineTo(14, -5);
-  G.ctx.lineTo(11, 14);
-  G.ctx.lineTo(-11, 14);
-  G.ctx.closePath();
-  G.ctx.fill();
-  G.ctx.stroke();
-
-  G.ctx.strokeStyle = "rgba(255, 205, 111, 0.62)";
-  G.ctx.lineWidth = 1.3;
-  G.ctx.beginPath();
-  G.ctx.moveTo(-10, 1);
-  G.ctx.lineTo(10, 6);
-  G.ctx.moveTo(-9, 8);
-  G.ctx.lineTo(9, 2);
-  G.ctx.stroke();
-
-  G.ctx.fillStyle = "#ff4925";
-  G.ctx.shadowColor = "#ff3b18";
-  G.ctx.shadowBlur = 8;
-  G.ctx.beginPath();
-  G.ctx.arc(0, -1, 3, 0, Math.PI * 2);
-  G.ctx.fill();
-  G.ctx.restore();
+  // Cesta desprendida con sus cuerdas rotas: lámina IA ia-basket.webp.
+  drawSprite(G.sprites.iaBasket, basket.x, basket.y, basket.w, basket.h, {
+    rotate: clamp(basket.vx / 900, -0.24, 0.24) + Math.sin(basket.age * 7 + basket.phase) * 0.08,
+    glow: "rgba(255, 91, 39, 0.52)",
+    blur: 10,
+  });
 }
 
 
@@ -518,97 +349,19 @@ function drawAirshipGondola(gondola) {
 
 
 function drawAirbase(base) {
+  // Plataforma volante con pista de aterrizaje: lámina IA ia-airbase.webp.
+  // El letrero ATERRIZA se dibuja encima porque es la instrucción de juego.
+  drawSprite(G.sprites.iaAirbase, base.x, base.y, base.w, base.h, {
+    glow: "rgba(91, 227, 255, 0.45)",
+    blur: 16,
+  });
   G.ctx.save();
   G.ctx.translate(base.x, base.y);
-  G.ctx.shadowColor = "rgba(91, 227, 255, 0.52)";
-  G.ctx.shadowBlur = 18;
-
-  // A compact flying platform with a clear landing pad and approach lights.
-  G.ctx.fillStyle = "rgba(79, 220, 255, 0.12)";
-  G.ctx.beginPath();
-  G.ctx.ellipse(0, 38, 105, 13, 0, 0, Math.PI * 2);
-  G.ctx.fill();
-
-  G.ctx.fillStyle = "#243238";
-  G.ctx.strokeStyle = "#101719";
-  G.ctx.lineWidth = 5;
-  G.ctx.beginPath();
-  G.ctx.moveTo(-112, -20);
-  G.ctx.lineTo(107, -20);
-  G.ctx.lineTo(122, 12);
-  G.ctx.lineTo(91, 31);
-  G.ctx.lineTo(-91, 31);
-  G.ctx.lineTo(-122, 12);
-  G.ctx.closePath();
-  G.ctx.fill();
-  G.ctx.stroke();
-
-  G.ctx.shadowBlur = 0;
-  G.ctx.fillStyle = "#d8f23b";
-  G.ctx.strokeStyle = "#536a16";
-  G.ctx.lineWidth = 3;
-  G.ctx.beginPath();
-  G.ctx.moveTo(-74, -8);
-  G.ctx.lineTo(74, -8);
-  G.ctx.lineTo(61, 13);
-  G.ctx.lineTo(-61, 13);
-  G.ctx.closePath();
-  G.ctx.fill();
-  G.ctx.stroke();
-
   G.ctx.fillStyle = "#132126";
   G.ctx.font = '900 16px Inter, sans-serif';
   G.ctx.textAlign = "center";
   G.ctx.textBaseline = "middle";
-  G.ctx.fillText("ATERRIZA", 0, 3);
-
-  G.ctx.strokeStyle = "#162326";
-  G.ctx.lineWidth = 4;
-  for (const x of [-78, 78]) {
-    G.ctx.beginPath();
-    G.ctx.moveTo(x, 22);
-    G.ctx.lineTo(x * 0.72, 47);
-    G.ctx.stroke();
-  }
-  for (const x of [-84, -42, 42, 84]) {
-    G.ctx.fillStyle = Math.floor(base.age * 5 + x) % 2 === 0 ? "#ffe95b" : "#ff6b2c";
-    G.ctx.beginPath();
-    G.ctx.arc(x, -27, 4, 0, Math.PI * 2);
-    G.ctx.fill();
-  }
-
-  G.ctx.strokeStyle = "#1b2629";
-  G.ctx.lineWidth = 6;
-  G.ctx.beginPath();
-  G.ctx.moveTo(-86, -22);
-  G.ctx.lineTo(-113, -48);
-  G.ctx.moveTo(86, -22);
-  G.ctx.lineTo(113, -48);
-  G.ctx.stroke();
-  G.ctx.save();
-  G.ctx.translate(-124, -56);
-  G.ctx.rotate(base.age * 6);
-  G.ctx.strokeStyle = "#5d7175";
-  G.ctx.lineWidth = 5;
-  G.ctx.beginPath();
-  G.ctx.moveTo(0, -15);
-  G.ctx.lineTo(0, 15);
-  G.ctx.moveTo(-15, 0);
-  G.ctx.lineTo(15, 0);
-  G.ctx.stroke();
-  G.ctx.restore();
-  G.ctx.save();
-  G.ctx.translate(124, -56);
-  G.ctx.rotate(-base.age * 6);
-  G.ctx.strokeStyle = "#5d7175";
-  G.ctx.lineWidth = 5;
-  G.ctx.beginPath();
-  G.ctx.moveTo(0, -15);
-  G.ctx.lineTo(0, 15);
-  G.ctx.moveTo(-15, 0);
-  G.ctx.lineTo(15, 0);
-  G.ctx.stroke();
-  G.ctx.restore();
+  G.ctx.fillText("ATERRIZA", 0, -base.h * 0.22);
   G.ctx.restore();
 }
 
@@ -633,8 +386,9 @@ function drawEntities() {
   if (G.airbase) drawAirbase(G.airbase);
 
   if (G.ally) {
-    const frame = Math.floor(G.ally.age * 6) % G.sprites.drone.length;
-    drawSprite(G.sprites.drone[frame], G.ally.x, G.ally.y, 64, 74, {
+    // La lámina IA del aliado mira a la izquierda como el resto del arte
+    // enemigo: se voltea para escoltar al helicóptero mirando a la derecha.
+    drawSprite(G.sprites.iaAlly, G.ally.x, G.ally.y, 64, 74, {
       flipX: true,
       glow: "rgba(108, 236, 255, 0.55)",
       blur: 12,
@@ -643,7 +397,7 @@ function drawEntities() {
 
   for (const bullet of G.playerBullets) {
     if (bullet.homing) {
-      drawSprite(G.sprites.missile, bullet.x, bullet.y, bullet.w, bullet.h, {
+      drawSprite(G.sprites.iaHoming, bullet.x, bullet.y, bullet.w, bullet.h, {
         rotate: Math.atan2(bullet.vy, bullet.vx),
         glow: "#b6ff3c",
         blur: 13,
@@ -660,8 +414,13 @@ function drawEntities() {
         blur: 10,
       });
     } else {
-      drawSprite(bullet.explosive ? G.sprites.missile : G.sprites.playerBullet, bullet.x, bullet.y, bullet.w, bullet.h, {
-        glow: bullet.explosive ? "#ff8a18" : "#6cecff",
+      const sprite = bullet.charged
+        ? G.sprites.iaCharged
+        : bullet.explosive
+          ? G.sprites.missile
+          : G.sprites.playerBullet;
+      drawSprite(sprite, bullet.x, bullet.y, bullet.w, bullet.h, {
+        glow: bullet.charged ? "#ffd63c" : bullet.explosive ? "#ff8a18" : "#6cecff",
         blur: 13,
       });
     }
@@ -704,19 +463,19 @@ function drawEntities() {
         rotate: Math.sin(enemy.age * 3) * 0.05,
       });
     } else if (enemy.type === "kamikaze") {
-      const frame = Math.floor(enemy.age * 8 + enemy.phase) % G.sprites.drone.length;
-      // El sprite del dron mira a la izquierda: en el piqué se orienta según
-      // el rumbo fijado, y en el aviso parpadea blanco/rojo.
+      // El diseño IA mira a la izquierda: en el piqué se orienta según el
+      // rumbo fijado, y en el aviso parpadea blanco/rojo.
       const parpadeo = enemy.diveState === "telegraph" && Math.floor(enemy.telegraphTimer * 16) % 2 === 0;
-      drawSprite(G.sprites.drone[frame], enemy.x, enemy.y, enemy.w, enemy.h, {
+      drawSprite(G.sprites.iaKamikaze, enemy.x, enemy.y, enemy.w, enemy.h, {
         rotate: enemy.diveState === "dive" ? Math.atan2(enemy.vy, enemy.vx) - Math.PI : 0,
         glow: parpadeo ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 40, 10, 0.6)",
         blur: 14,
       });
     } else if (enemy.type === "gunship") {
-      const frame = Math.floor(enemy.age * 5 + enemy.phase) % G.sprites.enemyHeli.length;
-      drawSprite(G.sprites.enemyHeli[frame], enemy.x, enemy.y, enemy.w, enemy.h);
-      drawGunshipArmor(enemy);
+      // El blindado tiene lámina propia: la coraza y la cúpula roja del punto
+      // débil vienen ya en el arte (ia-gunship.webp).
+      drawSprite(G.sprites.iaGunship, enemy.x, enemy.y, enemy.w, enemy.h);
+      drawGunshipWeakpoint(enemy);
     } else if (enemy.type === "fighter") {
       const frame = Math.floor(enemy.phase) % G.sprites.fighter.length;
       const squad = enemy.squadId != null ? G.state.squads[enemy.squadId] : null;
@@ -739,15 +498,11 @@ function drawEntities() {
   const playerAlpha =
     G.player.invulnerable > 0 && Math.floor(G.player.invulnerable * 14) % 2 === 0 ? 0.32 : 1;
   if (G.player.shield > 0) {
-    G.ctx.save();
-    G.ctx.beginPath();
-    G.ctx.arc(G.player.x, G.player.y, SHIELD_RADIUS + Math.sin(G.state.elapsed * 5) * 3, 0, Math.PI * 2);
-    G.ctx.strokeStyle = "rgba(88, 218, 255, 0.72)";
-    G.ctx.lineWidth = 4;
-    G.ctx.shadowColor = "#5be4ff";
-    G.ctx.shadowBlur = 14;
-    G.ctx.stroke();
-    G.ctx.restore();
+    // Burbuja de energía IA bajo el helicóptero, latiendo mientras dura.
+    const radio = SHIELD_RADIUS + Math.sin(G.state.elapsed * 5) * 3;
+    drawSprite(G.sprites.iaShield, G.player.x, G.player.y, radio * 2, radio * 2, {
+      alpha: 0.62 + Math.sin(G.state.elapsed * 5) * 0.12,
+    });
   }
   const playerSprite = G.sprites.playerVariants?.[G.player.helicopter] || G.sprites.player[G.player.frame];
   drawSprite(playerSprite, G.player.x, G.player.y, G.player.w, G.player.h, {
@@ -883,8 +638,8 @@ function drawHowTo() {
     [G.sprites.enemyHeli?.[0], "HELI", 135, 88],
     [G.sprites.drone?.[0], "DRON", 275, 80],
     [G.sprites.fighter?.[0], "CAZA", 415, 96],
-    [G.sprites.drone?.[2], "KAMIKAZE", 555, 80],
-    [G.sprites.enemyHeli?.[1], "BLINDADO", 700, 92],
+    [G.sprites.iaKamikaze, "KAMIKAZE", 555, 80],
+    [G.sprites.iaGunship, "BLINDADO", 700, 92],
     [G.sprites.boss, "ACORAZADO", 880, 150],
     [G.sprites.airshipBoss, "DIRIGIBLE", 1065, 170],
   ];

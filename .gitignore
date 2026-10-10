@@ -4,3 +4,6 @@ Thumbs.db
 
 # Capturas y vídeos de pruebas (las evidencias del QA viven en el commit 5f8edd7)
 gui-test-screenshots/
+
+# Artefactos temporales de sprites IA
+.qa-tmp/

@@ -46,6 +46,21 @@ export const G = {
   airshipSheet: new Image(),
   gondolaSheet: new Image(),
   helicopterSheets: { v1: new Image(), v2: new Image() },
+  // Láminas individuales generadas con IA para las entidades que antes se
+  // dibujaban con primitivas de canvas o reutilizando sprites prestados.
+  iaSheets: {
+    kamikaze: new Image(),
+    gunship: new Image(),
+    ally: new Image(),
+    homing: new Image(),
+    charged: new Image(),
+    fortress: new Image(),
+    turretAim: new Image(),
+    turretSpread: new Image(),
+    basket: new Image(),
+    airbase: new Image(),
+    shield: new Image(),
+  },
   sprites: {},
   keys: new Set(),
   pointer: { active: false, x: W * 0.22, y: H * 0.5 },

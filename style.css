@@ -511,6 +511,18 @@ button {
   text-align: center;
 }
 
+/* El manual comparte compact-card con otras pantallas: se compacta a solas
+   para que la tarjeta no tape la galería de enemigos dibujada en el canvas. */
+#howto-screen .compact-card {
+  padding: 24px 32px;
+}
+
+#howto-screen .howto-copy {
+  margin: 8px 0 12px;
+  font-size: 0.72rem;
+  line-height: 1.42;
+}
+
 .menu-record {
   margin: 10px 0 0;
   color: var(--acid);
