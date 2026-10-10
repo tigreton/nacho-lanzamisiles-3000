@@ -34,3 +34,13 @@ si es una decisión tomada a mitad de camino).
 ---
 
 <!-- Las entradas las añade automáticamente plans/herramientas/tareas.js debajo de esta línea -->
+### [2026-10-10 13:13] 0.1 — Crear .gitignore
+- **Estado:** pendiente → en_curso
+
+### [2026-10-10 13:15] 0.1 — Crear .gitignore
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Reglas: .DS_Store, Thumbs.db y gui-test-screenshots/ (evidencias QA ya preservadas en historial, commit 5f8edd7); verificado con git check-ignore --no-index
+- **Archivos:** .gitignore
+- **Verificación:** git check-ignore -v --no-index confirma que .DS_Store, Thumbs.db y gui-test-screenshots/ casan con las reglas; el juego no se toca
+

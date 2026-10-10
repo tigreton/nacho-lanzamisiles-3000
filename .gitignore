@@ -1,0 +1,6 @@
+# Basura de SO
+.DS_Store
+Thumbs.db
+
+# Capturas y vídeos de pruebas (las evidencias del QA viven en el commit 5f8edd7)
+gui-test-screenshots/
