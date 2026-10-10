@@ -101,8 +101,9 @@
       "prioridad": "P3",
       "titulo": "Añadir LICENSE",
       "detalle": "Solo si se va a publicar el código",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "bloqueada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 13:19"
     },
     {
       "id": "0.6",
@@ -121,7 +122,10 @@
         "assets/favicon-32.png",
         "index.html"
       ],
-      "verificacion": "servidor local: index 200, favicon.ico 200 image/x-icon, favicon-32.png 200 image/png; los <link> presentes en el HTML; los 9 assets del juego siguen sirviendo y tracked"
+      "verificacion": "servidor local: index 200, favicon.ico 200 image/x-icon, favicon-32.png 200 image/png; los <link> presentes en el HTML; los 9 assets del juego siguen sirviendo y tracked",
+      "notas": [
+        "Commit: 8068e47"
+      ]
     },
     {
       "id": "1.1",

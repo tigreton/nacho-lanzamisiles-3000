@@ -90,3 +90,11 @@ si es una decisión tomada a mitad de camino).
 - **Archivos:** assets/favicon.ico, assets/favicon-32.png, index.html
 - **Verificación:** servidor local: index 200, favicon.ico 200 image/x-icon, favicon-32.png 200 image/png; los <link> presentes en el HTML; los 9 assets del juego siguen sirviendo y tracked
 
+### [2026-10-10 13:19] 0.6 — Añadir favicon
+- **Estado:** sin cambio (completada)
+- **Nota:** Commit: 8068e47
+
+### [2026-10-10 13:19] 0.5 — Añadir LICENSE
+- **Estado:** pendiente → bloqueada
+- **Motivo:** Requiere decisión del propietario: si el código se va a publicar y con qué licencia (MIT, GPL, propietaria...). Si no se publicará, descartar esta tarea.
+
