@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 13:23",
+    "ultimaActualizacion": "2026-10-10 13:24",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -169,9 +169,17 @@
       "prioridad": "P2",
       "titulo": "Eliminar sprites.launcher y CROPS.launcher",
       "detalle": "game.js:130 y game.js:513; se recorta pero nunca se dibuja",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 13:23"
+      "actualizada": "2026-10-10 13:24",
+      "decisiones": [
+        "Grep previo: sprites.launcher solo se asignaba en prepareSprites, nunca se dibujaba; la única coincidencia restante de 'launcher' es un comentario del flood-fill sin relación"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "node --check OK; grep -i launcher deja solo el comentario ajeno",
+      "commit": "267275f"
     },
     {
       "id": "1.4",
@@ -179,8 +187,9 @@
       "prioridad": "P2",
       "titulo": "Eliminar state.defeated",
       "detalle": "game.js:1031; se incrementa pero nunca se lee",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 13:24"
     },
     {
       "id": "1.5",

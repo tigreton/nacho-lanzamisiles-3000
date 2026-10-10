@@ -566,7 +566,6 @@
       waveTime: 0,
       spawnTimer: 0.65,
       elapsed: 0,
-      defeated: 0,
       bossSpawned: false,
       bossActive: false,
       bossClearTimer: 0,
@@ -1026,7 +1025,6 @@
     if (enemy.type === "balloon") releaseBalloonBasket(enemy);
     if (enemy.type === "airship") releaseAirshipGondola(enemy);
     state.score += Math.round(enemy.score * state.difficulty.scoreMultiplier);
-    state.defeated += 1;
     createExplosion(enemy.x, enemy.y, isBossEnemy(enemy) ? (enemy.type === "airship" ? 210 : 240) : enemy.w * 0.88);
     dropReward(enemy);
 

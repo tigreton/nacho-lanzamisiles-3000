@@ -123,3 +123,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 13:23] 1.3 — Eliminar sprites.launcher y CROPS.launcher
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 13:24] 1.3 — Eliminar sprites.launcher y CROPS.launcher
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Grep previo: sprites.launcher solo se asignaba en prepareSprites, nunca se dibujaba; la única coincidencia restante de 'launcher' es un comentario del flood-fill sin relación
+- **Archivos:** game.js
+- **Verificación:** node --check OK; grep -i launcher deja solo el comentario ajeno
+- **Commit:** 267275f
+
+### [2026-10-10 13:24] 1.4 — Eliminar state.defeated
+- **Estado:** pendiente → en_curso
+
