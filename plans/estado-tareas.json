@@ -322,12 +322,20 @@
       "prioridad": "P1",
       "titulo": "Cargar fuentes antes del HUD",
       "detalle": "document.fonts.load() antes de dar la carga por terminada",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
       "dependencias": [
         "2.2"
       ],
-      "actualizada": "2026-10-10 17:06"
+      "actualizada": "2026-10-10 17:06",
+      "decisiones": [
+        "fontsReady añadido a la puerta de finishLoading; document.fonts.load con los 4 estilos exactos que usa el canvas (26px Black Ops One, Inter 500/700/900); rechazo tratado como listo: sin fuentes propias el juego sigue siendo jugable"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "node --check OK; arranque y HUD verificados en el e2e de cierre de fase",
+      "commit": "65f8f8a"
     },
     {
       "id": "2.4",
@@ -354,11 +362,12 @@
       "prioridad": "P2",
       "titulo": "Eliminar el quitafondos de cutSprite",
       "detalle": "game.js:404-507 pasa a ser un recorte drawImage simple",
-      "estado": "pendiente",
+      "estado": "en_curso",
       "creada": "2026-10-10",
       "dependencias": [
         "2.4"
-      ]
+      ],
+      "actualizada": "2026-10-10 17:06"
     },
     {
       "id": "2.6",

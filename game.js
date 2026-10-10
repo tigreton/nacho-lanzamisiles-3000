@@ -393,107 +393,13 @@
   }
 
   function cutSprite(crop) {
+    // La lámina assets/juego-nacho.webp ya viene con transparencia real:
+    // el fondo se eliminó offline (plans/herramientas/limpiar-lamina.py).
     const [sx, sy, sw, sh] = crop;
     const output = document.createElement("canvas");
     output.width = sw;
     output.height = sh;
-    const outputCtx = output.getContext("2d", { willReadFrequently: true });
-    outputCtx.drawImage(sheet, sx, sy, sw, sh, 0, 0, sw, sh);
-
-    let image;
-    try {
-      image = outputCtx.getImageData(0, 0, sw, sh);
-    } catch {
-      // Browsers can forbid pixel access when index.html is opened through
-      // file://. Keep the sprite usable; the local launcher avoids this fallback.
-      return output;
-    }
-    const data = image.data;
-    const visited = new Uint8Array(sw * sh);
-    const queue = new Int32Array(sw * sh);
-    let head = 0;
-    let tail = 0;
-
-    const looksLikeBackground = (index) => {
-      const offset = index * 4;
-      const r = data[offset];
-      const g = data[offset + 1];
-      const b = data[offset + 2];
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
-      return max - min < 19 && (r + g + b) / 3 > 204;
-    };
-
-    const add = (index) => {
-      if (!visited[index] && looksLikeBackground(index)) {
-        visited[index] = 1;
-        queue[tail++] = index;
-      }
-    };
-
-    for (let x = 0; x < sw; x += 1) {
-      add(x);
-      add((sh - 1) * sw + x);
-    }
-    for (let y = 0; y < sh; y += 1) {
-      add(y * sw);
-      add(y * sw + sw - 1);
-    }
-
-    while (head < tail) {
-      const index = queue[head++];
-      const x = index % sw;
-      const y = Math.floor(index / sw);
-      data[index * 4 + 3] = 0;
-      if (x > 0) add(index - 1);
-      if (x < sw - 1) add(index + 1);
-      if (y > 0) add(index - sw);
-      if (y < sh - 1) add(index + sw);
-    }
-
-    // Some frames in the supplied contact sheet overlap their neighbours by a few
-    // pixels. Remove small foreground islands clipped by the crop edge while
-    // keeping the main sprite and detached details such as rotors or flames.
-    const foregroundSeen = new Uint8Array(sw * sh);
-    const foregroundQueue = new Int32Array(sw * sh);
-    const component = [];
-    const smallIslandLimit = sw * sh * 0.075;
-
-    for (let start = 0; start < sw * sh; start += 1) {
-      if (foregroundSeen[start] || data[start * 4 + 3] === 0) continue;
-      let foregroundHead = 0;
-      let foregroundTail = 0;
-      let touchesEdge = false;
-      component.length = 0;
-      foregroundSeen[start] = 1;
-      foregroundQueue[foregroundTail++] = start;
-
-      while (foregroundHead < foregroundTail) {
-        const index = foregroundQueue[foregroundHead++];
-        const x = index % sw;
-        const y = Math.floor(index / sw);
-        component.push(index);
-        if (x === 0 || y === 0 || x === sw - 1 || y === sh - 1) touchesEdge = true;
-
-        const neighbours = [];
-        if (x > 0) neighbours.push(index - 1);
-        if (x < sw - 1) neighbours.push(index + 1);
-        if (y > 0) neighbours.push(index - sw);
-        if (y < sh - 1) neighbours.push(index + sw);
-        for (const neighbour of neighbours) {
-          if (!foregroundSeen[neighbour] && data[neighbour * 4 + 3] > 0) {
-            foregroundSeen[neighbour] = 1;
-            foregroundQueue[foregroundTail++] = neighbour;
-          }
-        }
-      }
-
-      if (touchesEdge && component.length < smallIslandLimit) {
-        for (const index of component) data[index * 4 + 3] = 0;
-      }
-    }
-
-    outputCtx.putImageData(image, 0, 0);
+    output.getContext("2d").drawImage(sheet, sx, sy, sw, sh, 0, 0, sw, sh);
     return output;
   }
 

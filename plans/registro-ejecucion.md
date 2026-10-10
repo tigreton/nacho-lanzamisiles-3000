@@ -230,3 +230,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 17:06] 2.3 — Cargar fuentes antes del HUD
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 17:06] 2.3 — Cargar fuentes antes del HUD
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - fontsReady añadido a la puerta de finishLoading; document.fonts.load con los 4 estilos exactos que usa el canvas (26px Black Ops One, Inter 500/700/900); rechazo tratado como listo: sin fuentes propias el juego sigue siendo jugable
+- **Archivos:** game.js
+- **Verificación:** node --check OK; arranque y HUD verificados en el e2e de cierre de fase
+- **Commit:** 65f8f8a
+
+### [2026-10-10 17:06] 2.5 — Eliminar el quitafondos de cutSprite
+- **Estado:** pendiente → en_curso
+
