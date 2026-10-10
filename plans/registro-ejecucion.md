@@ -156,3 +156,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 13:24] 1.6 — Reducir CROPS.missile al frame usado
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 13:25] 1.6 — Reducir CROPS.missile al frame usado
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - De array de 6 frames a crop único [519,229,140,82] (el antiguo índice 4); sprites.missile deja de ser array y el único uso (misil explosivo) se actualiza de sprites.missile[4] a sprites.missile
+- **Archivos:** game.js
+- **Verificación:** node --check OK; grep muestra exactamente definición, preparación y uso, sin índices
+- **Commit:** f9b2481
+
+### [2026-10-10 13:25] 1.7 — Eliminar campo enemy.sprite
+- **Estado:** pendiente → en_curso
+

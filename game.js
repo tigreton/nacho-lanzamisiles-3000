@@ -702,7 +702,6 @@
       fireTimer: rand(0.7, 2.2) * difficulty.enemyFireMultiplier,
       dead: false,
       flash: 0,
-      sprite: 0,
     };
 
     if (type === "drone") {
