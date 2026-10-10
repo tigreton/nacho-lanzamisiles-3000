@@ -9,8 +9,18 @@ Guía rápida para retomar el trabajo en cualquier momento. Lectura: 2 minutos.
 | [plan-de-mejora.md](plan-de-mejora.md) | El plan: 7 fases, tareas priorizadas (P1/P2/P3) y checklist de verificación |
 | [estado-tareas.json](estado-tareas.json) | **Fuente de verdad**: estado de las 39 tareas, dependencias y decisiones |
 | [registro-ejecucion.md](registro-ejecucion.md) | Diario cronológico: qué se hizo, qué se decidió y por qué |
+| [plan-qa.md](plan-qa.md) | Plan de verificación derivado del QA del 2026-10-10: correcciones de hallazgos, flujos pendientes de verificar e2e e infraestructura de regresión (fases Q0-Q2, 11 tareas) |
+| [estado-qa.json](estado-qa.json) | Estado de las 11 tareas del plan QA |
+| [registro-qa.md](registro-qa.md) | Diario cronológico del plan QA |
 | [herramientas/tareas.js](herramientas/tareas.js) | CLI que gestiona todo (Node, sin dependencias) |
 | `../game.js`, `../index.html`, `../style.css`, `../assets/` | El juego |
+
+Hay **dos planes independientes**. Sin flags, el CLI trabaja sobre el plan de
+mejora; para el plan QA hay que pasarle sus rutas:
+
+```bash
+node plans/herramientas/tareas.js proxima --estado plans/estado-qa.json --registro plans/registro-qa.md
+```
 
 ## Cómo seguir trabajando (5 pasos)
 

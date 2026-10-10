@@ -1,0 +1,27 @@
+{
+  "meta": {
+    "proyecto": "Operación Nacho",
+    "plan": "plans/plan-qa.md",
+    "creado": "2026-10-10",
+    "ultimaActualizacion": "2026-10-10",
+    "estadosValidos": ["pendiente", "en_curso", "completada", "bloqueada", "descartada"],
+    "reglas": {
+      "doc": "Plan derivado del QA del 2026-10-10. Q1.2 depende de Q1.1 (hay que superar la oleada 4 para llegar a la 8). Q2.3 debe esperar a que las fases 1-2 de plans/plan-de-mejora.md estén completas (dependencia externa, no imponible aquí)."
+    }
+  },
+  "tareas": [
+    { "id": "Q0.1", "fase": 0, "prioridad": "P1", "titulo": "Armería: «N RESTANTES» aunque falten monedas", "detalle": "updateShopUI (game.js:295-302) comprueba coins<price antes que explosiveAmmo>0; reordenar condiciones (el botón sigue deshabilitado si faltan monedas)", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "Q0.2", "fase": 0, "prioridad": "P2", "titulo": "HUD: mostrar todos los potenciadores activos", "detalle": "game.js:1539-1548 solo pinta una etiqueta (EXPLOSIVOS > RÁFAGA > ESCUDO); con misiles en reserva nunca se ve la cuenta atrás de ráfaga/escudo", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "Q0.3", "fase": 0, "prioridad": "P3", "titulo": "Valorar 3 s de gracia en la oleada 1", "detalle": "fireTimer inicial rand(0.7,2.2) (game.js:714) a >=3 s solo en wave 1; evidencia débil (piloto automático), decidir con juego humano", "estado": "pendiente", "creada": "2026-10-10" },
+
+    { "id": "Q1.1", "fase": 1, "prioridad": "P1", "titulo": "Derribar al acorazado y cerrar el ciclo", "detalle": "Banner ¡JEFE DERRIBADO!, armería a los 3,3 s (game.js:1025-1044, 1393-1406) y oleada 5 normal tras CONTINUAR; QA se quedó a ~20-25% del jefe", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "Q1.2", "fase": 1, "prioridad": "P1", "titulo": "Dirigible de globos (oleada 8)", "detalle": "Globos de 2 en 2 (game.js:906-911); cesta persigue y detona a los 5 s (radio 118, 1 daño); góndola 10 s con anillo y detona (radio 142, 2 daño)", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["Q1.1"] },
+    { "id": "Q1.3", "fase": 1, "prioridad": "P2", "titulo": "Escudo reflector letal", "detalle": "Confirmar que una bala reflejada (daño x2, game.js:1285-1310) mata al enemigo que la disparó (game.js:1320-1331); el rebote ya se vio en vídeo", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "Q1.4", "fase": 1, "prioridad": "P2", "titulo": "NORMAL y DIFÍCIL hasta oleada 2", "detalle": "QA solo jugó FÁCIL: spawn x1/x0.72, velocidad x1/x1.18, hitbox de proyectil 0.2/0.12 vs 0.48 (game.js:35-72)", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "Q1.5", "fase": 1, "prioridad": "P3", "titulo": "Táctil real en viewport estrecho", "detalle": "En ~400x800: arrastrar mueve y dispara, canvas escala, hint ARRASTRA visible (index.html:173); QA solo usó puntero de escritorio", "estado": "pendiente", "creada": "2026-10-10" },
+
+    { "id": "Q2.1", "fase": 2, "prioridad": "P2", "titulo": "Guion de pruebas reutilizable", "detalle": "docs/guion-pruebas.md con los 7 bloques del QA, criterios de éxito y matriz de cobertura e2e vs solo-código; enlazar desde el README raíz", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "Q2.2", "fase": 2, "prioridad": "P3", "titulo": "Colector de errores para pruebas", "detalle": "window.__erroresQA: listeners de error y unhandledrejection que acumulan sin cambiar jugabilidad; el checklist de consola pasa a consultarlo", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "Q2.3", "fase": 2, "prioridad": "P3", "titulo": "Re-pase del QA tras plan-de-mejora fases 1-2", "detalle": "Repetir vídeo del jefe y una pasada del guion Q2.1 cuando las fases 1-2 de plans/plan-de-mejora.md estén completas (dependencia externa)", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["Q2.1"] }
+  ]
+}
