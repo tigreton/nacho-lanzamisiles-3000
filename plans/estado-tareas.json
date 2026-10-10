@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 18:27",
+    "ultimaActualizacion": "2026-10-10 18:32",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -225,7 +225,7 @@
       "detalle": "Solo se usa missile[4] (game.js:2106)",
       "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 13:54",
+      "actualizada": "2026-10-10 18:32",
       "decisiones": [
         "De array de 6 frames a crop único [519,229,140,82] (el antiguo índice 4); sprites.missile deja de ser array y el único uso (misil explosivo) se actualiza de sprites.missile[4] a sprites.missile"
       ],
@@ -235,7 +235,8 @@
       "verificacion": "node --check OK; grep muestra exactamente definición, preparación y uso, sin índices",
       "commit": "f9b2481",
       "notas": [
-        "Verificación e2e acumulada de fase 1: arranque ×9 (2 orígenes, caché fría y caliente), menú, combate 10+ min en normal y fácil, oleadas 1→4 con jefe ACORAZADO, pausa/reanudación ×2, 0 errores de consola (hook window.error activo). Equivalencia del recorte demostrada por construcción: sprites.missile = cutSprite([519,229,140,82]) es exactamente el antiguo sprites.missile[4]. Pendiente de ver visualmente el misil tras compra en tienda (flujo e2e ya trackado en plan-qa). Evidencias: gui-test-screenshots/f1_*.png"
+        "Verificación e2e acumulada de fase 1: arranque ×9 (2 orígenes, caché fría y caliente), menú, combate 10+ min en normal y fácil, oleadas 1→4 con jefe ACORAZADO, pausa/reanudación ×2, 0 errores de consola (hook window.error activo). Equivalencia del recorte demostrada por construcción: sprites.missile = cutSprite([519,229,140,82]) es exactamente el antiguo sprites.missile[4]. Pendiente de ver visualmente el misil tras compra en tienda (flujo e2e ya trackado en plan-qa). Evidencias: gui-test-screenshots/f1_*.png",
+        "Cierre pendiente de fase 1: la tienda se alcanzo en el e2e de fase 4 y el boton de misil explosivo respondio correctamente (rechazo por monedas insuficientes); la equivalencia del recorte sigue siendo la garantia visual"
       ]
     },
     {
@@ -560,7 +561,7 @@
       "dependencias": [
         "2.4"
       ],
-      "actualizada": "2026-10-10 18:27",
+      "actualizada": "2026-10-10 18:32",
       "decisiones": [
         "drawSprite dibuja el canvas horneado (sprite + halo, margen blur*1.6+2) escalado al tamano de destino; cache Map por sprite -> (color|blur -> canvas), se crea una sola vez por combinacion; el halo escala con la transform igual que el shadowBlur en vivo; los glows de texto del HUD y las estrellas siguen en runtime (cambian cada frame, no son cacheables); equivalencia visual verificada en el e2e de fase"
       ],
@@ -568,7 +569,10 @@
         "game.js"
       ],
       "verificacion": "node --check OK; e2e de fase pendiente de acumular",
-      "commit": "b0a7b62"
+      "commit": "b0a7b62",
+      "notas": [
+        "E2E fase 4: bitmap del canvas = CSS x DPR exacto (1199x674 con dpr 1, adaptativo a resize); combate ~2 min con glows horneados sin un solo error de consola; analisis visual confirma halos cian en jugador, naranja en enemigos y glow en proyectiles; la tienda abrio tras limpiar oleada (flujo completo) y rechazo compra sin monedas ('FALTAN MONEDAS' con 2 monedas). Frame-time no medible por CDP (evaluate+rAF se queda sin presupuesto en el IAB): queda sin metrica numerica, el cambio es estructural (shadowBlur fuera del loop)"
+      ]
     },
     {
       "id": "4.3",
@@ -576,9 +580,17 @@
       "prioridad": "P3",
       "titulo": "Tope duro de partículas (~400)",
       "detalle": "Evitar picos en oleadas densas + jefes",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 18:27"
+      "actualizada": "2026-10-10 18:27",
+      "decisiones": [
+        "Cuando el array esta lleno se descartan las particulas nuevas de esa rafaga (las mas viejas siguen su vida, sin splice por frame); 400 cubre con holgura los picos visuales de oleadas densas + jefe"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "node --check OK; e2e de fase mide particulas y frame time",
+      "commit": "06157bf"
     },
     {
       "id": "5.1",

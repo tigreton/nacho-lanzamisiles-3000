@@ -363,3 +363,19 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 18:27] 4.3 — Tope duro de partículas (~400)
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 18:27] 4.3 — Tope duro de partículas (~400)
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Cuando el array esta lleno se descartan las particulas nuevas de esa rafaga (las mas viejas siguen su vida, sin splice por frame); 400 cubre con holgura los picos visuales de oleadas densas + jefe
+- **Archivos:** game.js
+- **Verificación:** node --check OK; e2e de fase mide particulas y frame time
+- **Commit:** 06157bf
+
+### [2026-10-10 18:32] 4.2 — Pre-renderizar glows
+- **Estado:** sin cambio (completada)
+- **Nota:** E2E fase 4: bitmap del canvas = CSS x DPR exacto (1199x674 con dpr 1, adaptativo a resize); combate ~2 min con glows horneados sin un solo error de consola; analisis visual confirma halos cian en jugador, naranja en enemigos y glow en proyectiles; la tienda abrio tras limpiar oleada (flujo completo) y rechazo compra sin monedas ('FALTAN MONEDAS' con 2 monedas). Frame-time no medible por CDP (evaluate+rAF se queda sin presupuesto en el IAB): queda sin metrica numerica, el cambio es estructural (shadowBlur fuera del loop)
+
+### [2026-10-10 18:32] 1.6 — Reducir CROPS.missile al frame usado
+- **Estado:** sin cambio (completada)
+- **Nota:** Cierre pendiente de fase 1: la tienda se alcanzo en el e2e de fase 4 y el boton de misil explosivo respondio correctamente (rechazo por monedas insuficientes); la equivalencia del recorte sigue siendo la garantia visual
+
