@@ -257,3 +257,6 @@ si es una decisión tomada a mitad de camino).
 - **Verificación:** E2E fase 2: arranque con fontsReady gate (fonts.status=loaded antes del menú), partida ~80 s con barridos, pausa+reanudación, 0 errores de consola; equivalencia de sprites garantizada por los 53/53 hashes de 2.4 y menú visual validado sin cajas ni ajedrezado
 - **Commit:** 748d20b
 
+### [2026-10-10 18:18] 3.1 — Mostrar récord por dificultad
+- **Estado:** pendiente → en_curso
+

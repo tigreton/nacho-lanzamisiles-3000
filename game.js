@@ -20,6 +20,7 @@
     soundButton: document.querySelector("#sound-button"),
     resultTitle: document.querySelector("#result-title"),
     resultCopy: document.querySelector("#result-copy"),
+    menuRecord: document.querySelector("#menu-record"),
     difficultyButtons: [...document.querySelectorAll(".difficulty-option")],
     helicopterButtons: [...document.querySelectorAll("#menu-screen .helicopter-option")],
     changeHelicopterButtons: [...document.querySelectorAll("#helicopter-screen .helicopter-option")],
@@ -229,7 +230,10 @@
 
   function setMode(nextMode) {
     mode = nextMode;
-    if (nextMode === "menu") showOnly(ui.menu);
+    if (nextMode === "menu") {
+      showOnly(ui.menu);
+      updateMenuRecord();
+    }
     else if (nextMode === "paused") showOnly(ui.pause);
     else if (nextMode === "shop") showOnly(ui.shop);
     else if (nextMode === "helicopter") showOnly(ui.helicopter);
@@ -246,6 +250,7 @@
       button.classList.toggle("is-selected", selected);
       button.setAttribute("aria-pressed", String(selected));
     }
+    updateMenuRecord();
   }
 
   function selectHelicopter(id) {
@@ -473,7 +478,7 @@
       shake: 0,
       flash: 0,
       background: 0,
-      highScore: getHighScore(),
+      highScore: getHighScore(selectedDifficulty),
       difficulty,
     };
 
@@ -504,20 +509,36 @@
     setTimeout(() => tone(540, 0.12, "square", 0.035), 90);
   }
 
-  function getHighScore() {
+  function getHighScore(difficultyId = selectedDifficulty) {
     try {
-      return Number(localStorage.getItem("operacion-nacho-record")) || 0;
+      const record =
+        Number(localStorage.getItem(`operacion-nacho-record-${difficultyId}`)) || 0;
+      // El récord global anterior (sin dificultad) se conserva como suelo:
+      // nunca hizo falta distinguir y los récords no deben bajar.
+      const legado = Number(localStorage.getItem("operacion-nacho-record")) || 0;
+      return Math.max(record, legado);
     } catch {
       return 0;
     }
   }
 
-  function saveHighScore(score) {
+  function saveHighScore(score, difficultyId = selectedDifficulty) {
     try {
-      localStorage.setItem("operacion-nacho-record", String(score));
+      const clave = `operacion-nacho-record-${difficultyId}`;
+      if (score > Number(localStorage.getItem(clave)) || 0) {
+        localStorage.setItem(clave, String(score));
+      }
     } catch {
       // The game still works when storage is unavailable.
     }
+  }
+
+  function updateMenuRecord() {
+    const etiqueta = DIFFICULTIES[selectedDifficulty].label;
+    const record = getHighScore();
+    ui.menuRecord.textContent = record
+      ? `RÉCORD ${etiqueta}: ${record.toLocaleString("es-ES")}`
+      : `AÚN SIN RÉCORD EN ${etiqueta}`;
   }
 
   function unlockAudio() {
@@ -982,10 +1003,11 @@
   function endGame() {
     if (mode !== "playing") return;
     const isRecord = state.score > state.highScore;
-    if (isRecord) saveHighScore(state.score);
+    if (isRecord) saveHighScore(state.score, selectedDifficulty);
     ui.resultTitle.textContent = isRecord ? "¡NUEVO RÉCORD!" : "MISIÓN TERMINADA";
+    const record = getHighScore(selectedDifficulty);
     ui.resultCopy.textContent =
-      `Dificultad: ${state.difficulty.label} · Puntuación: ${state.score.toLocaleString("es-ES")} · Monedas: ${state.coins}`;
+      `Dificultad: ${state.difficulty.label} · Puntuación: ${state.score.toLocaleString("es-ES")} · Récord: ${record.toLocaleString("es-ES")} · Monedas: ${state.coins}`;
     setMode("gameover");
   }
 
