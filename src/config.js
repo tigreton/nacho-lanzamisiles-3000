@@ -109,7 +109,6 @@ export const CHARGE_COOLDOWN = 0.42;
 // Misiles teledirigidos: corrigen su rumbo hacia el enemigo más cercano
 // con HOMING_TURN_RATE rad/s como máximo (se pueden ver venir).
 export const HOMING_TURN_RATE = 4.2;
-export const HOMING_SPEED = 620;
 export const HOMING_PACK_SIZE = 8;
 
 // Dron aliado: escolta al helicóptero durante la oleada siguiente a la
