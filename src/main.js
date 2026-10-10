@@ -13,6 +13,19 @@ import { installInput, pollGamepad } from "./input.js";
 import { getHighScore } from "./records.js";
 
 
+// Colector de errores para QA: acumula fallos sin tocar la jugabilidad.
+// Las pruebas consultan window.__erroresQA al terminar la partida.
+window.__erroresQA = [];
+window.addEventListener("error", (event) => {
+  window.__erroresQA.push(
+    `${event.message} @ ${event.filename}:${event.lineno}:${event.colno}`,
+  );
+});
+window.addEventListener("unhandledrejection", (event) => {
+  window.__erroresQA.push(`unhandledrejection: ${String(event.reason)}`);
+});
+
+
 // El mundo del juego vive en coordenadas lógicas fijas; el G.canvas físico se
 // dimensiona al tamaño CSS × devicePixelRatio para texto y G.sprites nítidos.
 
