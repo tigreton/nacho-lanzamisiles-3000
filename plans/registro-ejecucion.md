@@ -112,3 +112,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 13:23] 1.2 — Eliminar drawBalloon() (~140 líneas)
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 13:23] 1.2 — Eliminar drawBalloon() (~140 líneas)
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Borrado por rango 1603-1744 (función + línea en blanco); drawBalloonSprite y drawBalloonBasket, que sí se dibujan en el loop, quedan intactas
+- **Archivos:** game.js
+- **Verificación:** node --check OK; grep 0 referencias; 2197→2055 líneas
+- **Commit:** 6d9b5f7
+
+### [2026-10-10 13:23] 1.3 — Eliminar sprites.launcher y CROPS.launcher
+- **Estado:** pendiente → en_curso
+

@@ -127,7 +127,6 @@
       [519, 229, 140, 82],
       [652, 229, 143, 82],
     ],
-    launcher: [816, 226, 279, 106],
     enemyHeli: [
       [18, 380, 105, 95],
       [118, 380, 106, 95],
@@ -510,7 +509,6 @@
     sprites.player = CROPS.player.map(cutSprite);
     sprites.face = cutSprite(CROPS.face);
     sprites.missile = CROPS.missile.map(cutSprite);
-    sprites.launcher = cutSprite(CROPS.launcher);
     sprites.enemyHeli = CROPS.enemyHeli.map(cutSprite);
     sprites.drone = CROPS.drone.map(cutSprite);
     sprites.fighter = CROPS.fighter.map(cutSprite);
