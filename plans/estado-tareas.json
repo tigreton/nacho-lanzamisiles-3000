@@ -460,8 +460,9 @@
       "prioridad": "P2",
       "titulo": "Lanzador JUGAR.bat y README multiplataforma",
       "detalle": "python (sin 3) en Windows; instrucciones macOS y Windows",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 18:23"
     },
     {
       "id": "3.5",
@@ -469,8 +470,9 @@
       "prioridad": "P3",
       "titulo": "Documentar KeyJ como disparo alternativo",
       "detalle": "En controls-card del menú y en el README",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 18:23"
     },
     {
       "id": "3.6",
@@ -496,9 +498,17 @@
       "prioridad": "P3",
       "titulo": "Renombrar enemyFireMultiplier",
       "detalle": "A enemyFireIntervalMultiplier (>1 = dispara menos) en las 3 dificultades y sus usos",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 18:23"
+      "actualizada": "2026-10-10 18:23",
+      "decisiones": [
+        "El nombre refleja que multiplica el intervalo entre disparos (>1 = dispara mas lento); 7 apariciones: 3 dificultades y 4 usos en temporizadores de disparo"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "grep 7 apariciones del nombre nuevo, 0 del antiguo; node --check OK",
+      "commit": "05d73c9"
     },
     {
       "id": "4.1",

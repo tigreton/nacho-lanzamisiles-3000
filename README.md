@@ -9,12 +9,13 @@ independiente `assets/boss-globo-sprites.webp`.
 
 ## Ejecutarlo
 
-En macOS, haz doble clic en `JUGAR.command`.
+En macOS, haz doble clic en `JUGAR.command`. En Windows, doble clic en
+`JUGAR.bat` (requiere Python instalado y en el PATH).
 
 También puedes iniciar un servidor local desde esta carpeta:
 
 ```bash
-python3 -m http.server 8080
+python -m http.server 8080     # en Windows; en macOS/Linux usa python3
 ```
 
 Después visita `http://localhost:8080`.
@@ -26,9 +27,13 @@ El servidor local sigue siendo la opción recomendada.
 ## Controles
 
 - `WASD` o flechas: mover
-- `Espacio`: disparar
+- `Espacio` o `J`: disparar
 - `P` o `Escape`: pausa
 - Ratón/táctil: arrastrar sobre el juego para mover y disparar
+
+Si cambias de pestaña o la ventana pierde el foco en mitad de una oleada, el
+juego se pausa solo. Cada dificultad guarda su propio récord, visible en el
+menú y al terminar la partida.
 
 En el menú puedes elegir `Fácil`, `Normal` (predeterminado) o `Difícil` antes
 de empezar. La selección cambia el blindaje del jugador, la velocidad y vida
@@ -40,7 +45,8 @@ que sea más sencillo esquivarlos.
 
 Al terminar cada oleada se abre la armería: puedes gastar monedas en una vida,
 8 misiles explosivos, un escudo reflector o una ráfaga de doble disparo antes
-de continuar. Los misiles hacen daño en área al impactar y el escudo devuelve
+de continuar. La ráfaga dura 10 s, tanto comprada como recogida del enemigo.
+Los misiles hacen daño en área al impactar y el escudo devuelve
 los proyectiles enemigos al tocar su barrera, hacia sus atacantes, durante 15 s.
 
 En las oleadas de jefe se alternan el acorazado y un dirigible especial. El

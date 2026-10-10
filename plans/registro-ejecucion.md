@@ -304,3 +304,17 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 18:23] 3.7 — Renombrar enemyFireMultiplier
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 18:23] 3.7 — Renombrar enemyFireMultiplier
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - El nombre refleja que multiplica el intervalo entre disparos (>1 = dispara mas lento); 7 apariciones: 3 dificultades y 4 usos en temporizadores de disparo
+- **Archivos:** game.js
+- **Verificación:** grep 7 apariciones del nombre nuevo, 0 del antiguo; node --check OK
+- **Commit:** 05d73c9
+
+### [2026-10-10 18:23] 3.4 — Lanzador JUGAR.bat y README multiplataforma
+- **Estado:** pendiente → en_curso
+
+### [2026-10-10 18:23] 3.5 — Documentar KeyJ como disparo alternativo
+- **Estado:** pendiente → en_curso
+
