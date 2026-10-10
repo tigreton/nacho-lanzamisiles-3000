@@ -178,3 +178,19 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 13:25] 1.8 — Eliminar powerups[3] del crop
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 13:25] 1.8 — Eliminar powerups[3] del crop
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - El mapa de dibujado era {rapid:0, shield:1, heart:2, star:4} con fallback a 4: el índice 3 no existía; se borra el crop [292,942,82,80] y star pasa a ocupar el índice 3, con el fallback actualizado al mismo sprite estrella
+- **Archivos:** game.js
+- **Verificación:** node --check OK; los 4 tipos de pickup siguen mapeando al mismo sprite que antes
+- **Commit:** 6700cb8
+
+### [2026-10-10 13:54] 1.6 — Reducir CROPS.missile al frame usado
+- **Estado:** sin cambio (completada)
+- **Nota:** Verificación e2e acumulada de fase 1: arranque ×9 (2 orígenes, caché fría y caliente), menú, combate 10+ min en normal y fácil, oleadas 1→4 con jefe ACORAZADO, pausa/reanudación ×2, 0 errores de consola (hook window.error activo). Equivalencia del recorte demostrada por construcción: sprites.missile = cutSprite([519,229,140,82]) es exactamente el antiguo sprites.missile[4]. Pendiente de ver visualmente el misil tras compra en tienda (flujo e2e ya trackado en plan-qa). Evidencias: gui-test-screenshots/f1_*.png
+
+### [2026-10-10 13:54] 1.8 — Eliminar powerups[3] del crop
+- **Estado:** sin cambio (completada)
+- **Nota:** Verificación e2e: pickups flotando y recogidos en partida real (5 monedas coleccionadas en oleada 3-4, collectPickup ejecutado sin errores). Equivalencia por construcción: los tipos rapid/shield/heart/star mapean a los mismos rects [35/120/205/377,942,...] que antes; el índice 3 eliminado no estaba referenciado por ningún tipo. Capturas en gui-test-screenshots/f1_*.png
+
