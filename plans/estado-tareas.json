@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 18:18",
+    "ultimaActualizacion": "2026-10-10 18:22",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -404,9 +404,19 @@
       "prioridad": "P1",
       "titulo": "Mostrar récord por dificultad",
       "detalle": "En menú y game over; claves de localStorage por dificultad",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 18:18"
+      "actualizada": "2026-10-10 18:22",
+      "decisiones": [
+        "Claves operacion-nacho-record-easy/normal/hard; el record global legado (operacion-nacho-record) se usa como suelo max() para no devaluar records existentes; se muestra en el menu (se actualiza al cambiar dificultad) y en el informe de vuelo final; fix colateral: las previews de helicopteros del menu apuntaban a los PNG eliminados en fase 2 y funcionaban solo por cache del navegador, ahora a .webp; el texto ESPACIO/J del controls-card entra en el commit de 3.5"
+      ],
+      "archivos": [
+        "game.js",
+        "index.html",
+        "style.css"
+      ],
+      "verificacion": "node --check OK; verificacion e2e de fase pendiente de acumular (ver nota final de fase)",
+      "commit": "0e75dc7"
     },
     {
       "id": "3.2",
@@ -414,8 +424,9 @@
       "prioridad": "P1",
       "titulo": "Autopausa al perder foco",
       "detalle": "visibilitychange + blur → togglePause() si mode === 'playing'",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 18:22"
     },
     {
       "id": "3.3",

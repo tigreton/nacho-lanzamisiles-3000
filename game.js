@@ -1879,9 +1879,16 @@
     if (event.code === "Space") event.preventDefault();
     keys.delete(event.code);
   }, true);
-  window.addEventListener("blur", () => {
+  // Autopausa: si la pestaña o la ventana pierden el foco en mitad de una
+  // oleada, la partida se pausa en lugar de seguir corriendo sin defensa.
+  const autopause = () => {
     keys.clear();
     pointer.active = false;
+    if (mode === "playing") togglePause();
+  };
+  window.addEventListener("blur", autopause);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) autopause();
   });
 
   canvas.addEventListener("pointerdown", (event) => {

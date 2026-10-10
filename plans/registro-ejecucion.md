@@ -260,3 +260,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 18:18] 3.1 — Mostrar récord por dificultad
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 18:22] 3.1 — Mostrar récord por dificultad
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Claves operacion-nacho-record-easy/normal/hard; el record global legado (operacion-nacho-record) se usa como suelo max() para no devaluar records existentes; se muestra en el menu (se actualiza al cambiar dificultad) y en el informe de vuelo final; fix colateral: las previews de helicopteros del menu apuntaban a los PNG eliminados en fase 2 y funcionaban solo por cache del navegador, ahora a .webp; el texto ESPACIO/J del controls-card entra en el commit de 3.5
+- **Archivos:** game.js, index.html, style.css
+- **Verificación:** node --check OK; verificacion e2e de fase pendiente de acumular (ver nota final de fase)
+- **Commit:** 0e75dc7
+
+### [2026-10-10 18:22] 3.2 — Autopausa al perder foco
+- **Estado:** pendiente → en_curso
+
