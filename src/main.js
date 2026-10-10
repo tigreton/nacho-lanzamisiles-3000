@@ -1,7 +1,7 @@
 // Estado, arranque y bucle principal. La configuración vive en config.js.
 import { W, H, DIFFICULTIES, HELICOPTERS } from "./config.js";
-import { G, setMode, selectDifficulty, selectHelicopter } from "./state.js";
-import { updateGame } from "./systems/waves.js";
+import { G, setMode, selectDifficulty, selectMode, selectHelicopter } from "./state.js";
+import { updateGame, advanceWave } from "./systems/waves.js";
 import { buyShopItem, continueFromShop } from "./systems/shop.js";
 import { continueFromHelicopter } from "./entities/airbase.js";
 import { render } from "./render.js";
@@ -69,6 +69,7 @@ let fontsReady = false;
 function resetGame() {
   const difficulty = DIFFICULTIES[G.selectedDifficulty];
   const helicopter = HELICOPTERS[G.selectedHelicopter];
+  const gameMode = G.selectedMode;
   const maxHp = difficulty.playerHp + helicopter.maxHpBonus;
   G.player = {
     x: 150,
@@ -107,11 +108,16 @@ function resetGame() {
     bossClearTimer: 0,
     airbaseSpawned: false,
     banner: 2.4,
-    bannerText: `${difficulty.label} · OLEADA 1`,
+    bannerText:
+      gameMode === "supervivencia"
+        ? "SUPERVIVENCIA · OLEADA 1"
+        : gameMode === "jefes"
+          ? "SOLO JEFES · JEFE 1"
+          : `${difficulty.label} · OLEADA 1`,
     shake: 0,
     flash: 0,
     background: 0,
-    highScore: getHighScore(G.selectedDifficulty),
+    highScore: getHighScore(G.selectedDifficulty, gameMode),
     combo: { kills: 0, timer: 0, best: 0 },
     nearMisses: 0,
     waveDamageTaken: false,
@@ -120,6 +126,7 @@ function resetGame() {
     squads: {},
     squadSeq: 0,
     squadTimer: 8,
+    gameMode,
     difficulty,
   };
 
@@ -224,8 +231,15 @@ function loop(time) {
 
 installInput({ togglePause, startGame });
 
+// Gancho de QA: permite al guion de pruebas saltar a una oleada o modo
+// concretos sin jugar hasta ellos y avanzar fotogramas a demanda, porque
+// en navegadores embebidos sin foco el requestAnimationFrame se congela
+// (docs/guion-pruebas.md). No lo usa el juego en producción.
+window.__qa = { G, setMode, startGame, advanceWave, updateGame };
+
 G.ui.play.addEventListener("click", startGame);
 G.ui.restart.addEventListener("click", startGame);
+G.ui.resultMenuButton.addEventListener("click", () => setMode("menu"));
 G.ui.resume.addEventListener("click", togglePause);
 G.ui.pauseButton.addEventListener("click", togglePause);
 G.ui.soundButton.addEventListener("click", toggleSound);
@@ -237,6 +251,9 @@ G.ui.helicopterContinue.addEventListener("click", continueFromHelicopter);
 for (const button of G.ui.difficultyButtons) {
   button.addEventListener("click", () => selectDifficulty(button.dataset.difficulty));
 }
+for (const button of G.ui.modeButtons) {
+  button.addEventListener("click", () => selectMode(button.dataset.mode));
+}
 for (const button of [...G.ui.helicopterButtons, ...G.ui.changeHelicopterButtons]) {
   button.addEventListener("click", () => selectHelicopter(button.dataset.helicopter));
 }
@@ -244,6 +261,7 @@ for (const button of G.ui.shopItemButtons) {
   button.addEventListener("click", () => buyShopItem(button.dataset.shopItem));
 }
 selectDifficulty(G.selectedDifficulty);
+selectMode(G.selectedMode);
 selectHelicopter(G.selectedHelicopter);
 
 function finishLoading() {

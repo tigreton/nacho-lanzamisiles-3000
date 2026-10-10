@@ -21,6 +21,7 @@ export function notifyKill(enemy) {
   if (bajas >= 100) unlock("cien-bajas");
   if (enemy.type === "boss") unlock("primer-jefe");
   if (enemy.type === "airship") unlock("cazadirigibles");
+  if (enemy.type === "fortress") unlock("caza-fortalezas");
 }
 
 
