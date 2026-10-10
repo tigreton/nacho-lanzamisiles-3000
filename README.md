@@ -78,6 +78,12 @@ Al empezar puedes elegir entre los dos helicópteros. En las oleadas pares no
 boss aparece una base aérea volante; colócate encima de la plataforma con
 “ATERRIZA” para abrir el cambio de helicóptero durante la partida.
 
+## Probar el juego
+
+El guion de pruebas funcional (7 bloques: menú, partida, pausa/sonido,
+armería, base aérea, jefe y game over) vive en
+[docs/guion-pruebas.md](docs/guion-pruebas.md).
+
 ## Licencia
 
 [MIT](LICENSE) — el código es libre de usar, modificar y redistribuir.
