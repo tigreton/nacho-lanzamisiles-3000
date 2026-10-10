@@ -341,3 +341,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 18:25] 4.1 — Canvas adaptativo con DPR
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 18:26] 4.1 — Canvas adaptativo con DPR
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - W/H pasan a constantes logicas 1200x675 (los atributos HTML quedan como tamano de referencia); resizeCanvas dimensiona el bitmap a CSS x DPR (tope 2x por coste de relleno en 4K retina) y aplica setTransform con escalas independientes para reproducir el estirado actual si el contenedor no es 16:9; se llama al arrancar y en resize; updatePointer ya mapeaba clientX->W via rect, sin cambios
+- **Archivos:** game.js
+- **Verificación:** node --check OK; verificacion de render en el e2e de fase
+- **Commit:** cbf2978
+
+### [2026-10-10 18:26] 4.2 — Pre-renderizar glows
+- **Estado:** pendiente → en_curso
+

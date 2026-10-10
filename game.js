@@ -234,6 +234,7 @@
   let pickups = [];
   let effects = [];
   let particles = [];
+  const MAX_PARTICLES = 400;
   let stars = [];
 
   const rand = (min, max) => min + Math.random() * (max - min);
@@ -881,7 +882,11 @@
   }
 
   function createBurst(x, y, color, count = 8, speed = 150) {
-    for (let i = 0; i < count; i += 1) {
+    // Tope duro: en oleadas densas con jefes las explosiones podian acumular
+    // miles de particulas y castigar el frame time.
+    const restantes = MAX_PARTICLES - particles.length;
+    const nuevos = Math.min(count, Math.max(0, restantes));
+    for (let i = 0; i < nuevos; i += 1) {
       const angle = rand(0, Math.PI * 2);
       const velocity = rand(speed * 0.35, speed);
       particles.push({
@@ -1359,6 +1364,32 @@
     }
   }
 
+  // Halo pre-horneado: hornear el shadowBlur de cada sprite una sola vez en un
+  // canvas aparte cuesta mucho menos que aplicarlo en cada fotograma del loop.
+  const glowCache = new Map();
+
+  function bakedGlow(image, glow, blur) {
+    let porSprite = glowCache.get(image);
+    if (!porSprite) {
+      porSprite = new Map();
+      glowCache.set(image, porSprite);
+    }
+    const clave = `${glow}|${blur}`;
+    let horneado = porSprite.get(clave);
+    if (!horneado) {
+      const margen = Math.ceil(blur * 1.6) + 2;
+      horneado = document.createElement("canvas");
+      horneado.width = image.width + margen * 2;
+      horneado.height = image.height + margen * 2;
+      const hctx = horneado.getContext("2d");
+      hctx.shadowColor = glow;
+      hctx.shadowBlur = blur;
+      hctx.drawImage(image, margen, margen);
+      porSprite.set(clave, horneado);
+    }
+    return horneado;
+  }
+
   function drawSprite(image, x, y, width, height, options = {}) {
     if (!image) return;
     ctx.save();
@@ -1367,10 +1398,13 @@
     if (options.flipX) ctx.scale(-1, 1);
     if (options.alpha !== undefined) ctx.globalAlpha = options.alpha;
     if (options.glow) {
-      ctx.shadowColor = options.glow;
-      ctx.shadowBlur = options.blur || 14;
+      const horneado = bakedGlow(image, options.glow, options.blur || 14);
+      const w = horneado.width * (width / image.width);
+      const h = horneado.height * (height / image.height);
+      ctx.drawImage(horneado, -w / 2, -h / 2, w, h);
+    } else {
+      ctx.drawImage(image, -width / 2, -height / 2, width, height);
     }
-    ctx.drawImage(image, -width / 2, -height / 2, width, height);
     ctx.restore();
   }
 

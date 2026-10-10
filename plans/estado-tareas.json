@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 18:25",
+    "ultimaActualizacion": "2026-10-10 18:26",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -537,9 +537,17 @@
       "prioridad": "P1",
       "titulo": "Canvas adaptativo con DPR",
       "detalle": "Dimensionar el canvas a tamaño CSS × devicePixelRatio y escalar el contexto",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 18:25"
+      "actualizada": "2026-10-10 18:26",
+      "decisiones": [
+        "W/H pasan a constantes logicas 1200x675 (los atributos HTML quedan como tamano de referencia); resizeCanvas dimensiona el bitmap a CSS x DPR (tope 2x por coste de relleno en 4K retina) y aplica setTransform con escalas independientes para reproducir el estirado actual si el contenedor no es 16:9; se llama al arrancar y en resize; updatePointer ya mapeaba clientX->W via rect, sin cambios"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "node --check OK; verificacion de render en el e2e de fase",
+      "commit": "cbf2978"
     },
     {
       "id": "4.2",
@@ -547,11 +555,12 @@
       "prioridad": "P2",
       "titulo": "Pre-renderizar glows",
       "detalle": "Hornear shadowBlur en canvas offscreen al preparar sprites",
-      "estado": "pendiente",
+      "estado": "en_curso",
       "creada": "2026-10-10",
       "dependencias": [
         "2.4"
-      ]
+      ],
+      "actualizada": "2026-10-10 18:26"
     },
     {
       "id": "4.3",
