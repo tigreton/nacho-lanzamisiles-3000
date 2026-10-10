@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 13:19",
+    "ultimaActualizacion": "2026-10-10 13:23",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -133,8 +133,9 @@
       "prioridad": "P1",
       "titulo": "Eliminar drawAirship() (~175 líneas)",
       "detalle": "game.js:1603-1777, nunca se llama",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 13:23"
     },
     {
       "id": "1.2",

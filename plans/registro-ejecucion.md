@@ -98,3 +98,6 @@ si es una decisión tomada a mitad de camino).
 - **Estado:** pendiente → bloqueada
 - **Motivo:** Requiere decisión del propietario: si el código se va a publicar y con qué licencia (MIT, GPL, propietaria...). Si no se publicará, descartar esta tarea.
 
+### [2026-10-10 13:23] 1.1 — Eliminar drawAirship() (~175 líneas)
+- **Estado:** pendiente → en_curso
+
