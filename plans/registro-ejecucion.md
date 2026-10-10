@@ -241,3 +241,19 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 17:06] 2.5 — Eliminar el quitafondos de cutSprite
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 17:07] 2.6 — Simplificar README
+- **Estado:** pendiente → completada
+- **Decisiones:**
+  - La advertencia sobre abrir index.html directo se rebaja a recomendación: sin getImageData ya no hay contaminación de canvas en file:// y la lámina tiene transparencia real; extensiones .png actualizadas a .webp en las 4 referencias
+- **Archivos:** README.md
+- **Verificación:** grep: 0 referencias png activas (solo webp); lectura del fragmento actualizado
+- **Commit:** 7fbda9b
+
+### [2026-10-10 17:10] 2.5 — Eliminar el quitafondos de cutSprite
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - cutSprite queda como recorte drawImage puro (misma forma que cutAirshipSprite): la lámina ya viene limpia desde 2.4; sin getImageData desaparece también el fallback para file:// (ya innecesario); game.js 2038→1966 líneas
+- **Archivos:** game.js
+- **Verificación:** E2E fase 2: arranque con fontsReady gate (fonts.status=loaded antes del menú), partida ~80 s con barridos, pausa+reanudación, 0 errores de consola; equivalencia de sprites garantizada por los 53/53 hashes de 2.4 y menú visual validado sin cajas ni ajedrezado
+- **Commit:** 748d20b
+

@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 17:06",
+    "ultimaActualizacion": "2026-10-10 17:10",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -362,12 +362,20 @@
       "prioridad": "P2",
       "titulo": "Eliminar el quitafondos de cutSprite",
       "detalle": "game.js:404-507 pasa a ser un recorte drawImage simple",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
       "dependencias": [
         "2.4"
       ],
-      "actualizada": "2026-10-10 17:06"
+      "actualizada": "2026-10-10 17:10",
+      "decisiones": [
+        "cutSprite queda como recorte drawImage puro (misma forma que cutAirshipSprite): la lámina ya viene limpia desde 2.4; sin getImageData desaparece también el fallback para file:// (ya innecesario); game.js 2038→1966 líneas"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "E2E fase 2: arranque con fontsReady gate (fonts.status=loaded antes del menú), partida ~80 s con barridos, pausa+reanudación, 0 errores de consola; equivalencia de sprites garantizada por los 53/53 hashes de 2.4 y menú visual validado sin cajas ni ajedrezado",
+      "commit": "748d20b"
     },
     {
       "id": "2.6",
@@ -375,11 +383,20 @@
       "prioridad": "P3",
       "titulo": "Simplificar README",
       "detalle": "Rebajar la advertencia sobre abrir index.html directamente",
-      "estado": "pendiente",
+      "estado": "completada",
       "creada": "2026-10-10",
       "dependencias": [
         "2.5"
-      ]
+      ],
+      "actualizada": "2026-10-10 17:07",
+      "decisiones": [
+        "La advertencia sobre abrir index.html directo se rebaja a recomendación: sin getImageData ya no hay contaminación de canvas en file:// y la lámina tiene transparencia real; extensiones .png actualizadas a .webp en las 4 referencias"
+      ],
+      "archivos": [
+        "README.md"
+      ],
+      "verificacion": "grep: 0 referencias png activas (solo webp); lectura del fragmento actualizado",
+      "commit": "7fbda9b"
     },
     {
       "id": "3.1",
