@@ -200,3 +200,11 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 17:00] 2.4 — Limpiar la lámina juego-nacho.png offline
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 17:00] 2.4 — Limpiar la lámina juego-nacho.png offline
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Puente Python exacto del flood-fill de cutSprite (misma fórmula de fondo e islas <7.5%): verificado 53/53 hashes djb2 idénticos contra el JS original ejecutado en navegador (.qa-opt/comparar.html). Fondos de paisaje conservados byte a byte (drawBackground los pinta en crudo). 19 crops tienen franjas de solape (1-12 px, máx 2.6% del crop) con píxeles del frame vecino que hoy se dibujan por ambos frames: física y lógicamente irreproducibles en una lámina única; se eliminan (limpieza de artefactos de recorte, imperceptible en animación). Herramienta guardada en plans/herramientas/limpiar-lamina.py
+- **Archivos:** assets/juego-nacho.png, plans/herramientas/limpiar-lamina.py
+- **Verificación:** 53/53 hashes JS==Python; sin solapes no resueltos (20 pares analizados, 19 documentados); lámina RGBA 1536x1024; runtime actual sobre lámina limpia es no-op (fondo ya alpha 0)
+- **Commit:** f746e7b
+

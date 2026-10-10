@@ -2004,14 +2004,14 @@
 
   sheet.addEventListener("load", () => {
     prepareSprites();
-    airshipSheet.src = "assets/boss-globo-sprites.png";
-    helicopterSheets.v1.src = "assets/helicopter-player-v1.png";
-    helicopterSheets.v2.src = "assets/helicopter-player-v2.png";
+    airshipSheet.src = "assets/boss-globo-sprites.webp";
+    helicopterSheets.v1.src = "assets/helicopter-player-v1.webp";
+    helicopterSheets.v2.src = "assets/helicopter-player-v2.webp";
   });
   airshipSheet.addEventListener("load", () => {
     prepareAirshipSprites();
     airshipReady = true;
-    gondolaSheet.src = "assets/airship-gondola.png";
+    gondolaSheet.src = "assets/airship-gondola.webp";
     finishLoading();
   });
   gondolaSheet.addEventListener("load", () => {
@@ -2034,7 +2034,7 @@
   for (const helicopterSheet of Object.values(helicopterSheets)) {
     helicopterSheet.addEventListener("error", showSpriteLoadError);
   }
-  sheet.src = "assets/juego-nacho.png";
+  sheet.src = "assets/juego-nacho.webp";
 
   requestAnimationFrame(loop);
 })();
