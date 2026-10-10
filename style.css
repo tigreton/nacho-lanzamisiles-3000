@@ -1,4 +1,33 @@
-@import url("https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Inter:wght@500;700;900&display=swap");
+/* Fuentes auto-hospedadas (subsets latin de Google Fonts) */
+@font-face {
+  font-family: "Black Ops One";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/fonts/black-ops-one-latin.woff2") format("woff2");
+}
+/* Inter es variable: el mismo archivo cubre los tres pesos usados */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("assets/fonts/inter-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("assets/fonts/inter-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url("assets/fonts/inter-latin.woff2") format("woff2");
+}
 
 :root {
   color-scheme: dark;

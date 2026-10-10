@@ -208,3 +208,14 @@ si es una decisión tomada a mitad de camino).
 - **Verificación:** 53/53 hashes JS==Python; sin solapes no resueltos (20 pares analizados, 19 documentados); lámina RGBA 1536x1024; runtime actual sobre lámina limpia es no-op (fondo ya alpha 0)
 - **Commit:** f746e7b
 
+### [2026-10-10 17:04] 2.1 — Optimizar los 5 PNG (5,6 MB)
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - WebP q90 con method=6 (PIL): sin fallback PNG porque el juego ya exige JS 2020+ (encadenamiento opcional y ??) y todo navegador que lo ejecuta soporta WebP con alfa desde 2014-2020; los PNG originales viven en el historial (commit f746e7b y anteriores) y la lámina puede regenerarse con plans/herramientas/limpiar-lamina.py. Lámina convertida TRAS la limpieza 2.4 para que el detector de fondo del runtime no vea artefactos lossy (hasta que 2.5 lo elimine). Err medido q90: máx delta 60-109 y 5-13% de px >8 sobre imágenes que se dibujan reescaladas al 50-70% — imperceptible
+- **Archivos:** game.js, assets/*.webp (5), assets/*.png eliminados
+- **Verificación:** 5 webp cargan (19-12ms), menú visible (menu-screen screen--visible), análisis visual del menú: helicópteros limpios sin cajas ni ajedrezado, paisaje correcto, sin glitches; total 730 KB < objetivo 1500 KB
+- **Commit:** 3e4b6d0
+
+### [2026-10-10 17:04] 2.2 — Self-host de fuentes
+- **Estado:** pendiente → en_curso
+
