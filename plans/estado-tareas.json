@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 19:12",
+    "ultimaActualizacion": "2026-10-10 19:26",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -690,9 +690,21 @@
       "prioridad": "P2",
       "titulo": "Música chiptune + control de volumen",
       "detalle": "Loop de osciladores WebAudio coherente con los tone() actuales",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 19:12"
+      "actualizada": "2026-10-10 19:14",
+      "decisiones": [
+        "src/music.js: secuenciador lookahead (180 ms) sobre el AudioContext existente con su propio GainNode al 50%; loop de 16 corcheas a 130 BPM (Am-F-C-G: bajo square + arpegiо triangle) coherente con los tone() del juego; boton MUSICA ON/OFF en la cabecera junto al de SONIDO, preferencia en localStorage operacion-nacho-music; arranca con la primera partida (ensureMusic en startGame, tras el gesto que desbloquea el audio). Control de volumen interpretado como ON/OFF persistente al estilo del boton SONIDO existente"
+      ],
+      "archivos": [
+        "src/music.js",
+        "src/audio.js",
+        "src/state.js",
+        "src/main.js",
+        "index.html"
+      ],
+      "verificacion": "navegador: boton presente y conmuta MUSICA: ON/OFF, localStorage persiste off/on, partida arrancada sin errores de consola",
+      "commit": "e52a5dd"
     },
     {
       "id": "6.2",
@@ -700,8 +712,19 @@
       "prioridad": "P2",
       "titulo": "Deploy a GitHub Pages",
       "detalle": "El proyecto ya es 100% estático",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 19:26",
+      "decisiones": [
+        "Push de master y activacion de Pages desde master/ via gh API conmutando temporalmente a la cuenta tigreton (duena del repo; la activa jbellido-paymatico solo tiene READ) y volviendo a dejarla; og:image pasada a URL absoluta para los rastreadores y README con enlace directo. Nota: publicar sin LICENSE (0.5 sigue a decision del propietario) deja el codigo all-rights-reserved"
+      ],
+      "archivos": [
+        "index.html",
+        "README.md",
+        "(repo completo publicado)"
+      ],
+      "verificacion": "https://tigreton.github.io/nacho-lanzamisiles-3000/ responde 200; src/main.js, og.jpg, webp y fuentes online 200; primer build en ~40 s",
+      "commit": "6cd7d69"
     },
     {
       "id": "6.3",
@@ -709,8 +732,18 @@
       "prioridad": "P3",
       "titulo": "Soporte de gamepad",
       "detalle": "Stick mueve, A dispara, Start pausa",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 19:17",
+      "decisiones": [
+        "pollGamepad en input.js consultado cada fotograma desde el bucle; traduce el mando a las mismas teclas del teclado (stick->WASD con zona muerta 0.35, A->Espacio) y Start hace togglePause por flanco; sin mando no hace nada. La verificacion en navegador no fue posible (la pestana de prueba perdio el foco de la ventana: rAF congelado, document.hidden) — verificado con test unitario Node (.qa-tmp/test-gamepad.mjs, 9 afirmaciones) que importa los modulos reales"
+      ],
+      "archivos": [
+        "src/input.js",
+        "src/main.js"
+      ],
+      "verificacion": "test unitario Node: stick W+D simultaneo, centro suelta, zona muerta, A anade/quita Space, Start pausa una vez por flanco y reacciona al siguiente; 0 errores",
+      "commit": "4a754bc"
     },
     {
       "id": "6.4",
@@ -718,8 +751,18 @@
       "prioridad": "P3",
       "titulo": "Metadatos og para compartir",
       "detalle": "og:title y og:image con captura del juego",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 19:24",
+      "decisiones": [
+        "og:title/description/type/image 1200x630 + twitter:card summary_large_image; la imagen es una captura real del juego en combate recortada y reescalada con PIL (100 KB JPG); og:image con ruta relativa — al desplegar en Pages (6.2) conviene dejarla absoluta si se quiere validacion estricta de los rastreadores"
+      ],
+      "archivos": [
+        "index.html",
+        "assets/og.jpg"
+      ],
+      "verificacion": "curl og.jpg 200 image/jpeg; metas presentes en el HTML servido",
+      "commit": "d671df8"
     },
     {
       "id": "6.5",
@@ -727,8 +770,23 @@
       "prioridad": "P3",
       "titulo": "Pantalla de cómo jugar",
       "detalle": "Resumen de enemigos y powerups con sus sprites",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 19:23",
+      "decisiones": [
+        "Galeria dibujada en canvas sobre drawMenuBackdrop (render.js drawHowTo): filas de ENEMIGOS (heli, dron, caza, acorazado, dirigible) y BOTIN (moneda + 4 powerups) con etiquetas, mas controles y ritmo de jefes; en el DOM solo un boton CÓMO JUGAR en el menu y tarjeta inferior con VOLVER (Escape tambien vuelve). Tres replaces silenciosos de python obligaron a arreglos a mano (entrada ui.howto, rama setMode, export roto de render) — leccion anotada en el registro: verificar siempre que .replace() aplico"
+      ],
+      "archivos": [
+        "src/render.js",
+        "src/state.js",
+        "src/main.js",
+        "src/input.js",
+        "index.html",
+        "style.css",
+        "eslint.config.mjs"
+      ],
+      "verificacion": "navegador: abre y cierra (boton, VOLVER y Escape), 0 errores; muestreo de pixeles por zonas confirma titulo/enemigos/botin dibujados sobre fondo oscuro; eslint 0-0",
+      "commit": "0b0dc3d"
     }
   ]
 }

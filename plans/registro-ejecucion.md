@@ -428,3 +428,52 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 19:12] 6.1 — Música chiptune + control de volumen
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 19:14] 6.1 — Música chiptune + control de volumen
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - src/music.js: secuenciador lookahead (180 ms) sobre el AudioContext existente con su propio GainNode al 50%; loop de 16 corcheas a 130 BPM (Am-F-C-G: bajo square + arpegiо triangle) coherente con los tone() del juego; boton MUSICA ON/OFF en la cabecera junto al de SONIDO, preferencia en localStorage operacion-nacho-music; arranca con la primera partida (ensureMusic en startGame, tras el gesto que desbloquea el audio). Control de volumen interpretado como ON/OFF persistente al estilo del boton SONIDO existente
+- **Archivos:** src/music.js, src/audio.js, src/state.js, src/main.js, index.html
+- **Verificación:** navegador: boton presente y conmuta MUSICA: ON/OFF, localStorage persiste off/on, partida arrancada sin errores de consola
+- **Commit:** e52a5dd
+
+### [2026-10-10 19:14] 6.3 — Soporte de gamepad
+- **Estado:** pendiente → en_curso
+
+### [2026-10-10 19:17] 6.3 — Soporte de gamepad
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - pollGamepad en input.js consultado cada fotograma desde el bucle; traduce el mando a las mismas teclas del teclado (stick->WASD con zona muerta 0.35, A->Espacio) y Start hace togglePause por flanco; sin mando no hace nada. La verificacion en navegador no fue posible (la pestana de prueba perdio el foco de la ventana: rAF congelado, document.hidden) — verificado con test unitario Node (.qa-tmp/test-gamepad.mjs, 9 afirmaciones) que importa los modulos reales
+- **Archivos:** src/input.js, src/main.js
+- **Verificación:** test unitario Node: stick W+D simultaneo, centro suelta, zona muerta, A anade/quita Space, Start pausa una vez por flanco y reacciona al siguiente; 0 errores
+- **Commit:** 4a754bc
+
+### [2026-10-10 19:17] 6.5 — Pantalla de cómo jugar
+- **Estado:** pendiente → en_curso
+
+### [2026-10-10 19:23] 6.5 — Pantalla de cómo jugar
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Galeria dibujada en canvas sobre drawMenuBackdrop (render.js drawHowTo): filas de ENEMIGOS (heli, dron, caza, acorazado, dirigible) y BOTIN (moneda + 4 powerups) con etiquetas, mas controles y ritmo de jefes; en el DOM solo un boton CÓMO JUGAR en el menu y tarjeta inferior con VOLVER (Escape tambien vuelve). Tres replaces silenciosos de python obligaron a arreglos a mano (entrada ui.howto, rama setMode, export roto de render) — leccion anotada en el registro: verificar siempre que .replace() aplico
+- **Archivos:** src/render.js, src/state.js, src/main.js, src/input.js, index.html, style.css, eslint.config.mjs
+- **Verificación:** navegador: abre y cierra (boton, VOLVER y Escape), 0 errores; muestreo de pixeles por zonas confirma titulo/enemigos/botin dibujados sobre fondo oscuro; eslint 0-0
+- **Commit:** 0b0dc3d
+
+### [2026-10-10 19:23] 6.4 — Metadatos og para compartir
+- **Estado:** pendiente → en_curso
+
+### [2026-10-10 19:24] 6.4 — Metadatos og para compartir
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - og:title/description/type/image 1200x630 + twitter:card summary_large_image; la imagen es una captura real del juego en combate recortada y reescalada con PIL (100 KB JPG); og:image con ruta relativa — al desplegar en Pages (6.2) conviene dejarla absoluta si se quiere validacion estricta de los rastreadores
+- **Archivos:** index.html, assets/og.jpg
+- **Verificación:** curl og.jpg 200 image/jpeg; metas presentes en el HTML servido
+- **Commit:** d671df8
+
+### [2026-10-10 19:26] 6.2 — Deploy a GitHub Pages
+- **Estado:** pendiente → completada
+- **Decisiones:**
+  - Push de master y activacion de Pages desde master/ via gh API conmutando temporalmente a la cuenta tigreton (duena del repo; la activa jbellido-paymatico solo tiene READ) y volviendo a dejarla; og:image pasada a URL absoluta para los rastreadores y README con enlace directo. Nota: publicar sin LICENSE (0.5 sigue a decision del propietario) deja el codigo all-rights-reserved
+- **Archivos:** index.html, README.md, (repo completo publicado)
+- **Verificación:** https://tigreton.github.io/nacho-lanzamisiles-3000/ responde 200; src/main.js, og.jpg, webp y fuentes online 200; primer build en ~40 s
+- **Commit:** 6cd7d69
+
