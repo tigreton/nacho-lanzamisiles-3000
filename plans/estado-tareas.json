@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 13:54",
+    "ultimaActualizacion": "2026-10-10 17:00",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -283,8 +283,9 @@
       "prioridad": "P1",
       "titulo": "Optimizar los 5 PNG (5,6 MB)",
       "detalle": "pngquant o WebP; objetivo <1,5 MB totales",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 16:54"
     },
     {
       "id": "2.2",
@@ -313,8 +314,9 @@
       "prioridad": "P2",
       "titulo": "Limpiar la lámina juego-nacho.png offline",
       "detalle": "PNG con transparencia real, sin fondo ajedrezado",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 17:00"
     },
     {
       "id": "2.5",

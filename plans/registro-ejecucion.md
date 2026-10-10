@@ -194,3 +194,9 @@ si es una decisión tomada a mitad de camino).
 - **Estado:** sin cambio (completada)
 - **Nota:** Verificación e2e: pickups flotando y recogidos en partida real (5 monedas coleccionadas en oleada 3-4, collectPickup ejecutado sin errores). Equivalencia por construcción: los tipos rapid/shield/heart/star mapean a los mismos rects [35/120/205/377,942,...] que antes; el índice 3 eliminado no estaba referenciado por ningún tipo. Capturas en gui-test-screenshots/f1_*.png
 
+### [2026-10-10 16:54] 2.1 — Optimizar los 5 PNG (5,6 MB)
+- **Estado:** pendiente → en_curso
+
+### [2026-10-10 17:00] 2.4 — Limpiar la lámina juego-nacho.png offline
+- **Estado:** pendiente → en_curso
+
