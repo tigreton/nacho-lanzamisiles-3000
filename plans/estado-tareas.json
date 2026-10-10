@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 19:07",
+    "ultimaActualizacion": "2026-10-10 19:12",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -690,8 +690,9 @@
       "prioridad": "P2",
       "titulo": "Música chiptune + control de volumen",
       "detalle": "Loop de osciladores WebAudio coherente con los tone() actuales",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 19:12"
     },
     {
       "id": "6.2",

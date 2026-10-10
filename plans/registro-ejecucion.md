@@ -425,3 +425,6 @@ si es una decisión tomada a mitad de camino).
 - **Estado:** sin cambio (completada)
 - **Nota:** E2E final tras depurar imports: arranque + 16 ciclos de combate, 0 errores
 
+### [2026-10-10 19:12] 6.1 — Música chiptune + control de volumen
+- **Estado:** pendiente → en_curso
+

@@ -20,6 +20,7 @@ export const G = {
   resume: document.querySelector("#resume-button"),
   pauseButton: document.querySelector("#pause-button"),
   soundButton: document.querySelector("#sound-button"),
+  musicButton: document.querySelector("#music-button"),
   resultTitle: document.querySelector("#result-title"),
   resultCopy: document.querySelector("#result-copy"),
   menuRecord: document.querySelector("#menu-record"),

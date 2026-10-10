@@ -8,6 +8,7 @@ import { render } from "./render.js";
 import { prepareSprites, prepareAirshipSprites } from "./sprites.js";
 import { rand } from "./utils.js";
 import { unlockAudio, tone, toggleSound } from "./audio.js";
+import { ensureMusic, initMusicUI } from "./music.js";
 import { installInput } from "./input.js";
 import { getHighScore } from "./records.js";
 
@@ -120,6 +121,7 @@ function startGame() {
   setMode("playing");
   G.canvas.focus();
   unlockAudio();
+  ensureMusic();
   tone(360, 0.08, "square", 0.035);
   setTimeout(() => tone(540, 0.12, "square", 0.035), 90);
 }
@@ -199,6 +201,7 @@ G.ui.restart.addEventListener("click", startGame);
 G.ui.resume.addEventListener("click", togglePause);
 G.ui.pauseButton.addEventListener("click", togglePause);
 G.ui.soundButton.addEventListener("click", toggleSound);
+initMusicUI();
 G.ui.continueButton.addEventListener("click", continueFromShop);
 G.ui.helicopterContinue.addEventListener("click", continueFromHelicopter);
 for (const button of G.ui.difficultyButtons) {

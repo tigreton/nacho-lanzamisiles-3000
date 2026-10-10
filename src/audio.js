@@ -7,6 +7,10 @@ let audioContext = null;
 let soundEnabled = true;
 
 
+export function getAudioContext() {
+  return audioContext;
+}
+
 export function unlockAudio() {
   if (!audioContext) {
     const AudioCtor = window.AudioContext || window.webkitAudioContext;
