@@ -1,5 +1,5 @@
 // Particulas, explosiones y estrellas del fondo.
-import { W, MAX_PARTICLES } from "../config.js";
+import { W, H, MAX_PARTICLES } from "../config.js";
 import { G } from "../state.js";
 import { rand } from "../utils.js";
 

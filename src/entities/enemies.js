@@ -5,6 +5,7 @@ import { rand, clamp, lerp, overlaps, isBossEnemy } from "../utils.js";
 import { tone } from "../audio.js";
 import { createBurst, createExplosion } from "./particles.js";
 import { hurtPlayer } from "./player.js";
+import { detonateExplosiveBullet } from "./bullets.js";
 import { announceWave } from "../systems/waves.js";
 
 

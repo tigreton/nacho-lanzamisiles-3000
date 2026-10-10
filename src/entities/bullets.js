@@ -1,5 +1,5 @@
 // Proyectiles: trayectorias, rebotes del escudo y balas explosivas.
-import { W, SHIELD_RADIUS } from "../config.js";
+import { W, H, SHIELD_RADIUS } from "../config.js";
 import { G } from "../state.js";
 import { clamp, lerp, overlaps } from "../utils.js";
 import { tone } from "../audio.js";

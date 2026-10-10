@@ -3,6 +3,7 @@ import { SHOP_ITEMS, SHIELD_DURATION } from "../config.js";
 import { G, setMode } from "../state.js";
 import { tone } from "../audio.js";
 import { createBurst } from "../entities/particles.js";
+import { advanceWave } from "./waves.js";
 
 
 export function updateShopUI() {

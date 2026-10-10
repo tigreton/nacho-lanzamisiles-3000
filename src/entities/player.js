@@ -1,5 +1,5 @@
 // Jugador: movimiento, disparo y dano.
-import { W, H } from "../config.js";
+import { W, H, HELICOPTERS } from "../config.js";
 import { G } from "../state.js";
 import { clamp, lerp } from "../utils.js";
 import { tone } from "../audio.js";
