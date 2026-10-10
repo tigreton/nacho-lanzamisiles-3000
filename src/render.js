@@ -1,7 +1,7 @@
 // Renderizado: fondo, entidades, HUD y banners sobre el canvas logico.
-import { W, H, CROPS } from "./config.js";
+import { W, H, CROPS, SHIELD_RADIUS } from "./config.js";
 import { G } from "./state.js";
-import { rand, clamp } from "./utils.js";
+import { rand, clamp, isBossEnemy } from "./utils.js";
 import { bakedGlow } from "./sprites.js";
 
 

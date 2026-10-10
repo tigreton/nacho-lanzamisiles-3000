@@ -6,7 +6,7 @@ import {
 import { G, setMode, selectDifficulty, selectHelicopter } from "./state.js";
 import { render } from "src/render.js";
 import { prepareSprites, prepareAirshipSprites, bakedGlow } from "src/sprites.js";
-import { rand, clamp, lerp, overlaps } from "./utils.js";
+import { rand, clamp, lerp, overlaps, isBossEnemy } from "./utils.js";
 import { unlockAudio, tone, toggleSound } from "./audio.js";
 import { getHighScore, saveHighScore } from "./records.js";
 
@@ -268,9 +268,6 @@ function announceWave(text) {
   setTimeout(() => tone(440, 0.16, "square", 0.03), 110);
 }
 
-function isBossEnemy(enemy) {
-  return enemy.type === "boss" || enemy.type === "airship";
-}
 
 function advanceWave() {
   G.state.wave += 1;

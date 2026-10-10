@@ -18,3 +18,6 @@ export function overlaps(a, b, inset = 0.25) {
   return Math.abs(a.x - b.x) * 2 < aw + bw && Math.abs(a.y - b.y) * 2 < ah + bh;
 }
 
+export function isBossEnemy(enemy) {
+  return enemy.type === "boss" || enemy.type === "airship";
+}
