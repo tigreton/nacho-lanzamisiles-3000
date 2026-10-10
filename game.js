@@ -1860,8 +1860,12 @@
 
   window.addEventListener("keydown", (event) => {
     if (event.code === "Space") {
-      event.preventDefault();
-      event.stopImmediatePropagation();
+      if (mode === "playing") {
+        // Solo en partida se aísla Espacio: fuera de ella los botones del
+        // menú, la tienda y el fin de partida deben responder a la tecla.
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
       keys.add("Space");
       return;
     }

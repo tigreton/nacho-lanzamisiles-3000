@@ -424,9 +424,17 @@
       "prioridad": "P1",
       "titulo": "Autopausa al perder foco",
       "detalle": "visibilitychange + blur → togglePause() si mode === 'playing'",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 18:22"
+      "actualizada": "2026-10-10 18:22",
+      "decisiones": [
+        "Un solo handler autopause para blur y visibilitychange (el guarda mode==='playing' evita el doble toggle: tras la primera pausa el modo ya no es playing); se conserva la limpieza de teclas y puntero del handler original"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "e2e: blur sintetico durante partida pausa el juego (verificacion de fase)",
+      "commit": "7765a7c"
     },
     {
       "id": "3.3",
@@ -434,8 +442,9 @@
       "prioridad": "P1",
       "titulo": "Bloquear Espacio solo en partida",
       "detalle": "game.js:2265-2271; los botones de menú/tienda deben responder a Espacio",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 18:22"
     },
     {
       "id": "3.4",

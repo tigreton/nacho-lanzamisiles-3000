@@ -271,3 +271,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 18:22] 3.2 — Autopausa al perder foco
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 18:22] 3.2 — Autopausa al perder foco
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Un solo handler autopause para blur y visibilitychange (el guarda mode==='playing' evita el doble toggle: tras la primera pausa el modo ya no es playing); se conserva la limpieza de teclas y puntero del handler original
+- **Archivos:** game.js
+- **Verificación:** e2e: blur sintetico durante partida pausa el juego (verificacion de fase)
+- **Commit:** 7765a7c
+
+### [2026-10-10 18:22] 3.3 — Bloquear Espacio solo en partida
+- **Estado:** pendiente → en_curso
+
