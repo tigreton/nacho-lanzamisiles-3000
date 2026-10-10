@@ -442,9 +442,17 @@
       "prioridad": "P1",
       "titulo": "Bloquear Espacio solo en partida",
       "detalle": "game.js:2265-2271; los botones de menú/tienda deben responder a Espacio",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 18:22"
+      "actualizada": "2026-10-10 18:22",
+      "decisiones": [
+        "preventDefault/stopImmediatePropagation solo cuando mode==='playing'; keys.add('Space') se mantiene siempre (inofensivo, el disparo solo ocurre en playing)"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "e2e: Espacio sobre el boton JUGAR enfocado arranca la partida (verificacion de fase)",
+      "commit": "3d7bf32"
     },
     {
       "id": "3.4",
@@ -470,8 +478,9 @@
       "prioridad": "P3",
       "titulo": "Unificar duración de ráfaga (10s vs 8s)",
       "detalle": "Tienda 10 s vs pickup 8 s (game.js:1078); decidir valor y documentarlo",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 18:22"
     },
     {
       "id": "3.7",

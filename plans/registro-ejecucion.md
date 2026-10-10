@@ -282,3 +282,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 18:22] 3.3 — Bloquear Espacio solo en partida
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 18:22] 3.3 — Bloquear Espacio solo en partida
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - preventDefault/stopImmediatePropagation solo cuando mode==='playing'; keys.add('Space') se mantiene siempre (inofensivo, el disparo solo ocurre en playing)
+- **Archivos:** game.js
+- **Verificación:** e2e: Espacio sobre el boton JUGAR enfocado arranca la partida (verificacion de fase)
+- **Commit:** 3d7bf32
+
+### [2026-10-10 18:22] 3.6 — Unificar duración de ráfaga (10s vs 8s)
+- **Estado:** pendiente → en_curso
+

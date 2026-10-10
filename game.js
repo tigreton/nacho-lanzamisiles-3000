@@ -988,7 +988,8 @@
       player.shield = Math.max(player.shield, SHIELD_DURATION);
       tone(520, 0.2, "sine", 0.028, 260);
     } else if (pickup.type === "rapid") {
-      player.rapid = Math.max(player.rapid, 8);
+      // Misma duración que la ráfaga de la tienda (10 s): un solo valor documentado.
+      player.rapid = Math.max(player.rapid, 10);
       tone(300, 0.2, "square", 0.025, 450);
     } else {
       state.score += 1500;
