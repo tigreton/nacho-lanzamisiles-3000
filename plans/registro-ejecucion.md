@@ -44,3 +44,10 @@ si es una decisión tomada a mitad de camino).
 - **Archivos:** .gitignore
 - **Verificación:** git check-ignore -v --no-index confirma que .DS_Store, Thumbs.db y gui-test-screenshots/ casan con las reglas; el juego no se toca
 
+### [2026-10-10 13:15] 0.1 — Crear .gitignore
+- **Estado:** sin cambio (completada)
+- **Nota:** Commit: dde4243
+
+### [2026-10-10 13:15] 0.2 — Quitar .DS_Store del índice de git
+- **Estado:** pendiente → en_curso
+

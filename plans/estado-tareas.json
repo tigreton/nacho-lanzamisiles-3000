@@ -31,7 +31,10 @@
       "archivos": [
         ".gitignore"
       ],
-      "verificacion": "git check-ignore -v --no-index confirma que .DS_Store, Thumbs.db y gui-test-screenshots/ casan con las reglas; el juego no se toca"
+      "verificacion": "git check-ignore -v --no-index confirma que .DS_Store, Thumbs.db y gui-test-screenshots/ casan con las reglas; el juego no se toca",
+      "notas": [
+        "Commit: dde4243"
+      ]
     },
     {
       "id": "0.2",
@@ -39,11 +42,12 @@
       "prioridad": "P1",
       "titulo": "Quitar .DS_Store del índice de git",
       "detalle": "git rm --cached .DS_Store",
-      "estado": "pendiente",
+      "estado": "en_curso",
       "creada": "2026-10-10",
       "dependencias": [
         "0.1"
-      ]
+      ],
+      "actualizada": "2026-10-10 13:15"
     },
     {
       "id": "0.3",
