@@ -483,3 +483,11 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 19:29] 0.5 — Añadir LICENSE
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 19:29] 0.5 — Añadir LICENSE
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Decision del propietario tras publicar en GitHub Pages: MIT; titular tigreton, ano 2026; campo license: MIT anadido a package.json y seccion de licencia en el README
+- **Archivos:** LICENSE, package.json, README.md
+- **Verificación:** texto MIT estandar completo; git status limpio tras commit y push
+- **Commit:** aadac79
+

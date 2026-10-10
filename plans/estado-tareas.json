@@ -101,9 +101,19 @@
       "prioridad": "P3",
       "titulo": "Añadir LICENSE",
       "detalle": "Solo si se va a publicar el código",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 19:29"
+      "actualizada": "2026-10-10 19:29",
+      "decisiones": [
+        "Decision del propietario tras publicar en GitHub Pages: MIT; titular tigreton, ano 2026; campo license: MIT anadido a package.json y seccion de licencia en el README"
+      ],
+      "archivos": [
+        "LICENSE",
+        "package.json",
+        "README.md"
+      ],
+      "verificacion": "texto MIT estandar completo; git status limpio tras commit y push",
+      "commit": "aadac79"
     },
     {
       "id": "0.6",
