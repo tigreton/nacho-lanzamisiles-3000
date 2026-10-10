@@ -1,10 +1,11 @@
 # Operación Nacho
 
 Juego arcade sencillo, hecho con HTML, CSS y JavaScript sin dependencias. Usa la
-lámina `assets/juego-nacho.png` como atlas de sprites.
+lámina `assets/juego-nacho.webp` como atlas de sprites (con transparencia real:
+el fondo se eliminó una sola vez, offline).
 
 El boss del globo aerostático y sus cuatro miniglobos usan la lámina transparente
-independiente `assets/boss-globo-sprites.png`.
+independiente `assets/boss-globo-sprites.webp`.
 
 ## Ejecutarlo
 
@@ -18,9 +19,9 @@ python3 -m http.server 8080
 
 Después visita `http://localhost:8080`.
 
-El servidor permite que el juego quite limpiamente el fondo ajedrezado de la
-lámina. Si abres `index.html` directamente, el juego seguirá funcionando, pero
-algunos navegadores pueden mostrar ese fondo dentro de los sprites.
+También puedes abrir `index.html` directamente con doble clic: los sprites ya
+tienen transparencia real y no dependen de ningún procesado en el navegador.
+El servidor local sigue siendo la opción recomendada.
 
 ## Controles
 
@@ -50,14 +51,14 @@ antes de explotar.
 
 Al destruir el dirigible, su góndola inferior se separa y persigue al
 helicóptero durante 10 segundos antes de detonar. La góndola usa un sprite
-separado extraído del atlas del dirigible (`assets/airship-gondola.png`).
+separado extraído del atlas del dirigible (`assets/airship-gondola.webp`).
 
 ## Variantes de helicóptero
 
 Se han guardado dos diseños nuevos para elegir como helicóptero del jugador:
 
-- `assets/helicopter-player-v1.png`: blindaje oliva, cabina azul y pods de misiles.
-- `assets/helicopter-player-v2.png`: versión sigilosa de grafito con cañón frontal.
+- `assets/helicopter-player-v1.webp`: blindaje oliva, cabina azul y pods de misiles.
+- `assets/helicopter-player-v2.webp`: versión sigilosa de grafito con cañón frontal.
 
 Las habilidades son distintas: `BLINDADO` empieza con 2 vidas extra y reduce
 un 25% el daño recibido; `SIGILO` se mueve un 22% más rápido, dispara un 28%
