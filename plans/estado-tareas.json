@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 18:22",
+    "ultimaActualizacion": "2026-10-10 18:23",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -478,9 +478,17 @@
       "prioridad": "P3",
       "titulo": "Unificar duración de ráfaga (10s vs 8s)",
       "detalle": "Tienda 10 s vs pickup 8 s (game.js:1078); decidir valor y documentarlo",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 18:22"
+      "actualizada": "2026-10-10 18:23",
+      "decisiones": [
+        "10 s (lo que la tienda ya anunciaba en su boton): el pickup de rapid se sube de 8 a 10 y el README lo documenta; un solo valor evita la confusion"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "grep: un unico valor 10 en rapid de pickup y tienda; node --check OK",
+      "commit": "dd7c8c3"
     },
     {
       "id": "3.7",
@@ -488,8 +496,9 @@
       "prioridad": "P3",
       "titulo": "Renombrar enemyFireMultiplier",
       "detalle": "A enemyFireIntervalMultiplier (>1 = dispara menos) en las 3 dificultades y sus usos",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 18:23"
     },
     {
       "id": "4.1",

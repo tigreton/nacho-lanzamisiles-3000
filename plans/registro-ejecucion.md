@@ -293,3 +293,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 18:22] 3.6 — Unificar duración de ráfaga (10s vs 8s)
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 18:23] 3.6 — Unificar duración de ráfaga (10s vs 8s)
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - 10 s (lo que la tienda ya anunciaba en su boton): el pickup de rapid se sube de 8 a 10 y el README lo documenta; un solo valor evita la confusion
+- **Archivos:** game.js
+- **Verificación:** grep: un unico valor 10 en rapid de pickup y tienda; node --check OK
+- **Commit:** dd7c8c3
+
+### [2026-10-10 18:23] 3.7 — Renombrar enemyFireMultiplier
+- **Estado:** pendiente → en_curso
+

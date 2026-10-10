@@ -39,7 +39,7 @@
       playerHp: 9,
       enemyHpMultiplier: 0.8,
       enemySpeedMultiplier: 0.8,
-      enemyFireMultiplier: 1.35,
+      enemyFireIntervalMultiplier: 1.35,
       enemyBulletHitboxInset: 0.48,
       spawnIntervalMultiplier: 1.35,
       waveDuration: 21,
@@ -51,7 +51,7 @@
       playerHp: 7,
       enemyHpMultiplier: 1,
       enemySpeedMultiplier: 1,
-      enemyFireMultiplier: 1,
+      enemyFireIntervalMultiplier: 1,
       enemyBulletHitboxInset: 0.2,
       spawnIntervalMultiplier: 1,
       waveDuration: 18,
@@ -63,7 +63,7 @@
       playerHp: 5,
       enemyHpMultiplier: 1.28,
       enemySpeedMultiplier: 1.18,
-      enemyFireMultiplier: 0.72,
+      enemyFireIntervalMultiplier: 0.72,
       enemyBulletHitboxInset: 0.12,
       spawnIntervalMultiplier: 0.72,
       waveDuration: 16,
@@ -626,7 +626,7 @@
       y: rand(92, H - 88),
       age: 0,
       phase: rand(0, Math.PI * 2),
-      fireTimer: rand(0.7, 2.2) * difficulty.enemyFireMultiplier,
+      fireTimer: rand(0.7, 2.2) * difficulty.enemyFireIntervalMultiplier,
       dead: false,
       flash: 0,
     };
@@ -820,7 +820,7 @@
     if (enemy.type === "airship") {
       spawnBalloon(enemy, -30);
       spawnBalloon(enemy, 30);
-      enemy.fireTimer = rand(1.7, 2.45) * difficulty.enemyFireMultiplier;
+      enemy.fireTimer = rand(1.7, 2.45) * difficulty.enemyFireIntervalMultiplier;
       tone(280, 0.16, "triangle", 0.022, -80);
       return;
     }
@@ -839,7 +839,7 @@
           age: 0,
         });
       });
-      enemy.fireTimer = rand(1.1, 1.55) * difficulty.enemyFireMultiplier;
+      enemy.fireTimer = rand(1.1, 1.55) * difficulty.enemyFireIntervalMultiplier;
       tone(125, 0.12, "sawtooth", 0.018, -30);
       return;
     }
@@ -859,7 +859,7 @@
       age: 0,
     });
     enemy.fireTimer =
-      rand(1.5, 2.8) * difficulty.enemyFireMultiplier * Math.max(0.55, 1 - state.wave * 0.025);
+      rand(1.5, 2.8) * difficulty.enemyFireIntervalMultiplier * Math.max(0.55, 1 - state.wave * 0.025);
   }
 
   function createBurst(x, y, color, count = 8, speed = 150) {
