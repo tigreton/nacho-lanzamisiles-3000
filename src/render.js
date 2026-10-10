@@ -1,6 +1,6 @@
 // Renderizado: fondo, entidades, HUD y banners sobre el canvas logico.
-import { W, H, CROPS, SHIELD_RADIUS } from "./config.js";
-import { G } from "./state.js";
+import { W, H, CROPS, SHIELD_RADIUS, COMBO_TIMEOUT } from "./config.js";
+import { G, comboMultiplier } from "./state.js";
 import { rand, clamp, isBossEnemy } from "./utils.js";
 import { bakedGlow } from "./sprites.js";
 
@@ -148,6 +148,24 @@ function drawHud() {
   G.ctx.fillStyle = "#ffffff";
   G.ctx.font = '400 26px "Black Ops One", Impact, sans-serif';
   G.ctx.fillText(String(G.state.wave).padStart(2, "0"), W / 2, 57);
+
+  // Combo activo: multiplicador vigente y barra del tiempo que queda
+  // antes de que la racha caduque.
+  if (G.state.combo.kills > 0) {
+    const comboColor = comboMultiplier() > 1 ? "#ffb02e" : "rgba(255,255,255,0.66)";
+    const restante = clamp(G.state.combo.timer / COMBO_TIMEOUT, 0, 1);
+    G.ctx.fillStyle = comboColor;
+    G.ctx.font = '400 15px "Black Ops One", Impact, sans-serif';
+    G.ctx.fillText(`COMBO x${comboMultiplier()}`, W / 2, 97);
+    roundedRect(W / 2 - 34, 105, 68, 6, 3);
+    G.ctx.fillStyle = "rgba(255,255,255,0.22)";
+    G.ctx.fill();
+    if (restante > 0) {
+      roundedRect(W / 2 - 34 + 68 * (1 - restante), 105, 68 * restante, 6, 3);
+      G.ctx.fillStyle = comboColor;
+      G.ctx.fill();
+    }
+  }
 
   roundedRect(W - 300, 17, 282, 72, 12);
   G.ctx.fillStyle = "rgba(4, 13, 18, 0.77)";
@@ -471,6 +489,16 @@ function drawEffects() {
     G.ctx.fill();
   }
   G.ctx.globalAlpha = 1;
+
+  G.ctx.textAlign = "center";
+  G.ctx.textBaseline = "middle";
+  G.ctx.font = '900 13px Inter, sans-serif';
+  for (const floater of G.floaters) {
+    G.ctx.globalAlpha = clamp(1 - floater.age / floater.duration, 0, 1);
+    G.ctx.fillStyle = floater.color;
+    G.ctx.fillText(floater.text, floater.x, floater.y);
+  }
+  G.ctx.globalAlpha = 1;
 }
 
 
@@ -494,6 +522,24 @@ function drawBanner() {
   G.ctx.fillStyle = "#d8f23b";
   G.ctx.font = '400 37px "Black Ops One", Impact, sans-serif';
   G.ctx.fillText(G.state.bannerText, W / 2, y + 2);
+  G.ctx.restore();
+}
+
+
+// Avisos cortos (rachas, logros) bajo el HUD central, sin tapar el banner.
+function drawToast() {
+  const toast = G.state.toast;
+  if (!toast || toast.time <= 0) return;
+  const alpha = Math.min(1, (toast.duration - toast.time) * 6, toast.time * 2.5);
+  G.ctx.save();
+  G.ctx.globalAlpha = alpha;
+  G.ctx.textAlign = "center";
+  G.ctx.textBaseline = "middle";
+  G.ctx.fillStyle = toast.color;
+  G.ctx.font = '400 23px "Black Ops One", Impact, sans-serif';
+  G.ctx.shadowColor = "rgba(0,0,0,0.65)";
+  G.ctx.shadowBlur = 9;
+  G.ctx.fillText(toast.text, W / 2, 128);
   G.ctx.restore();
 }
 
@@ -552,7 +598,8 @@ function drawHowTo() {
   G.ctx.fillText("WASD / flechas mover · ESPACIO / J disparar · P / ESC pausa · ratón y táctil arrastrando", W / 2, 572);
   G.ctx.fillText("Mando: stick mueve · A dispara · Start pausa", W / 2, 598);
   G.ctx.fillStyle = "#d8f23b";
-  G.ctx.fillText("Sobrevive a las oleadas · Jefes cada 4 · Dirigible cada 8", W / 2, 626);
+  G.ctx.fillText("Sobrevive a las oleadas · Jefes cada 4 · Dirigible cada 8", W / 2, 622);
+  G.ctx.fillText("Bajas seguidas = multiplicador · Rozar proyectiles = puntos de esquiva", W / 2, 648);
 }
 
 export function render() {
@@ -580,6 +627,7 @@ export function render() {
   drawEffects();
   drawHud();
   drawBanner();
+  drawToast();
   G.ctx.restore();
 
   if (G.state.flash > 0) {

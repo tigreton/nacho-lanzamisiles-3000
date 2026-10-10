@@ -58,6 +58,7 @@ export function openShop() {
   G.balloonBaskets = [];
   G.airshipGondolas = [];
   G.pickups = [];
+  G.floaters = [];
   G.state.bossClearTimer = 0;
   updateShopUI();
   setMode("shop");

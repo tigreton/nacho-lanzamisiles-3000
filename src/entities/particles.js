@@ -33,9 +33,20 @@ export function createExplosion(x, y, size = 110) {
 }
 
 
+export function createFloater(x, y, text, color = "#ffffff") {
+  G.floaters.push({ x, y, text, color, age: 0, duration: 0.9 });
+}
+
+
 export function updateEffects(dt) {
   for (const effect of G.effects) effect.age += dt;
   G.effects = G.effects.filter((effect) => effect.age < effect.duration);
+
+  for (const floater of G.floaters) {
+    floater.age += dt;
+    floater.y -= 46 * dt;
+  }
+  G.floaters = G.floaters.filter((floater) => floater.age < floater.duration);
 
   for (const particle of G.particles) {
     particle.life -= dt;

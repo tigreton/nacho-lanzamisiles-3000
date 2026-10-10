@@ -1,12 +1,13 @@
 // Enemigos y jefes: aparicion, disparo, muerte y desprendimientos.
-import { W, H } from "../config.js";
-import { G } from "../state.js";
+import { W, H, COMBO_TIMEOUT } from "../config.js";
+import { G, showToast, comboMultiplier } from "../state.js";
 import { rand, clamp, lerp, overlaps, isBossEnemy } from "../utils.js";
 import { tone } from "../audio.js";
 import { createBurst, createExplosion } from "./particles.js";
 import { hurtPlayer } from "./player.js";
 import { detonateExplosiveBullet } from "./bullets.js";
 import { announceWave } from "../systems/waves.js";
+import { unlock, notifyKill } from "../systems/achievements.js";
 
 
 export function spawnEnemy(forcedType) {
@@ -300,9 +301,21 @@ export function killEnemy(enemy) {
   enemy.dead = true;
   if (enemy.type === "balloon") releaseBalloonBasket(enemy);
   if (enemy.type === "airship") releaseAirshipGondola(enemy);
-  G.state.score += Math.round(enemy.score * G.state.difficulty.scoreMultiplier);
+
+  // Cada baja seguida alimenta el combo: sube el multiplicador de puntos y
+  // se anuncia la racha cada 5 derribos.
+  G.state.combo.kills += 1;
+  G.state.combo.timer = COMBO_TIMEOUT;
+  G.state.combo.best = Math.max(G.state.combo.best, G.state.combo.kills);
+  if (G.state.combo.kills >= 15) unlock("imparable");
+  if (G.state.combo.kills % 5 === 0) {
+    showToast(`¡RACHA x${G.state.combo.kills}!`, "#ffb02e", 1.2);
+    tone(420 + G.state.combo.kills * 12, 0.1, "square", 0.03, 150);
+  }
+  G.state.score += Math.round(enemy.score * G.state.difficulty.scoreMultiplier * comboMultiplier());
   createExplosion(enemy.x, enemy.y, isBossEnemy(enemy) ? (enemy.type === "airship" ? 210 : 240) : enemy.w * 0.88);
   dropReward(enemy);
+  notifyKill(enemy);
 
   if (isBossEnemy(enemy)) {
     G.state.bossActive = false;

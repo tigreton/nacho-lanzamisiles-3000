@@ -72,6 +72,29 @@ export const SHOP_ITEMS = {
 };
 
 
+// Combo: cada 4 bajas seguidas el multiplicador de puntos sube 1 (hasta x8).
+// Se pierde al recibir daño o si pasan COMBO_TIMEOUT segundos sin matar.
+export const COMBO_TIMEOUT = 3;
+export const COMBO_KILLS_PER_STEP = 4;
+export const MAX_COMBO_MULTIPLIER = 8;
+
+// Esquiva de milagro: puntos extra si un proyectil enemigo pasa a menos de
+// NEAR_MISS_RADIUS píxeles del helicóptero sin llegar a tocarlo.
+export const NEAR_MISS_RADIUS = 90;
+export const NEAR_MISS_POINTS = 30;
+
+// Logros: se desbloquean una sola vez y se guardan junto a los récords.
+export const ACHIEVEMENTS = {
+  "primer-jefe": { label: "MATAJEFES", description: "Derriba tu primer acorazado" },
+  cazadirigibles: { label: "CAZADIRIGIBLES", description: "Derriba el dirigible de globos" },
+  intocable: { label: "INTOCABLE", description: "Completa una oleada sin recibir daño" },
+  "cien-bajas": { label: "CENTENAR", description: "Acumula 100 bajas en total" },
+  imparable: { label: "IMPARABLE", description: "Encadena 15 bajas seguidas" },
+  esquivador: { label: "AL LÍMITE", description: "Acumula 25 esquivas de milagro" },
+  veterano: { label: "VETERANO", description: "Alcanza la oleada 10" },
+};
+
+
 export const SHIELD_DURATION = 15;
 export const SHIELD_RADIUS = 86;
 

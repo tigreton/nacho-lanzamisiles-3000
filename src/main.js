@@ -108,6 +108,11 @@ function resetGame() {
     flash: 0,
     background: 0,
     highScore: getHighScore(G.selectedDifficulty),
+    combo: { kills: 0, timer: 0, best: 0 },
+    nearMisses: 0,
+    waveDamageTaken: false,
+    toast: null,
+    newAchievements: [],
     difficulty,
   };
 
@@ -120,6 +125,7 @@ function resetGame() {
   G.pickups = [];
   G.effects = [];
   G.particles = [];
+  G.floaters = [];
   G.stars = Array.from({ length: 46 }, () => ({
     x: rand(0, W),
     y: rand(0, H),

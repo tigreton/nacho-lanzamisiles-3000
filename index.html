@@ -104,7 +104,7 @@
                 <span>▶</span> JUGAR
               </button>
               <button id="howto-button" class="secondary-button" type="button">CÓMO JUGAR</button>
-              <p id="menu-record" class="menu-record" aria-live="polite"></p>
+              <div id="menu-record" class="menu-record" aria-live="polite"></div>
               <div class="controls-card">
                 <span><kbd>WASD</kbd> o <kbd>← ↑ ↓ →</kbd> mover</span>
                 <span><kbd>ESPACIO</kbd> o <kbd>J</kbd> disparar</span>
@@ -188,7 +188,9 @@
               <span class="eyebrow">MANUAL DE VUELO</span>
               <p class="howto-copy">
                 Derriba enemigos, recoge monedas y mejora tu helicóptero en la
-                armería de cada oleada. Los jefes llegan cada 4 oleadas. Con
+                armería de cada oleada. Los jefes llegan cada 4 oleadas.
+                Encadena bajas para multiplicar los puntos y roza los
+                proyectiles sin tocarlos para ganar esquivas de milagro. Con
                 mando: cruceta o stick para elegir, A para pulsar y B para
                 volver.
               </p>
@@ -201,6 +203,8 @@
               <span class="eyebrow">INFORME DE VUELO</span>
               <h2 id="result-title">MISIÓN TERMINADA</h2>
               <p id="result-copy">Puntuación: 0</p>
+              <ol id="result-scores" class="result-scores" aria-label="Mejores puntuaciones de la dificultad"></ol>
+              <p id="result-achievements" class="result-achievements"></p>
               <button id="restart-button" class="primary-button" type="button">VOLVER A JUGAR</button>
             </div>
           </div>

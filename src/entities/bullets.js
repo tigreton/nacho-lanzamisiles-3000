@@ -1,11 +1,16 @@
 // Proyectiles: trayectorias, rebotes del escudo y balas explosivas.
-import { W, H, SHIELD_RADIUS } from "../config.js";
+import { W, H, SHIELD_RADIUS, NEAR_MISS_RADIUS, NEAR_MISS_POINTS } from "../config.js";
 import { G } from "../state.js";
 import { clamp, overlaps } from "../utils.js";
 import { tone } from "../audio.js";
-import { createBurst, createExplosion } from "./particles.js";
+import { createBurst, createExplosion, createFloater } from "./particles.js";
 import { killEnemy } from "./enemies.js";
 import { hurtPlayer } from "./player.js";
+import { notifyNearMiss } from "../systems/achievements.js";
+
+// El tono de esquiva se limita en densidad para no ametrallar el oído
+// cuando varios proyectiles rozan en el mismo fotograma.
+let ultimoTonoEsquiva = -1;
 
 
 export function detonateExplosiveBullet(bullet, directHit) {
@@ -67,6 +72,28 @@ export function updateProjectiles(dt) {
       0,
       0.8,
     );
+    // Esquiva de milagro: el proyectil roza al helicóptero sin tocarlo.
+    // Se premia una vez por proyectil, solo si no lo está impactando y el
+    // jugador no está en el período de invulnerabilidad tras un golpe.
+    if (
+      !bullet.dead &&
+      !bullet.reflected &&
+      !bullet.grazed &&
+      G.player.invulnerable <= 0 &&
+      Math.hypot(bullet.x - G.player.x, bullet.y - G.player.y) <= NEAR_MISS_RADIUS &&
+      !overlaps(G.player, bullet, bulletHitbox)
+    ) {
+      bullet.grazed = true;
+      const puntos = Math.round(NEAR_MISS_POINTS * G.state.difficulty.scoreMultiplier);
+      G.state.score += puntos;
+      G.state.nearMisses += 1;
+      createFloater(bullet.x, bullet.y - 20, `¡ESQUIVA +${puntos}!`, "#9ff3ff");
+      if (G.state.elapsed - ultimoTonoEsquiva > 0.12) {
+        ultimoTonoEsquiva = G.state.elapsed;
+        tone(940, 0.07, "sine", 0.022, 240);
+      }
+      notifyNearMiss();
+    }
     if (!bullet.dead && !bullet.reflected && overlaps(G.player, bullet, bulletHitbox)) {
       bullet.dead = true;
       hurtPlayer(bullet.damage);

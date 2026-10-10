@@ -61,6 +61,10 @@ export function hurtPlayer(damage) {
   const actualDamage = damage * (1 - G.player.damageReduction);
   G.player.hp -= actualDamage;
   G.player.invulnerable = 1.05;
+  // Recibir un daño rompe el combo y la oleada deja de ser "intocable".
+  G.state.combo.kills = 0;
+  G.state.combo.timer = 0;
+  G.state.waveDamageTaken = true;
   G.state.shake = 12;
   G.state.flash = 0.16;
   createExplosion(G.player.x + 18, G.player.y, 72);

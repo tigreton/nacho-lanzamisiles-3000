@@ -1,7 +1,7 @@
 // Estado compartido del juego: las mutables viven en la bolsa G para que
 // los módulos puedan leerlas y reasignarlas sin ciclos de importación.
-import { W, H, DIFFICULTIES, HELICOPTERS } from "./config.js";
-import { getHighScore } from "./records.js";
+import { W, H, DIFFICULTIES, HELICOPTERS, ACHIEVEMENTS, COMBO_KILLS_PER_STEP, MAX_COMBO_MULTIPLIER } from "./config.js";
+import { getHighScores, getUnlockedAchievements } from "./records.js";
 
 const canvas = document.querySelector("#game-canvas");
 
@@ -26,6 +26,8 @@ export const G = {
   musicButton: document.querySelector("#music-button"),
   resultTitle: document.querySelector("#result-title"),
   resultCopy: document.querySelector("#result-copy"),
+  resultScores: document.querySelector("#result-scores"),
+  resultAchievements: document.querySelector("#result-achievements"),
   menuRecord: document.querySelector("#menu-record"),
   difficultyButtons: [...document.querySelectorAll(".difficulty-option")],
   helicopterButtons: [...document.querySelectorAll("#menu-screen .helicopter-option")],
@@ -60,6 +62,7 @@ export const G = {
   pickups: [],
   effects: [],
   particles: [],
+  floaters: [],
   stars: [],
 };
 
@@ -86,10 +89,16 @@ export function setMode(nextMode) {
 
 function updateMenuRecord() {
   const etiqueta = DIFFICULTIES[G.selectedDifficulty].label;
-  const record = getHighScore(G.selectedDifficulty);
-  G.ui.menuRecord.textContent = record
-    ? `RÉCORD ${etiqueta}: ${record.toLocaleString("es-ES")}`
-    : `AÚN SIN RÉCORD EN ${etiqueta}`;
+  const top = getHighScores(G.selectedDifficulty);
+  const filas = top.length
+    ? `<ol class="menu-top">${top
+        .map((puntos, i) => `<li><span>${i + 1}</span><strong>${puntos.toLocaleString("es-ES")}</strong></li>`)
+        .join("")}</ol>`
+    : `<p class="menu-top-empty">AÚN SIN RÉCORD EN ${etiqueta}</p>`;
+  const totalLogros = Object.keys(ACHIEVEMENTS).length;
+  const logros = getUnlockedAchievements().size;
+  G.ui.menuRecord.innerHTML =
+    `<p class="menu-record-title">TOP 5 · ${etiqueta}</p>${filas}<p class="menu-logros">★ LOGROS ${logros}/${totalLogros}</p>`;
 }
 
 export function selectDifficulty(id) {
@@ -111,5 +120,19 @@ export function selectHelicopter(id) {
     button.classList.toggle("is-selected", selected);
     button.setAttribute("aria-pressed", String(selected));
   }
+}
+
+
+// Aviso corto sobre el HUD (rachas, logros): comparte hueco para no tapar
+// el banner central de oleadas y jefes.
+export function showToast(text, color, duration = 1.4) {
+  if (!G.state) return;
+  G.state.toast = { text, color, duration, time: duration };
+}
+
+
+export function comboMultiplier() {
+  const kills = G.state?.combo?.kills || 0;
+  return Math.min(MAX_COMBO_MULTIPLIER, 1 + Math.floor(kills / COMBO_KILLS_PER_STEP));
 }
 

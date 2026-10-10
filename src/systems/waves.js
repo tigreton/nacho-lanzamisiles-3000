@@ -10,6 +10,7 @@ import { updatePickups } from "../entities/pickups.js";
 import { updateEffects } from "../entities/particles.js";
 import { spawnAirbase, updateAirbase } from "../entities/airbase.js";
 import { openShop } from "./shop.js";
+import { unlock } from "./achievements.js";
 
 
 export function announceWave(text) {
@@ -29,10 +30,21 @@ export function advanceWave() {
   G.state.bossClearTimer = 0;
   G.state.airbaseSpawned = false;
   G.airbase = null;
+  // El combo es impulso de una oleada: al cambiar de oleada se empieza de cero.
+  G.state.combo.kills = 0;
+  G.state.combo.timer = 0;
   G.state.background = Math.floor((G.state.wave - 1) / 2) % CROPS.backgrounds.length;
+  if (G.state.wave >= 10) unlock("veterano");
   const bossWave = G.state.wave % 4 === 0;
   const airshipWave = G.state.wave % 8 === 0;
   announceWave(bossWave ? `${airshipWave ? "DIRIGIBLE" : "JEFE"} · OLEADA ${G.state.wave}` : `OLEADA ${G.state.wave}`);
+}
+
+
+function completeWave() {
+  if (!G.state.waveDamageTaken) unlock("intocable");
+  G.state.waveDamageTaken = false;
+  openShop();
 }
 
 
@@ -42,6 +54,18 @@ export function updateGame(dt) {
   G.state.banner = Math.max(0, G.state.banner - dt);
   G.state.shake = Math.max(0, G.state.shake - dt * 30);
   G.state.flash = Math.max(0, G.state.flash - dt);
+
+  if (G.state.combo.kills > 0) {
+    G.state.combo.timer -= dt;
+    if (G.state.combo.timer <= 0) {
+      G.state.combo.kills = 0;
+      G.state.combo.timer = 0;
+    }
+  }
+  if (G.state.toast) {
+    G.state.toast.time -= dt;
+    if (G.state.toast.time <= 0) G.state.toast = null;
+  }
 
   updatePlayer(dt);
   updateAirbase(dt);
@@ -63,7 +87,7 @@ export function updateGame(dt) {
         G.balloonBaskets.length === 0 &&
         G.airshipGondolas.length === 0
       ) {
-        openShop();
+        completeWave();
       }
     }
   } else {
@@ -84,7 +108,7 @@ export function updateGame(dt) {
         G.state.difficulty.spawnIntervalMultiplier *
         rand(0.78, 1.24);
     }
-    if (G.state.waveTime > G.state.difficulty.waveDuration && !G.airbase) openShop();
+    if (G.state.waveTime > G.state.difficulty.waveDuration && !G.airbase) completeWave();
   }
 }
 
