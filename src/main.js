@@ -1,10 +1,14 @@
+// Estado, arranque y bucle principal. La configuración vive en config.js.
+import {
+  W, H, DIFFICULTIES, HELICOPTERS, SHOP_ITEMS, CROPS, AIRSHIP_CROPS,
+  SHIELD_DURATION, SHIELD_RADIUS, MAX_PARTICLES,
+} from "./config.js";
+
 
 const canvas = document.querySelector("#game-canvas");
 const ctx = canvas.getContext("2d");
 // El mundo del juego vive en coordenadas lógicas fijas; el canvas físico se
 // dimensiona al tamaño CSS × devicePixelRatio para texto y sprites nítidos.
-const W = 1200;
-const H = 675;
 
 function resizeCanvas() {
   const ratio = Math.min(window.devicePixelRatio || 1, 2);
@@ -49,156 +53,6 @@ const ui = {
   shopItemButtons: [...document.querySelectorAll(".shop-item")],
 };
 
-const DIFFICULTIES = {
-  easy: {
-    label: "FÁCIL",
-    playerHp: 9,
-    enemyHpMultiplier: 0.8,
-    enemySpeedMultiplier: 0.8,
-    enemyFireIntervalMultiplier: 1.35,
-    enemyBulletHitboxInset: 0.48,
-    spawnIntervalMultiplier: 1.35,
-    waveDuration: 21,
-    bossHpMultiplier: 0.82,
-    scoreMultiplier: 0.8,
-  },
-  normal: {
-    label: "NORMAL",
-    playerHp: 7,
-    enemyHpMultiplier: 1,
-    enemySpeedMultiplier: 1,
-    enemyFireIntervalMultiplier: 1,
-    enemyBulletHitboxInset: 0.2,
-    spawnIntervalMultiplier: 1,
-    waveDuration: 18,
-    bossHpMultiplier: 1,
-    scoreMultiplier: 1,
-  },
-  hard: {
-    label: "DIFÍCIL",
-    playerHp: 5,
-    enemyHpMultiplier: 1.28,
-    enemySpeedMultiplier: 1.18,
-    enemyFireIntervalMultiplier: 0.72,
-    enemyBulletHitboxInset: 0.12,
-    spawnIntervalMultiplier: 0.72,
-    waveDuration: 16,
-    bossHpMultiplier: 1.3,
-    scoreMultiplier: 1.35,
-  },
-};
-
-const HELICOPTERS = {
-  v1: {
-    label: "BLINDADO",
-    description: "Más vida y placas que reducen el daño",
-    maxHpBonus: 2,
-    damageReduction: 0.25,
-    speedMultiplier: 0.94,
-    fireCooldownMultiplier: 1,
-    hitboxBonus: 0,
-  },
-  v2: {
-    label: "SIGILO",
-    description: "Más rápido, dispara antes y es más difícil de golpear",
-    maxHpBonus: 0,
-    damageReduction: 0,
-    speedMultiplier: 1.22,
-    fireCooldownMultiplier: 0.72,
-    hitboxBonus: 0.13,
-  },
-};
-
-const SHOP_ITEMS = {
-  life: { price: 3 },
-  explosive: { price: 5 },
-  shield: { price: 6 },
-  rapid: { price: 4 },
-};
-
-const SHIELD_DURATION = 15;
-const SHIELD_RADIUS = 86;
-
-const CROPS = {
-  backgrounds: [
-    [743, 755, 248, 148],
-    [1021, 754, 238, 149],
-    [1288, 754, 234, 149],
-  ],
-  player: [
-    [18, 47, 101, 99],
-    [119, 47, 103, 99],
-    [218, 47, 102, 99],
-    [310, 47, 99, 99],
-    [402, 47, 99, 99],
-    [492, 47, 96, 99],
-    [579, 47, 98, 99],
-    [667, 47, 83, 99],
-  ],
-  face: [796, 49, 95, 101],
-  missile: [519, 229, 140, 82],
-  enemyHeli: [
-    [18, 380, 105, 95],
-    [118, 380, 106, 95],
-    [216, 380, 101, 95],
-    [311, 380, 103, 95],
-    [407, 380, 103, 95],
-  ],
-  drone: [
-    [533, 380, 83, 96],
-    [615, 380, 84, 96],
-    [696, 380, 81, 96],
-    [772, 380, 81, 96],
-    [849, 380, 80, 96],
-    [925, 380, 82, 96],
-  ],
-  fighter: [
-    [1033, 383, 116, 88],
-    [1138, 383, 112, 88],
-    [1238, 383, 108, 88],
-    [1337, 383, 109, 88],
-    [1437, 383, 82, 88],
-  ],
-  boss: [31, 543, 337, 166],
-  explosion: [
-    [397, 541, 67, 68],
-    [467, 541, 67, 68],
-    [538, 541, 68, 68],
-    [611, 541, 68, 68],
-    [683, 541, 69, 68],
-    [754, 541, 69, 68],
-    [824, 541, 69, 68],
-    [893, 541, 68, 68],
-    [397, 615, 68, 76],
-    [467, 615, 68, 76],
-    [538, 615, 69, 76],
-    [610, 615, 69, 76],
-    [682, 615, 70, 76],
-    [753, 615, 70, 76],
-    [824, 615, 70, 76],
-    [893, 615, 69, 76],
-  ],
-  enemyBullet: [706, 943, 61, 67],
-  playerBullet: [1057, 945, 76, 67],
-  coin: [1245, 942, 90, 81],
-  powerups: [
-    [35, 942, 84, 80],
-    [120, 942, 85, 80],
-    [205, 942, 85, 80],
-    [377, 942, 88, 80],
-  ],
-};
-
-const AIRSHIP_CROPS = {
-  boss: [35, 65, 845, 825],
-  balloons: [
-    [925, 60, 260, 425],
-    [1215, 60, 275, 425],
-    [920, 515, 255, 425],
-    [1215, 515, 275, 425],
-  ],
-};
-
 const sheet = new Image();
 const airshipSheet = new Image();
 const gondolaSheet = new Image();
@@ -232,7 +86,6 @@ let airbase = null;
 let pickups = [];
 let effects = [];
 let particles = [];
-const MAX_PARTICLES = 400;
 let stars = [];
 
 const rand = (min, max) => min + Math.random() * (max - min);
