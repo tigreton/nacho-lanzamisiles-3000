@@ -133,9 +133,17 @@
       "prioridad": "P1",
       "titulo": "Eliminar drawAirship() (~175 líneas)",
       "detalle": "game.js:1603-1777, nunca se llama",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 13:23"
+      "actualizada": "2026-10-10 13:23",
+      "decisiones": [
+        "Borrado por rango exacto 1603-1778 tras verificar con grep que solo existía la definición; drawAirshipSprite y drawAirshipGondola (que sí se usan) quedan intactas"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "node --check sin errores; grep confirma 0 referencias a drawAirship; 176 líneas menos (2373→2197); verificación en navegador pendiente de acumular al final de la fase",
+      "commit": "3b20a50"
     },
     {
       "id": "1.2",
@@ -143,8 +151,9 @@
       "prioridad": "P1",
       "titulo": "Eliminar drawBalloon() (~140 líneas)",
       "detalle": "game.js:1779-1919, nunca se llama",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 13:23"
     },
     {
       "id": "1.3",

@@ -101,3 +101,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 13:23] 1.1 — Eliminar drawAirship() (~175 líneas)
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 13:23] 1.1 — Eliminar drawAirship() (~175 líneas)
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Borrado por rango exacto 1603-1778 tras verificar con grep que solo existía la definición; drawAirshipSprite y drawAirshipGondola (que sí se usan) quedan intactas
+- **Archivos:** game.js
+- **Verificación:** node --check sin errores; grep confirma 0 referencias a drawAirship; 176 líneas menos (2373→2197); verificación en navegador pendiente de acumular al final de la fase
+- **Commit:** 3b20a50
+
+### [2026-10-10 13:23] 1.2 — Eliminar drawBalloon() (~140 líneas)
+- **Estado:** pendiente → en_curso
+
