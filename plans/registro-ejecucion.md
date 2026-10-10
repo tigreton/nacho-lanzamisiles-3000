@@ -382,3 +382,46 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 18:40] 5.1 — Extraer configuración a config.js
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 18:43] 5.1 — Extraer configuración a config.js
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Datos puros sin dependencias: W/H logicos, DIFFICULTIES, HELICOPTERS, SHOP_ITEMS, SHIELD_*, CROPS, AIRSHIP_CROPS y MAX_PARTICLES. Se requiere el paso previo f22b5fc (game.js -> src/main.js como modulo ES) porque un script clasico no puede importar. Adios a los numeros magicos dispersos: los que quedaban en funciones son parametros de feel del gameplay y se movieron con sus funciones en 5.2
+- **Archivos:** src/config.js, src/main.js, index.html
+- **Verificación:** node --check ambos; arranque en navegador con menu activo y 0 errores
+- **Commit:** 1c2e9d7
+
+### [2026-10-10 18:43] 5.2 — Dividir game.js en módulos ES
+- **Estado:** pendiente → en_curso
+
+### [2026-10-10 19:06] 5.2 — Dividir game.js en módulos ES
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Arquitectura final: config (datos puros), utils (puras), records (localStorage puro), state (bolsa G mut + setMode/selectores), audio, sprites (recorte+glows), render, input (handlers inyectados para evitar ciclos), entities/{particles,player,enemies,bullets,pickups,airbase}, systems/{gameover,shop,waves} y main como orquestador (289 lineas desde 2052). La bolsa G normaliza el estado compartido sin ciclos; los ciclos funcionales restantes (waves<->enemies/shop<->waves/enemies<->bullets) son legales en ESM con declaraciones de funcion. Se empleo un extractor automatico por bloques + corredor Node con stubs DOM para validar el grafo en cada paso; el chequeo sistemático de simbolos compartidos cazo 5 imports latentes que las pruebas cortas no pisaban (H en bullets/particles, HELICOPTERS en player, detonateExplosiveBullet en enemies, advanceWave en shop)
+- **Archivos:** src/ (18 archivos)
+- **Verificación:** corredor Node: MODULOS CARGADOS SIN ERRORES; navegador: arranque, menu con record, partida ~8 min acumulados, pausa, tienda abierta tras oleada (compra rechazada por monedas y continuar verificados), 0 errores de consola; analisis visual del combate correcto
+- **Commit:** ef45719
+
+### [2026-10-10 19:06] 5.3 — Migrar index.html a script module
+- **Estado:** pendiente → completada
+- **Decisiones:**
+  - La migracion del HTML ya vive en f22b5fc: <script type="module" src="src/main.js"> desde el primer commit de la fase; sin requisito nuevo porque el juego ya exigia servidor local (y file:// sigue funcionando para modulo simple). Cerrada con la verificacion completa del grafo
+- **Archivos:** index.html
+- **Verificación:** index.html carga src/main.js como modulo y el juego completo funciona (e2e de 5.2)
+- **Commit:** f22b5fc
+
+### [2026-10-10 19:06] 5.4 — Añadir linter (eslint/standard)
+- **Estado:** pendiente → completada
+- **Decisiones:**
+  - eslint 9 flat config en eslint.config.mjs con globales de navegador; package.json con script lint y SIN type:module (plans/herramientas/tareas.js es CommonJS y romperia); sin dependencias de runtime. Ejecucion: npx eslint@9 src/ = 0 errores, 0 avisos tras depurar 30 imports/variables sin uso
+- **Archivos:** package.json, eslint.config.mjs, src/main.js, src/entities/bullets.js
+- **Verificación:** npx eslint@9 src/: 0 problemas; corredor Node OK tras la depuracion
+- **Commit:** df78428
+
+### [2026-10-10 19:07] 5.2 — Dividir game.js en módulos ES
+- **Estado:** sin cambio (completada)
+- **Nota:** Cierre de fase 5: partida completa ~8 min acumulados con el grafo modular final (menu, record, combate, pausa, tienda tras oleada con compra rechazada por monedas y continuar a oleada 2), 0 errores de consola; captura f5_juego_modular.png. Ejecutado tambien el juego con JUGAR-command-style server normal. No llego a verse: oleada 8 con dirigible y base aerea (flujos ya pendientes en plan-qa)
+
+### [2026-10-10 19:07] 5.2 — Dividir game.js en módulos ES
+- **Estado:** sin cambio (completada)
+- **Nota:** E2E final tras depurar imports: arranque + 16 ciclos de combate, 0 errores
+

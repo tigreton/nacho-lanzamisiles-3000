@@ -13,7 +13,9 @@ Guía rápida para retomar el trabajo en cualquier momento. Lectura: 2 minutos.
 | [estado-qa.json](estado-qa.json) | Estado de las 11 tareas del plan QA |
 | [registro-qa.md](registro-qa.md) | Diario cronológico del plan QA |
 | [herramientas/tareas.js](herramientas/tareas.js) | CLI que gestiona todo (Node, sin dependencias) |
-| `../game.js`, `../index.html`, `../style.css`, `../assets/` | El juego |
+| `../src/` | El juego en módulos ES: `main.js` (orquestación), `config.js`, `state.js` (bolsa `G`), `utils.js`, `records.js`, `audio.js`, `sprites.js`, `render.js`, `input.js`, `entities/`, `systems/` |
+| `../index.html`, `../style.css`, `../assets/` | Página, estilos y WebP/fuentes locales |
+| `../package.json`, `../eslint.config.mjs` | Linter: `npm run lint` |
 
 Hay **dos planes independientes**. Sin flags, el CLI trabaja sobre el plan de
 mejora; para el plan QA hay que pasarle sus rutas:
