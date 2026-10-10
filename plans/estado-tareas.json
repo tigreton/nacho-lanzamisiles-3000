@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "proyecto": "Operación Nacho",
+    "plan": "plans/plan-de-mejora.md",
+    "creado": "2026-10-10",
+    "ultimaActualizacion": "2026-10-10",
+    "estadosValidos": ["pendiente", "en_curso", "completada", "bloqueada", "descartada"],
+    "reglas": {
+      "fases-0-a-4": "Las tareas de la fase 5 solo pueden iniciarse cuando todas las tareas de las fases 0-4 estén en estado terminal (completada o descartada)."
+    }
+  },
+  "tareas": [
+    { "id": "0.1", "fase": 0, "prioridad": "P1", "titulo": "Crear .gitignore", "detalle": "Ignorar .DS_Store, gui-test-screenshots/, Thumbs.db", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "0.2", "fase": 0, "prioridad": "P1", "titulo": "Quitar .DS_Store del índice de git", "detalle": "git rm --cached .DS_Store", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["0.1"] },
+    { "id": "0.3", "fase": 0, "prioridad": "P2", "titulo": "Resolver gui-test-screenshots/", "detalle": "Borrar la carpeta o dejarla ignorada; no debe entrar al repo", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["0.1"] },
+    { "id": "0.4", "fase": 0, "prioridad": "P2", "titulo": "Adoptar commits atómicos descriptivos", "detalle": "Un commit por tarea con mensaje descriptivo, no fechas sueltas", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "0.5", "fase": 0, "prioridad": "P3", "titulo": "Añadir LICENSE", "detalle": "Solo si se va a publicar el código", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "0.6", "fase": 0, "prioridad": "P3", "titulo": "Añadir favicon", "detalle": "Recorte 32×32 del helicóptero desde la lámina", "estado": "pendiente", "creada": "2026-10-10" },
+
+    { "id": "1.1", "fase": 1, "prioridad": "P1", "titulo": "Eliminar drawAirship() (~175 líneas)", "detalle": "game.js:1603-1777, nunca se llama", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "1.2", "fase": 1, "prioridad": "P1", "titulo": "Eliminar drawBalloon() (~140 líneas)", "detalle": "game.js:1779-1919, nunca se llama", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "1.3", "fase": 1, "prioridad": "P2", "titulo": "Eliminar sprites.launcher y CROPS.launcher", "detalle": "game.js:130 y game.js:513; se recorta pero nunca se dibuja", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "1.4", "fase": 1, "prioridad": "P2", "titulo": "Eliminar state.defeated", "detalle": "game.js:1031; se incrementa pero nunca se lee", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "1.5", "fase": 1, "prioridad": "P2", "titulo": "Eliminar previousMode", "detalle": "game.js:206; siempre vale 'playing'; simplificar togglePause", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "1.6", "fase": 1, "prioridad": "P3", "titulo": "Reducir CROPS.missile al frame usado", "detalle": "Solo se usa missile[4] (game.js:2106)", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "1.7", "fase": 1, "prioridad": "P3", "titulo": "Eliminar campo enemy.sprite", "detalle": "game.js:717; se inicializa pero nunca se lee", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "1.8", "fase": 1, "prioridad": "P3", "titulo": "Eliminar powerups[3] del crop", "detalle": "game.js:175-181; índice 3 nunca se dibuja", "estado": "pendiente", "creada": "2026-10-10" },
+
+    { "id": "2.1", "fase": 2, "prioridad": "P1", "titulo": "Optimizar los 5 PNG (5,6 MB)", "detalle": "pngquant o WebP; objetivo <1,5 MB totales", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "2.2", "fase": 2, "prioridad": "P1", "titulo": "Self-host de fuentes", "detalle": "@font-face con Black Ops One e Inter locales; quitar el @import de Google Fonts (style.css:1)", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "2.3", "fase": 2, "prioridad": "P1", "titulo": "Cargar fuentes antes del HUD", "detalle": "document.fonts.load() antes de dar la carga por terminada", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["2.2"] },
+    { "id": "2.4", "fase": 2, "prioridad": "P2", "titulo": "Limpiar la lámina juego-nacho.png offline", "detalle": "PNG con transparencia real, sin fondo ajedrezado", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "2.5", "fase": 2, "prioridad": "P2", "titulo": "Eliminar el quitafondos de cutSprite", "detalle": "game.js:404-507 pasa a ser un recorte drawImage simple", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["2.4"] },
+    { "id": "2.6", "fase": 2, "prioridad": "P3", "titulo": "Simplificar README", "detalle": "Rebajar la advertencia sobre abrir index.html directamente", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["2.5"] },
+
+    { "id": "3.1", "fase": 3, "prioridad": "P1", "titulo": "Mostrar récord por dificultad", "detalle": "En menú y game over; claves de localStorage por dificultad", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "3.2", "fase": 3, "prioridad": "P1", "titulo": "Autopausa al perder foco", "detalle": "visibilitychange + blur → togglePause() si mode === 'playing'", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "3.3", "fase": 3, "prioridad": "P1", "titulo": "Bloquear Espacio solo en partida", "detalle": "game.js:2265-2271; los botones de menú/tienda deben responder a Espacio", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "3.4", "fase": 3, "prioridad": "P2", "titulo": "Lanzador JUGAR.bat y README multiplataforma", "detalle": "python (sin 3) en Windows; instrucciones macOS y Windows", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "3.5", "fase": 3, "prioridad": "P3", "titulo": "Documentar KeyJ como disparo alternativo", "detalle": "En controls-card del menú y en el README", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "3.6", "fase": 3, "prioridad": "P3", "titulo": "Unificar duración de ráfaga (10s vs 8s)", "detalle": "Tienda 10 s vs pickup 8 s (game.js:1078); decidir valor y documentarlo", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "3.7", "fase": 3, "prioridad": "P3", "titulo": "Renombrar enemyFireMultiplier", "detalle": "A enemyFireIntervalMultiplier (>1 = dispara menos) en las 3 dificultades y sus usos", "estado": "pendiente", "creada": "2026-10-10" },
+
+    { "id": "4.1", "fase": 4, "prioridad": "P1", "titulo": "Canvas adaptativo con DPR", "detalle": "Dimensionar el canvas a tamaño CSS × devicePixelRatio y escalar el contexto", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "4.2", "fase": 4, "prioridad": "P2", "titulo": "Pre-renderizar glows", "detalle": "Hornear shadowBlur en canvas offscreen al preparar sprites", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["2.4"] },
+    { "id": "4.3", "fase": 4, "prioridad": "P3", "titulo": "Tope duro de partículas (~400)", "detalle": "Evitar picos en oleadas densas + jefes", "estado": "pendiente", "creada": "2026-10-10" },
+
+    { "id": "5.1", "fase": 5, "prioridad": "P1", "titulo": "Extraer configuración a config.js", "detalle": "Dificultades, helicópteros, tienda, crops y constantes de gameplay; adiós números mágicos", "estado": "pendiente", "creada": "2026-10-10", "regla": "fases-0-a-4" },
+    { "id": "5.2", "fase": 5, "prioridad": "P1", "titulo": "Dividir game.js en módulos ES", "detalle": "main, audio, input, entities/, systems/, render", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["5.1"], "regla": "fases-0-a-4" },
+    { "id": "5.3", "fase": 5, "prioridad": "P2", "titulo": "Migrar index.html a script module", "detalle": "<script type=\"module\" src=\"src/main.js\">", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["5.2"] },
+    { "id": "5.4", "fase": 5, "prioridad": "P3", "titulo": "Añadir linter (eslint/standard)", "detalle": "Sin dependencias de runtime", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["5.2"] },
+
+    { "id": "6.1", "fase": 6, "prioridad": "P2", "titulo": "Música chiptune + control de volumen", "detalle": "Loop de osciladores WebAudio coherente con los tone() actuales", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "6.2", "fase": 6, "prioridad": "P2", "titulo": "Deploy a GitHub Pages", "detalle": "El proyecto ya es 100% estático", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "6.3", "fase": 6, "prioridad": "P3", "titulo": "Soporte de gamepad", "detalle": "Stick mueve, A dispara, Start pausa", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "6.4", "fase": 6, "prioridad": "P3", "titulo": "Metadatos og para compartir", "detalle": "og:title y og:image con captura del juego", "estado": "pendiente", "creada": "2026-10-10" },
+    { "id": "6.5", "fase": 6, "prioridad": "P3", "titulo": "Pantalla de cómo jugar", "detalle": "Resumen de enemigos y powerups con sus sprites", "estado": "pendiente", "creada": "2026-10-10" }
+  ]
+}
