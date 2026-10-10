@@ -51,3 +51,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 13:15] 0.2 — Quitar .DS_Store del índice de git
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 13:15] 0.2 — Quitar .DS_Store del índice de git
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - git rm --cached: el artefacto de macOS se des-trackea pero no se borra del disco; .gitignore evita que vuelva a entrar
+- **Archivos:** .DS_Store (índice)
+- **Verificación:** ls .DS_Store OK en disco; git ls-files sin referencias; git status limpio tras commit
+- **Commit:** 31bcd2e
+
+### [2026-10-10 13:16] 0.3 — Resolver gui-test-screenshots/
+- **Estado:** pendiente → en_curso
+
