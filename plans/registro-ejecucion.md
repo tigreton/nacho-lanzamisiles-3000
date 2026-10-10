@@ -62,3 +62,31 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 13:16] 0.3 — Resolver gui-test-screenshots/
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 13:16] 0.3 — Resolver gui-test-screenshots/
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Dejarla ignorada, sin borrar: git rm -r --cached conserva los 15 archivos en disco para consulta local; las evidencias siguen en el historial del commit 5f8edd7 que plan-qa.md cita expresamente; .gitignore impide que futuras capturas engorden el repo
+- **Archivos:** gui-test-screenshots/ (índice)
+- **Verificación:** ls confirma 15 archivos en disco; git check-ignore confirma la carpeta ignorada; git log 5f8edd7 conserva las evidencias
+- **Commit:** 0e39669
+
+### [2026-10-10 13:16] 0.4 — Adoptar commits atómicos descriptivos
+- **Estado:** pendiente → en_curso
+
+### [2026-10-10 13:16] 0.4 — Adoptar commits atómicos descriptivos
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Práctica adoptada desde esta fase: un commit atómico por tarea con mensaje descriptivo convencional (chore/feat/refactor/perf/docs), prohibidos los mensajes con fechas sueltas como el 76a6e05 original; la regla ya está escrita en plans/README.md y en el ciclo de trabajo de registro-ejecucion.md
+- **Archivos:** plans/README.md (ya documentado)
+- **Verificación:** git log --oneline muestra dde4243, 31bcd2e y 0e39669, uno por tarea 0.1-0.3, todos con mensaje descriptivo
+
+### [2026-10-10 13:17] 0.6 — Añadir favicon
+- **Estado:** pendiente → en_curso
+
+### [2026-10-10 13:19] 0.6 — Añadir favicon
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - Fuente: helicopter-player-v1.png (helicóptero por defecto), recorte del bounding box (99,102,1402,883) con 8% de margen; se genera assets/favicon.ico multi-tamaño (16/32/48) y assets/favicon-32.png, ambos ~7 KB combinados; verificado con análisis visual del 32px ampliado
+- **Archivos:** assets/favicon.ico, assets/favicon-32.png, index.html
+- **Verificación:** servidor local: index 200, favicon.ico 200 image/x-icon, favicon-32.png 200 image/png; los <link> presentes en el HTML; los 9 assets del juego siguen sirviendo y tracked
+

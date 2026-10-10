@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 13:16",
+    "ultimaActualizacion": "2026-10-10 13:19",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -63,12 +63,20 @@
       "prioridad": "P2",
       "titulo": "Resolver gui-test-screenshots/",
       "detalle": "Borrar la carpeta o dejarla ignorada; no debe entrar al repo",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
       "dependencias": [
         "0.1"
       ],
-      "actualizada": "2026-10-10 13:16"
+      "actualizada": "2026-10-10 13:16",
+      "decisiones": [
+        "Dejarla ignorada, sin borrar: git rm -r --cached conserva los 15 archivos en disco para consulta local; las evidencias siguen en el historial del commit 5f8edd7 que plan-qa.md cita expresamente; .gitignore impide que futuras capturas engorden el repo"
+      ],
+      "archivos": [
+        "gui-test-screenshots/ (índice)"
+      ],
+      "verificacion": "ls confirma 15 archivos en disco; git check-ignore confirma la carpeta ignorada; git log 5f8edd7 conserva las evidencias",
+      "commit": "0e39669"
     },
     {
       "id": "0.4",
@@ -76,8 +84,16 @@
       "prioridad": "P2",
       "titulo": "Adoptar commits atómicos descriptivos",
       "detalle": "Un commit por tarea con mensaje descriptivo, no fechas sueltas",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 13:16",
+      "decisiones": [
+        "Práctica adoptada desde esta fase: un commit atómico por tarea con mensaje descriptivo convencional (chore/feat/refactor/perf/docs), prohibidos los mensajes con fechas sueltas como el 76a6e05 original; la regla ya está escrita en plans/README.md y en el ciclo de trabajo de registro-ejecucion.md"
+      ],
+      "archivos": [
+        "plans/README.md (ya documentado)"
+      ],
+      "verificacion": "git log --oneline muestra dde4243, 31bcd2e y 0e39669, uno por tarea 0.1-0.3, todos con mensaje descriptivo"
     },
     {
       "id": "0.5",
@@ -94,8 +110,18 @@
       "prioridad": "P3",
       "titulo": "Añadir favicon",
       "detalle": "Recorte 32×32 del helicóptero desde la lámina",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 13:19",
+      "decisiones": [
+        "Fuente: helicopter-player-v1.png (helicóptero por defecto), recorte del bounding box (99,102,1402,883) con 8% de margen; se genera assets/favicon.ico multi-tamaño (16/32/48) y assets/favicon-32.png, ambos ~7 KB combinados; verificado con análisis visual del 32px ampliado"
+      ],
+      "archivos": [
+        "assets/favicon.ico",
+        "assets/favicon-32.png",
+        "index.html"
+      ],
+      "verificacion": "servidor local: index 200, favicon.ico 200 image/x-icon, favicon-32.png 200 image/png; los <link> presentes en el HTML; los 9 assets del juego siguen sirviendo y tracked"
     },
     {
       "id": "1.1",
