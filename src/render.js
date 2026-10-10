@@ -124,15 +124,16 @@ function drawHud() {
     G.ctx.fill();
   }
 
-  if (G.player.explosiveAmmo > 0 || G.player.rapid > 0 || G.player.shield > 0) {
-    const label = G.player.explosiveAmmo > 0
-      ? `EXPLOSIVOS ${G.player.explosiveAmmo}`
-      : G.player.rapid > 0
-        ? `RÁFAGA ${Math.ceil(G.player.rapid)}s`
-        : `ESCUDO ${Math.ceil(G.player.shield)}s`;
-    G.ctx.fillStyle = G.player.explosiveAmmo > 0 ? "#ff8a18" : G.player.rapid > 0 ? "#ffb02e" : "#68d8ff";
-    G.ctx.font = '900 11px Inter, sans-serif';
-    G.ctx.fillText(label, 96, 77);
+  const powerLabels = [];
+  if (G.player.explosiveAmmo > 0) powerLabels.push({ text: `EXPLOSIVOS ${G.player.explosiveAmmo}`, color: "#ff8a18" });
+  if (G.player.rapid > 0) powerLabels.push({ text: `RÁFAGA ${Math.ceil(G.player.rapid)}s`, color: "#ffb02e" });
+  if (G.player.shield > 0) powerLabels.push({ text: `ESCUDO ${Math.ceil(G.player.shield)}s`, color: "#68d8ff" });
+  G.ctx.font = '900 11px Inter, sans-serif';
+  let labelX = 96;
+  for (const { text, color } of powerLabels) {
+    G.ctx.fillStyle = color;
+    G.ctx.fillText(text, labelX, 77);
+    labelX += G.ctx.measureText(text).width + 18;
   }
 
   roundedRect(W / 2 - 78, 17, 156, 60, 10);

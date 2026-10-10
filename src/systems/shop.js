@@ -22,8 +22,8 @@ export function updateShopUI() {
     const canBuy = G.state.coins >= item.price && !lifeAlreadyFull;
     button.disabled = !canBuy;
     if (lifeAlreadyFull) status.textContent = "COMPLETO";
-    else if (G.state.coins < item.price) status.textContent = "FALTAN MONEDAS";
     else if (itemId === "explosive" && G.player.explosiveAmmo > 0) status.textContent = `${G.player.explosiveAmmo} RESTANTES`;
+    else if (G.state.coins < item.price) status.textContent = "FALTAN MONEDAS";
     else status.textContent = "DISPONIBLE";
   }
 }
