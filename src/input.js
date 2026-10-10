@@ -10,6 +10,34 @@ function updatePointer(event) {
   G.pointer.y = ((event.clientY - rect.top) / rect.height) * H;
 }
 
+// Gamepad: stick izquierdo mueve, botón A dispara, Start pausa.
+// Se consulta una vez por fotograma desde el bucle principal.
+let startAnterior = false;
+
+export function pollGamepad({ togglePause }) {
+  const pads = navigator.getGamepads?.() ?? [];
+  const pad = [...pads].find(Boolean);
+  if (!pad) {
+    startAnterior = false;
+    return;
+  }
+  const zona = 0.35;
+  const [x = 0, y = 0] = pad.axes;
+  const pulsa = (code, activo) => {
+    if (activo) G.keys.add(code);
+    else G.keys.delete(code);
+  };
+  pulsa("KeyA", x < -zona);
+  pulsa("KeyD", x > zona);
+  pulsa("KeyW", y < -zona);
+  pulsa("KeyS", y > zona);
+  pulsa("Space", pad.buttons[0]?.pressed);
+
+  const start = !!pad.buttons[9]?.pressed;
+  if (start && !startAnterior) togglePause();
+  startAnterior = start;
+}
+
 export function installInput({ togglePause, startGame }) {
   window.addEventListener("keydown", (event) => {
     if (event.code === "Space") {

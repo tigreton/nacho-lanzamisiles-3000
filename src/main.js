@@ -9,7 +9,7 @@ import { prepareSprites, prepareAirshipSprites } from "./sprites.js";
 import { rand } from "./utils.js";
 import { unlockAudio, tone, toggleSound } from "./audio.js";
 import { ensureMusic, initMusicUI } from "./music.js";
-import { installInput } from "./input.js";
+import { installInput, pollGamepad } from "./input.js";
 import { getHighScore } from "./records.js";
 
 
@@ -189,6 +189,7 @@ function togglePause() {
 function loop(time) {
   const dt = Math.min(0.034, (time - G.lastTime) / 1000 || 0);
   G.lastTime = time;
+  pollGamepad({ togglePause });
   if (G.mode === "playing") updateGame(dt);
   render();
   requestAnimationFrame(loop);
