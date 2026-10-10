@@ -34,6 +34,11 @@ El servidor local sigue siendo la opción recomendada.
 - `Espacio` o `J`: disparar
 - `P` o `Escape`: pausa
 - Ratón/táctil: arrastrar sobre el juego para mover y disparar
+- Mando: stick izquierdo o cruceta mueven, `A` dispara y `Start` pausa. En
+  los menús (dificultad, helicóptero, armería, base aérea, pausa y fin de
+  partida) la cruceta o el stick mueven el cursor entre las opciones, `A`
+  pulsa la señalada, `Start` activa la acción principal de la pantalla y `B`
+  vuelve atrás en el manual y la pausa.
 
 Si cambias de pestaña o la ventana pierde el foco en mitad de una oleada, el
 juego se pausa solo. Cada dificultad guarda su propio récord, visible en el

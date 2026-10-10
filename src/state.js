@@ -16,6 +16,8 @@ export const G = {
   helicopter: document.querySelector("#helicopter-screen"),
   gameover: document.querySelector("#gameover-screen"),
   howto: document.querySelector("#howto-screen"),
+  howtoButton: document.querySelector("#howto-button"),
+  howtoBack: document.querySelector("#howto-back"),
   play: document.querySelector("#play-button"),
   restart: document.querySelector("#restart-button"),
   resume: document.querySelector("#resume-button"),

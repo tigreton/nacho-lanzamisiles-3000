@@ -202,6 +202,13 @@ button {
   opacity: 1;
 }
 
+/* Cursor del mando: contorno firme común a cualquier botón de menú, más
+   claro que el realce de la opción seleccionada (.is-selected). */
+.screen--visible button.is-pad-focus:not(:disabled) {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
 #menu-screen {
   place-items: center start;
   padding-left: clamp(28px, 8vw, 116px);
@@ -293,7 +300,8 @@ button {
 }
 
 .difficulty-option:hover,
-.difficulty-option:focus-visible {
+.difficulty-option:focus-visible,
+.difficulty-option.is-pad-focus {
   border-color: rgba(200, 239, 41, 0.68);
   color: #fff;
   outline: none;
@@ -361,7 +369,8 @@ button {
 }
 
 .helicopter-option:hover,
-.helicopter-option:focus-visible {
+.helicopter-option:focus-visible,
+.helicopter-option.is-pad-focus {
   border-color: rgba(200, 239, 41, 0.68);
   color: #fff;
   outline: none;
@@ -414,7 +423,8 @@ button {
 }
 
 .primary-button:hover,
-.primary-button:focus-visible {
+.primary-button:focus-visible,
+.primary-button.is-pad-focus {
   filter: saturate(1.15) brightness(1.08);
   outline: 2px solid white;
   outline-offset: 3px;
@@ -440,7 +450,8 @@ button {
   cursor: pointer;
 }
 
-.secondary-button:hover {
+.secondary-button:hover,
+.secondary-button.is-pad-focus {
   border-color: var(--acid);
   color: var(--acid);
 }
@@ -568,7 +579,8 @@ kbd {
 }
 
 .shop-item:hover:not(:disabled),
-.shop-item:focus-visible:not(:disabled) {
+.shop-item:focus-visible:not(:disabled),
+.shop-item.is-pad-focus:not(:disabled) {
   border-color: rgba(200, 239, 41, 0.7);
   background: rgba(112, 145, 12, 0.2);
   outline: none;
