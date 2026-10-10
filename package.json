@@ -1,0 +1,8 @@
+{
+  "name": "operacion-nacho",
+  "private": true,
+  "description": "Juego arcade de helicopteros sin dependencias de runtime.",
+  "scripts": {
+    "lint": "eslint src/"
+  }
+}

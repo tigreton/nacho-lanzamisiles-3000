@@ -1,24 +1,15 @@
 // Estado, arranque y bucle principal. La configuración vive en config.js.
-import {
-  W, H, DIFFICULTIES, HELICOPTERS, SHOP_ITEMS, CROPS, AIRSHIP_CROPS,
-  SHIELD_DURATION, SHIELD_RADIUS, MAX_PARTICLES,
-} from "./config.js";
+import { W, H, DIFFICULTIES, HELICOPTERS } from "./config.js";
 import { G, setMode, selectDifficulty, selectHelicopter } from "./state.js";
 import { updateGame } from "./systems/waves.js";
 import { buyShopItem, continueFromShop } from "./systems/shop.js";
-import { spawnAirbase, updateAirbase, continueFromHelicopter } from "./entities/airbase.js";
-import { updatePickups } from "./entities/pickups.js";
-import { updateProjectiles } from "./entities/bullets.js";
-import { spawnEnemy, spawnBoss, updateEnemies, updateBalloonBaskets, updateAirshipGondolas } from "./entities/enemies.js";
-import { updatePlayer, hurtPlayer, applyHelicopterStats } from "./entities/player.js";
-import { endGame } from "./systems/gameover.js";
-import { createBurst, createExplosion, updateEffects } from "./entities/particles.js";
+import { continueFromHelicopter } from "./entities/airbase.js";
 import { render } from "./render.js";
-import { prepareSprites, prepareAirshipSprites, bakedGlow } from "./sprites.js";
-import { rand, clamp, lerp, overlaps, isBossEnemy } from "./utils.js";
+import { prepareSprites, prepareAirshipSprites } from "./sprites.js";
+import { rand } from "./utils.js";
 import { unlockAudio, tone, toggleSound } from "./audio.js";
 import { installInput } from "./input.js";
-import { getHighScore, saveHighScore } from "./records.js";
+import { getHighScore } from "./records.js";
 
 
 // El mundo del juego vive en coordenadas lógicas fijas; el G.canvas físico se
