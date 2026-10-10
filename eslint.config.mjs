@@ -13,6 +13,8 @@ export default [
         requestAnimationFrame: "readonly",
         localStorage: "readonly",
         setTimeout: "readonly",
+        setInterval: "readonly",
+        clearInterval: "readonly",
         navigator: "readonly",
         Image: "readonly",
         AudioContext: "readonly",

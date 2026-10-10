@@ -497,6 +497,63 @@ function drawBanner() {
 }
 
 
+function drawHowTo() {
+  drawMenuBackdrop();
+  G.ctx.fillStyle = "rgba(3, 10, 15, 0.72)";
+  G.ctx.fillRect(0, 0, W, H);
+
+  G.ctx.textAlign = "center";
+  G.ctx.textBaseline = "middle";
+  G.ctx.fillStyle = "#d8f23b";
+  G.ctx.font = '400 34px "Black Ops One", Impact, sans-serif';
+  G.ctx.fillText("CÓMO JUGAR", W / 2, 64);
+
+  const etiqueta = (texto, x, y) => {
+    G.ctx.fillStyle = "rgba(255, 255, 255, 0.78)";
+    G.ctx.font = "900 11px Inter, sans-serif";
+    G.ctx.fillText(texto, x, y);
+  };
+  const seccion = (texto, y) => {
+    G.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    G.ctx.font = "900 12px Inter, sans-serif";
+    G.ctx.fillText(texto, W / 2, y);
+  };
+
+  seccion("ENEMIGOS", 122);
+  const enemigos = [
+    [G.sprites.enemyHeli?.[0], "HELI", 220],
+    [G.sprites.drone?.[0], "DRON", 370],
+    [G.sprites.fighter?.[0], "CAZA", 520],
+    [G.sprites.boss, "ACORAZADO", 700, 190],
+    [G.sprites.airshipBoss, "DIRIGIBLE", 920, 210],
+  ];
+  for (const [sprite, texto, x, tam = 96] of enemigos) {
+    drawSprite(sprite, x, 210, tam, tam * 0.75, { glow: "rgba(255, 72, 20, 0.25)", blur: 12 });
+    etiqueta(texto, x, 285);
+  }
+
+  seccion("BOTÍN", 350);
+  const botin = [
+    [G.sprites.coin, "MONEDA", 250],
+    [G.sprites.powerups?.[0], "RÁFAGA", 460],
+    [G.sprites.powerups?.[1], "ESCUDO", 670],
+    [G.sprites.powerups?.[2], "VIDA", 880],
+    [G.sprites.powerups?.[3], "ESTRELLA", 1060],
+  ];
+  for (const [sprite, texto, x] of botin) {
+    drawSprite(sprite, x, 425, 64, 62, { glow: "#9ce7ff", blur: 10 });
+    etiqueta(texto, x, 482);
+  }
+
+  seccion("CONTROLES", 540);
+  G.ctx.fillStyle = "rgba(255, 255, 255, 0.66)";
+  G.ctx.font = "700 13px Inter, sans-serif";
+  G.ctx.fillText("WASD / flechas mover · ESPACIO / J disparar · P / ESC pausa · ratón y táctil arrastrando", W / 2, 572);
+  G.ctx.fillText("Mando: stick mueve · A dispara · Start pausa", W / 2, 598);
+  G.ctx.fillStyle = "#d8f23b";
+  G.ctx.fillText("Sobrevive a las oleadas · Jefes cada 4 · Dirigible cada 8", W / 2, 626);
+}
+
 export function render() {
   G.ctx.clearRect(0, 0, W, H);
   if (!G.sheet.complete || !G.sprites.player) {
@@ -507,6 +564,11 @@ export function render() {
 
   if (G.mode === "menu" || G.mode === "loading") {
     drawMenuBackdrop();
+    return;
+  }
+
+  if (G.mode === "howto") {
+    drawHowTo();
     return;
   }
 

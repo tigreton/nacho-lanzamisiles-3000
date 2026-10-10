@@ -15,6 +15,7 @@ export const G = {
   shop: document.querySelector("#shop-screen"),
   helicopter: document.querySelector("#helicopter-screen"),
   gameover: document.querySelector("#gameover-screen"),
+  howto: document.querySelector("#howto-screen"),
   play: document.querySelector("#play-button"),
   restart: document.querySelector("#restart-button"),
   resume: document.querySelector("#resume-button"),
@@ -61,7 +62,7 @@ export const G = {
 };
 
 function showOnly(screen) {
-  [G.ui.loading, G.ui.menu, G.ui.pause, G.ui.shop, G.ui.helicopter, G.ui.gameover].forEach((item) => {
+  [G.ui.loading, G.ui.menu, G.ui.pause, G.ui.shop, G.ui.helicopter, G.ui.gameover, G.ui.howto].forEach((item) => {
     item.classList.toggle("screen--visible", item === screen);
   });
 }
@@ -75,6 +76,7 @@ export function setMode(nextMode) {
   else if (nextMode === "paused") showOnly(G.ui.pause);
   else if (nextMode === "shop") showOnly(G.ui.shop);
   else if (nextMode === "helicopter") showOnly(G.ui.helicopter);
+  else if (nextMode === "howto") showOnly(G.ui.howto);
   else if (nextMode === "gameover") showOnly(G.ui.gameover);
   else showOnly(null);
   G.ui.pauseButton.textContent = nextMode === "paused" ? "SEGUIR" : "PAUSA";

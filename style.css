@@ -428,6 +428,36 @@ button {
     0 2px 0 #3d5506;
 }
 
+.secondary-button {
+  margin-top: 12px;
+  padding: 10px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  color: rgba(255, 255, 255, 0.86);
+  font: 800 0.72rem Inter, system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.secondary-button:hover {
+  border-color: var(--acid);
+  color: var(--acid);
+}
+
+.screen--bottom {
+  align-items: end;
+}
+
+.howto-copy {
+  margin: 10px 0 14px;
+  max-width: 420px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .menu-record {
   margin: 14px 0 0;
   color: var(--acid);

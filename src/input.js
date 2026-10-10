@@ -1,7 +1,7 @@
 // Entrada: teclado, puntero/táctil y autopausa. Los handlers del juego se
 // inyectan en installInput para evitar ciclos de importación.
 import { W, H } from "./config.js";
-import { G } from "./state.js";
+import { G, setMode } from "./state.js";
 import { unlockAudio } from "./audio.js";
 
 function updatePointer(event) {
@@ -58,6 +58,7 @@ export function installInput({ togglePause, startGame }) {
     G.keys.add(event.code);
     if ((event.code === "KeyP" || event.code === "Escape") && !event.repeat) togglePause();
     if (event.code === "Enter" && G.mode === "menu") startGame();
+    if (event.code === "Escape" && G.mode === "howto") setMode("menu");
   }, true);
 
   window.addEventListener("keyup", (event) => {
