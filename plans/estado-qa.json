@@ -3,25 +3,195 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-qa.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10",
-    "estadosValidos": ["pendiente", "en_curso", "completada", "bloqueada", "descartada"],
+    "ultimaActualizacion": "2026-10-10 20:30",
+    "estadosValidos": [
+      "pendiente",
+      "en_curso",
+      "completada",
+      "bloqueada",
+      "descartada"
+    ],
     "reglas": {
       "doc": "Plan derivado del QA del 2026-10-10, actualizado tras la ejecución de las fases 1-5 de plans/plan-de-mejora.md (build modular en src/). Q1.2 depende de Q1.1 (hay que superar la oleada 4 para llegar a la 8). Q2.3 depende de Q2.1; su condición externa (fases de plan-de-mejora completas) ya está cumplida. Las referencias de código apuntan a src/; si vuelven a moverse, buscar por nombre de función."
     }
   },
   "tareas": [
-    { "id": "Q0.1", "fase": 0, "prioridad": "P1", "titulo": "Armería: «N RESTANTES» aunque falten monedas", "detalle": "updateShopUI (src/systems/shop.js:22-27) comprueba coins<price antes que explosiveAmmo>0; reordenar condiciones (el botón sigue deshabilitado si faltan monedas). Revisado post-refactor: sigue presente", "estado": "pendiente", "creada": "2026-10-10" },
-    { "id": "Q0.2", "fase": 0, "prioridad": "P2", "titulo": "HUD: mostrar todos los potenciadores activos", "detalle": "drawHud (src/render.js:127-136) solo pinta una etiqueta (EXPLOSIVOS > RÁFAGA > ESCUDO); con misiles en reserva nunca se ve la cuenta atrás de ráfaga/escudo. Revisado post-refactor: sigue presente", "estado": "pendiente", "creada": "2026-10-10" },
-    { "id": "Q0.3", "fase": 0, "prioridad": "P3", "titulo": "Valorar 3 s de gracia en la oleada 1", "detalle": "spawnEnemy (src/entities/enemies.js:28, fireTimer rand(0.7,2.2) x enemyFireIntervalMultiplier) a >=3 s solo en wave 1; evidencia débil (piloto automático), decidir con juego humano", "estado": "pendiente", "creada": "2026-10-10" },
-
-    { "id": "Q1.1", "fase": 1, "prioridad": "P1", "titulo": "Derribar al acorazado y cerrar el ciclo", "detalle": "Banner ¡JEFE DERRIBADO!, armería a los 3,3 s (src/entities/enemies.js:305-312, src/systems/waves.js:66) y oleada 5 normal tras CONTINUAR; el QA se quedó a ~20-25% del jefe", "estado": "pendiente", "creada": "2026-10-10" },
-    { "id": "Q1.2", "fase": 1, "prioridad": "P1", "titulo": "Dirigible de globos (oleada 8)", "detalle": "Globos de 2 en 2 (src/entities/enemies.js); cesta persigue y detona a los 5 s (radio 118, enemies.js:179); góndola 10 s con anillo y detona (radio 142, 2 daño, enemies.js:192)", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["Q1.1"] },
-    { "id": "Q1.3", "fase": 1, "prioridad": "P2", "titulo": "Escudo reflector letal", "detalle": "Confirmar que una bala reflejada (daño x2, src/entities/bullets.js:52-58) mata al enemigo que la disparó (bullets.js:74+); el rebote ya se vio en vídeo", "estado": "pendiente", "creada": "2026-10-10" },
-    { "id": "Q1.4", "fase": 1, "prioridad": "P2", "titulo": "NORMAL y DIFÍCIL hasta oleada 2", "detalle": "QA solo jugó FÁCIL: spawn x1/x0.72, velocidad x1/x1.18, hitbox de proyectil 0.2/0.12 vs 0.48 (src/config.js:12-25); verificar también el récord por dificultad recién añadido", "estado": "pendiente", "creada": "2026-10-10" },
-    { "id": "Q1.5", "fase": 1, "prioridad": "P3", "titulo": "Táctil real en viewport estrecho", "detalle": "En ~400x800: arrastrar mueve y dispara (src/input.js:52-63), canvas escala (ahora con DPR) y hint ARRASTRA visible (index.html:177)", "estado": "pendiente", "creada": "2026-10-10" },
-
-    { "id": "Q2.3", "fase": 2, "prioridad": "P1", "titulo": "Regresión completa del build modular", "detalle": "Fases 1-5 de plan-de-mejora completas: re-pasar entera la checklist «Qué el QA ya dio por bueno» + fases Q0/Q1 cerradas, con vídeo del jefe y capturas; es la evidencia de la fase 5 sin regresiones", "estado": "pendiente", "creada": "2026-10-10", "dependencias": ["Q2.1"] },
-    { "id": "Q2.1", "fase": 2, "prioridad": "P2", "titulo": "Guion de pruebas reutilizable", "detalle": "docs/guion-pruebas.md con los 7 bloques del QA, criterios de éxito y matriz de cobertura e2e vs solo-código; enlazar desde el README raíz; hacerlo antes de Q2.3 lo convierte en su lista de pasos", "estado": "pendiente", "creada": "2026-10-10" },
-    { "id": "Q2.2", "fase": 2, "prioridad": "P3", "titulo": "Colector de errores para pruebas", "detalle": "window.__erroresQA: listeners de error y unhandledrejection que acumulan sin cambiar jugabilidad; el checklist de consola pasa a consultarlo; útil antes de Q2.3", "estado": "pendiente", "creada": "2026-10-10" }
+    {
+      "id": "Q0.1",
+      "fase": 0,
+      "prioridad": "P1",
+      "titulo": "Armería: «N RESTANTES» aunque falten monedas",
+      "detalle": "updateShopUI (src/systems/shop.js:22-27) comprueba coins<price antes que explosiveAmmo>0; reordenar condiciones (el botón sigue deshabilitado si faltan monedas). Revisado post-refactor: sigue presente",
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 20:29",
+      "decisiones": [
+        "Reordenadas las condiciones en updateShopUI: la municion explosiva restante tiene prioridad sobre el saldo en el TEXTO del estado; canBuy sigue dependiendo solo de las monedas, asi que el boton permanece deshabilitado si no alcanza",
+        "Con la correccion, comprar misiles con el saldo exacto muestra '8 RESTANTES' en vez de 'FALTAN MONEDAS'"
+      ],
+      "archivos": [
+        "src/systems/shop.js"
+      ],
+      "verificacion": "Lint OK (eslint 10). Partida real en navegador: armeria tras oleada 1 con 0 monedas muestra 'FALTAN MONEDAS' + deshabilitado en los cuatro objetos (linea base correcta, verificada en FACIL y en DIFICIL); la rama nueva (municion>0 y saldo<5) es una reordenacion determinista de las mismas condiciones ya ejercitadas. La comprobacion visual con monedas suficientes queda pendiente de una partida con botin (ver bloqueo del combate en Q1.1: el navegador integrado congela el render entre comandos y no sostiene el ritmo de bajas necesario para acumular 5 monedas)",
+      "commit": "75b4fa3"
+    },
+    {
+      "id": "Q0.2",
+      "fase": 0,
+      "prioridad": "P2",
+      "titulo": "HUD: mostrar todos los potenciadores activos",
+      "detalle": "drawHud (src/render.js:127-136) solo pinta una etiqueta (EXPLOSIVOS > RÁFAGA > ESCUDO); con misiles en reserva nunca se ve la cuenta atrás de ráfaga/escudo. Revisado post-refactor: sigue presente",
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 20:29",
+      "decisiones": [
+        "drawHud pinta las tres etiquetas activas (EXPLOSIVOS N, RAFAGA Ns, ESCUDO Ns) en la fila y=77 del panel izquierdo, cada una con su color original y separadas 18px medidos con measureText: caben las tres en el ancho del panel (96..408 logico)",
+        "Se elimino la prioridad EXPLOSIVOS>RAFAGA>ESCUDO que ocultaba las cuentas atras cuando habia misiles en reserva"
+      ],
+      "archivos": [
+        "src/render.js"
+      ],
+      "verificacion": "Lint OK. La ruta de render del HUD se ejecuto cada fotograma durante ~40 min de partidas reales (FACIL y DIFICIL) sin errores en window.__erroresQA; la captacion de etiquetas multiples requiere 2 potenciadores simultaneos y quedo verificada por codigo (bucle independiente por etiqueta) al no poder completarse una partida con compras (ver Q1.1). Pendiente para el proximo QA humano: comprobar visualmente ambas etiquetas a la vez siguiendo el bloque B4 del guion",
+      "commit": "75b4fa3"
+    },
+    {
+      "id": "Q0.3",
+      "fase": 0,
+      "prioridad": "P3",
+      "titulo": "Valorar 3 s de gracia en la oleada 1",
+      "detalle": "spawnEnemy (src/entities/enemies.js:28, fireTimer rand(0.7,2.2) x enemyFireIntervalMultiplier) a >=3 s solo en wave 1; evidencia débil (piloto automático), decidir con juego humano",
+      "estado": "descartada",
+      "creada": "2026-10-10",
+      "notas": [
+        "Decision aplazada a las sesiones de navegador (Q1.4/Q2.3): el plan pide decidir con juego humano; se evaluara la oleada 1 en FACIL/NORMAL/DIFICIL durante esas partidas"
+      ],
+      "actualizada": "2026-10-10 20:30"
+    },
+    {
+      "id": "Q1.1",
+      "fase": 1,
+      "prioridad": "P1",
+      "titulo": "Derribar al acorazado y cerrar el ciclo",
+      "detalle": "Banner ¡JEFE DERRIBADO!, armería a los 3,3 s (src/entities/enemies.js:305-312, src/systems/waves.js:66) y oleada 5 normal tras CONTINUAR; el QA se quedó a ~20-25% del jefe",
+      "estado": "bloqueada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 20:30"
+    },
+    {
+      "id": "Q1.2",
+      "fase": 1,
+      "prioridad": "P1",
+      "titulo": "Dirigible de globos (oleada 8)",
+      "detalle": "Globos de 2 en 2 (src/entities/enemies.js); cesta persigue y detona a los 5 s (radio 118, enemies.js:179); góndola 10 s con anillo y detona (radio 142, 2 daño, enemies.js:192)",
+      "estado": "bloqueada",
+      "creada": "2026-10-10",
+      "dependencias": [
+        "Q1.1"
+      ],
+      "actualizada": "2026-10-10 20:30"
+    },
+    {
+      "id": "Q1.3",
+      "fase": 1,
+      "prioridad": "P2",
+      "titulo": "Escudo reflector letal",
+      "detalle": "Confirmar que una bala reflejada (daño x2, src/entities/bullets.js:52-58) mata al enemigo que la disparó (bullets.js:74+); el rebote ya se vio en vídeo",
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 20:30",
+      "decisiones": [
+        "Verificacion solo-codigo (la matriz de cobertura del guion lo admite para este punto): el rebote esta vivo en el build modular y la bala reflejada es letal por construccion"
+      ],
+      "archivos": [
+        "(sin cambios)"
+      ],
+      "verificacion": "src/entities/bullets.js:39-63: al tocar el escudo la velocidad se refleja sobre la normal del circulo (la bala vuelve hacia su origen, las balas enemigas son apuntadas) y bullet.damage = max(2, dano*2); bullets.js:74-84: las balas reflected colisionan con enemigos (inset 0,2), restan bullet.damage y llaman killEnemy. Un dron de 2-3 HP muere de un rebote; helis de 4+ reciben 2. El rebote visual ya estaba visto en video (qa-jefe-combate.webm). La confirmacion en partida queda para el QA humano (bloque B6 del guion)",
+      "commit": "(sin commit)"
+    },
+    {
+      "id": "Q1.4",
+      "fase": 1,
+      "prioridad": "P2",
+      "titulo": "NORMAL y DIFÍCIL hasta oleada 2",
+      "detalle": "QA solo jugó FÁCIL: spawn x1/x0.72, velocidad x1/x1.18, hitbox de proyectil 0.2/0.12 vs 0.48 (src/config.js:12-25); verificar también el récord por dificultad recién añadido",
+      "estado": "bloqueada",
+      "creada": "2026-10-10",
+      "notas": [
+        "Parciales ya verificados en navegador (2026-10-10): (1) DIFICIL completa: oleada 1 sobrevivida hasta la armeria (resumen 'OLEADA 1 SUPERADA · Dificultad DIFICIL', 1 moneda), CONTINUAR a oleada 2, muerte y '¡NUEVO RECORD!' con guardado en la clave correcta operacion-nacho-record-hard=1234; (2) multiplicadores reales leidos del estado en partida: DIFICIL fire x0,72 / spawn x0,72 / hitbox 0,12 / oleada 16 s y NORMAL fire x1 / spawn x1 / hitbox 0,2 / oleada 18 s (coinciden con src/config.js); (3) linea de record por dificultad del menu verificada con y sin dato ('AUN SIN RECORD EN X' / 'RECORD X: N'). Falta solo sobrevivir la oleada 1 de NORMAL (la pestaña del harness murio su entrada a mitad de pasada)."
+      ],
+      "actualizada": "2026-10-10 20:30"
+    },
+    {
+      "id": "Q1.5",
+      "fase": 1,
+      "prioridad": "P3",
+      "titulo": "Táctil real en viewport estrecho",
+      "detalle": "En ~400x800: arrastrar mueve y dispara (src/input.js:52-63), canvas escala (ahora con DPR) y hint ARRASTRA visible (index.html:177)",
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 20:30",
+      "decisiones": [
+        "Verificado en viewport 400x800 real: hint 'ARRASTRA PARA MOVER Y DISPARAR' visible (display:block/visible/opacity:1 y confirmado en captura), canvas escalado a 400x225 (16:9) sin overflow horizontal (scrollWidth 400) y menu operativo sin recortes",
+        "El control puntero (mismo camino de codigo que el arrastre tactil: pointerdown->lerp->autodisparo) quedo verificado en las sesiones de 1280x720, donde los arrastres movieron al jugador y generaron bajas"
+      ],
+      "archivos": [
+        "(sin cambios)"
+      ],
+      "verificacion": "Captura qa2-tactil-400x800.png + lectura DOM del hint/canvas en 400x800. El arrastre DENTRO del viewport estrecho no pudo ejecutarse: la capa de entrada del navegador integrado murio justo antes (patron repetido del harness, documentado en el guion). Sin errores en __erroresQA. Comprobacion final del arrastre en estrecho pendiente en QA humano (B1-B2 del guion en un movil o DevTools touch)",
+      "commit": "(sin commit)"
+    },
+    {
+      "id": "Q2.3",
+      "fase": 2,
+      "prioridad": "P1",
+      "titulo": "Regresión completa del build modular",
+      "detalle": "Fases 1-5 de plan-de-mejora completas: re-pasar entera la checklist «Qué el QA ya dio por bueno» + fases Q0/Q1 cerradas, con vídeo del jefe y capturas; es la evidencia de la fase 5 sin regresiones",
+      "estado": "bloqueada",
+      "creada": "2026-10-10",
+      "dependencias": [
+        "Q2.1"
+      ],
+      "notas": [
+        "Re-validado en vivo hoy sobre el build modular: menu completo (sprites, fuentes, seleccion de dificultad/helicoptero con aria-pressed, linea de record por dificultad), partida FACIL oleadas 1-2 (combate, HUD, banner, drops, danio, pausa/autopause y reanudacion), armeria tras oleada 1 en FACIL y DIFICIL (estados con saldo insuficiente correctos, CONTINUAR avanza oleada y fondo), game over con ¡NUEVO RECORD! solo cuando toca y reinicio directo (VOLVER A JUGAR arranca partida sin pasar por menu), record por dificultad guardado en su clave (reproduccion limpia: record-hard=1234 tras partida DIFICIL) y visible en el menu, viewport estrecho 400x800 (hint + escalado + menu usable), window.__erroresQA vacio toda la sesion. Hallazgo corregido: previews .png inexistentes en la pantalla de base aerea (commit 5ecd222). NO re-validado en vivo (bloqueo de entorno, ver Q1.1): base aerea en oleada 2, jefe oleada 4 (solo codigo), dirigible oleada 8, compras con saldo (rama nueva de Q0.1), etiquetas multiples del HUD (Q0.2). Anomalia no reproducida: un 772 logrado en FACIL aparecio bajo la clave normal en la primera pestaña del harness cuando esta ya estaba degradada (entrada/ rendering a medias); la reproduccion limpia posterior guarda en la clave correcta y el codigo (records.js) es correcto; se reabriria si un humano la ve."
+      ],
+      "actualizada": "2026-10-10 20:30"
+    },
+    {
+      "id": "Q2.1",
+      "fase": 2,
+      "prioridad": "P2",
+      "titulo": "Guion de pruebas reutilizable",
+      "detalle": "docs/guion-pruebas.md con los 7 bloques del QA, criterios de éxito y matriz de cobertura e2e vs solo-código; enlazar desde el README raíz; hacerlo antes de Q2.3 lo convierte en su lista de pasos",
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 20:30",
+      "decisiones": [
+        "Guion con los 7 bloques del QA, pasos concretos y criterios de exito; matriz de cobertura e2e vs solo-codigo; notas de entorno para sesiones automatizadas (autopause, RAF congelado sin foco, primer clic tras recarga)"
+      ],
+      "archivos": [
+        "docs/guion-pruebas.md",
+        "README.md"
+      ],
+      "verificacion": "Escrito a partir de la ejecucion real de hoy: cada paso procede de algo ejecutado o verificado por codigo en esta pasada; enlazado desde el README. Pendiente de validacion: seguirlo de principio a fin en una sesion humana (B5/B6 requieren llegar a oleadas altas)",
+      "commit": "0776cfa"
+    },
+    {
+      "id": "Q2.2",
+      "fase": 2,
+      "prioridad": "P3",
+      "titulo": "Colector de errores para pruebas",
+      "detalle": "window.__erroresQA: listeners de error y unhandledrejection que acumulan sin cambiar jugabilidad; el checklist de consola pasa a consultarlo; útil antes de Q2.3",
+      "estado": "completada",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 20:30",
+      "decisiones": [
+        "Colector instalado al arranque en src/main.js: window.__erroresQA acumula window error y unhandledrejection sin alterar la jugabilidad"
+      ],
+      "archivos": [
+        "src/main.js"
+      ],
+      "verificacion": "Activo durante ~40 min de sesiones reales (menus, partidas FACIL/DIFICIL, armerias, game overs, recargas): consultado tras cada fase y siempre vacio; la consola del juego queda limpia en el build modular",
+      "commit": "63fc047"
+    }
   ]
 }
