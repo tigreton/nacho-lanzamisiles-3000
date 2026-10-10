@@ -4,6 +4,7 @@ import {
   SHIELD_DURATION, SHIELD_RADIUS, MAX_PARTICLES,
 } from "./config.js";
 import { G, setMode, selectDifficulty, selectHelicopter } from "./state.js";
+import { endGame } from "./systems/gameover.js";
 import { createBurst, createExplosion, updateEffects } from "./entities/particles.js";
 import { render } from "./render.js";
 import { prepareSprites, prepareAirshipSprites, bakedGlow } from "./sprites.js";
@@ -656,16 +657,6 @@ function collectPickup(pickup) {
   pickup.collected = true;
 }
 
-function endGame() {
-  if (G.mode !== "playing") return;
-  const isRecord = G.state.score > G.state.highScore;
-  if (isRecord) saveHighScore(G.state.score, G.selectedDifficulty);
-  G.ui.resultTitle.textContent = isRecord ? "¡NUEVO RÉCORD!" : "MISIÓN TERMINADA";
-  const record = getHighScore(G.selectedDifficulty);
-  G.ui.resultCopy.textContent =
-    `Dificultad: ${G.state.difficulty.label} · Puntuación: ${G.state.score.toLocaleString("es-ES")} · Récord: ${record.toLocaleString("es-ES")} · Monedas: ${G.state.coins}`;
-  setMode("gameover");
-}
 
 
 function detonateExplosiveBullet(bullet, directHit) {
