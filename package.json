@@ -2,6 +2,7 @@
   "name": "operacion-nacho",
   "private": true,
   "description": "Juego arcade de helicopteros sin dependencias de runtime.",
+  "license": "MIT",
   "scripts": {
     "lint": "eslint src/"
   }

@@ -77,3 +77,7 @@ antes y tiene un hitbox un 13% menor.
 Al empezar puedes elegir entre los dos helicópteros. En las oleadas pares no
 boss aparece una base aérea volante; colócate encima de la plataforma con
 “ATERRIZA” para abrir el cambio de helicóptero durante la partida.
+
+## Licencia
+
+[MIT](LICENSE) — el código es libre de usar, modificar y redistribuir.

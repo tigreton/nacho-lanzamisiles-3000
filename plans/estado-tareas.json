@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 19:26",
+    "ultimaActualizacion": "2026-10-10 19:29",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -101,9 +101,9 @@
       "prioridad": "P3",
       "titulo": "Añadir LICENSE",
       "detalle": "Solo si se va a publicar el código",
-      "estado": "bloqueada",
+      "estado": "en_curso",
       "creada": "2026-10-10",
-      "actualizada": "2026-10-10 13:19"
+      "actualizada": "2026-10-10 19:29"
     },
     {
       "id": "0.6",

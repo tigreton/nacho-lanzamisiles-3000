@@ -477,3 +477,9 @@ si es una decisión tomada a mitad de camino).
 - **Verificación:** https://tigreton.github.io/nacho-lanzamisiles-3000/ responde 200; src/main.js, og.jpg, webp y fuentes online 200; primer build en ~40 s
 - **Commit:** 6cd7d69
 
+### [2026-10-10 19:29] 0.5 — Añadir LICENSE
+- **Estado:** bloqueada → pendiente
+
+### [2026-10-10 19:29] 0.5 — Añadir LICENSE
+- **Estado:** pendiente → en_curso
+
