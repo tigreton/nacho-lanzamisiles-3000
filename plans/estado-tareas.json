@@ -3,7 +3,7 @@
     "proyecto": "Operación Nacho",
     "plan": "plans/plan-de-mejora.md",
     "creado": "2026-10-10",
-    "ultimaActualizacion": "2026-10-10 18:26",
+    "ultimaActualizacion": "2026-10-10 18:27",
     "estadosValidos": [
       "pendiente",
       "en_curso",
@@ -555,12 +555,20 @@
       "prioridad": "P2",
       "titulo": "Pre-renderizar glows",
       "detalle": "Hornear shadowBlur en canvas offscreen al preparar sprites",
-      "estado": "en_curso",
+      "estado": "completada",
       "creada": "2026-10-10",
       "dependencias": [
         "2.4"
       ],
-      "actualizada": "2026-10-10 18:26"
+      "actualizada": "2026-10-10 18:27",
+      "decisiones": [
+        "drawSprite dibuja el canvas horneado (sprite + halo, margen blur*1.6+2) escalado al tamano de destino; cache Map por sprite -> (color|blur -> canvas), se crea una sola vez por combinacion; el halo escala con la transform igual que el shadowBlur en vivo; los glows de texto del HUD y las estrellas siguen en runtime (cambian cada frame, no son cacheables); equivalencia visual verificada en el e2e de fase"
+      ],
+      "archivos": [
+        "game.js"
+      ],
+      "verificacion": "node --check OK; e2e de fase pendiente de acumular",
+      "commit": "b0a7b62"
     },
     {
       "id": "4.3",
@@ -568,8 +576,9 @@
       "prioridad": "P3",
       "titulo": "Tope duro de partículas (~400)",
       "detalle": "Evitar picos en oleadas densas + jefes",
-      "estado": "pendiente",
-      "creada": "2026-10-10"
+      "estado": "en_curso",
+      "creada": "2026-10-10",
+      "actualizada": "2026-10-10 18:27"
     },
     {
       "id": "5.1",

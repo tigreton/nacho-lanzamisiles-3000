@@ -352,3 +352,14 @@ si es una decisión tomada a mitad de camino).
 ### [2026-10-10 18:26] 4.2 — Pre-renderizar glows
 - **Estado:** pendiente → en_curso
 
+### [2026-10-10 18:27] 4.2 — Pre-renderizar glows
+- **Estado:** en_curso → completada
+- **Decisiones:**
+  - drawSprite dibuja el canvas horneado (sprite + halo, margen blur*1.6+2) escalado al tamano de destino; cache Map por sprite -> (color|blur -> canvas), se crea una sola vez por combinacion; el halo escala con la transform igual que el shadowBlur en vivo; los glows de texto del HUD y las estrellas siguen en runtime (cambian cada frame, no son cacheables); equivalencia visual verificada en el e2e de fase
+- **Archivos:** game.js
+- **Verificación:** node --check OK; e2e de fase pendiente de acumular
+- **Commit:** b0a7b62
+
+### [2026-10-10 18:27] 4.3 — Tope duro de partículas (~400)
+- **Estado:** pendiente → en_curso
+
