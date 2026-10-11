@@ -29,6 +29,11 @@ propios generados con IA, procesados offline a láminas WebP transparentes con
 - `assets/ia-atardecer.webp`: fondo de atardecer de las oleadas 11-12 (en
   sustitución del recorte del atlas, cuyo resplandor saturado dominaba la
   pantalla y se percibía como un círculo rojo gigante sobre los enemigos).
+- `assets/ia-fx-debil.webp`, `ia-fx-crater.webp` y `ia-fx-fogonazo.webp`:
+  tiras de frames para los efectos animados —el latido del punto débil del
+  blindado, las brasas del cráter de una torreta derribada y el fogonazo de
+  aviso del cañón—, construidas con
+  `plans/herramientas/tiras-efectos-ia.py` a partir de arte IA.
 
 ## Jugar online
 

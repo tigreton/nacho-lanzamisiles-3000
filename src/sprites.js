@@ -41,6 +41,22 @@ export function cutAirshipSprite(crop) {
 }
 
 
+// Corta una tira horizontal de frames iguales (efectos IA) en canvases.
+export function cutStrip(image, frames) {
+  const salida = [];
+  for (let i = 0; i < frames; i += 1) {
+    const x0 = Math.round((image.width / frames) * i);
+    const x1 = Math.round((image.width / frames) * (i + 1));
+    const output = document.createElement("canvas");
+    output.width = x1 - x0;
+    output.height = image.height;
+    output.getContext("2d").drawImage(image, x0, 0, x1 - x0, image.height, 0, 0, x1 - x0, image.height);
+    salida.push(output);
+  }
+  return salida;
+}
+
+
 export function prepareAirshipSprites() {
   G.sprites.airshipBoss = cutAirshipSprite(AIRSHIP_CROPS.boss);
   G.sprites.balloons = AIRSHIP_CROPS.balloons.map(cutAirshipSprite);
