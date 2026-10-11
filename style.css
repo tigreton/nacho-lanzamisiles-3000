@@ -72,8 +72,11 @@ button {
   place-items: center;
 }
 
+/* El ancho se ciñe también a la altura disponible (cabecera 73 + pie 46 +
+   márgenes del shell ~68 + bordes): así el marco completo entra en el
+   viewport sin scroll de página. Los cortes de móvil mandan sobre esto. */
 .game-frame {
-  width: 100%;
+  width: min(100%, calc((100dvh - 190px) * 16 / 9));
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -120,6 +123,12 @@ button {
   font-size: clamp(1.15rem, 2.2vw, 1.75rem);
   font-weight: 400;
   letter-spacing: 0.04em;
+}
+
+/* En el menú el título gigante ya ocupa la tarjeta: se apaga el eco de
+   la cabecera (visibility mantiene el alto de la barra). */
+.game-frame:has(#menu-screen.screen--visible) .brand strong {
+  visibility: hidden;
 }
 
 .header-actions {
