@@ -47,7 +47,9 @@ export const G = {
   gondolaSheet: new Image(),
   helicopterSheets: { v1: new Image(), v2: new Image() },
   // Láminas individuales generadas con IA para las entidades que antes se
-  // dibujaban con primitivas de canvas o reutilizando sprites prestados.
+  // dibujaban con primitivas de canvas o reutilizando sprites prestados
+  // (más el fondo de atardecer de las oleadas 11-12, en sustitución del
+  // recorte del atlas, cuyo resplandor saturado dominaba la pantalla).
   iaSheets: {
     kamikaze: new Image(),
     gunship: new Image(),
@@ -60,6 +62,7 @@ export const G = {
     basket: new Image(),
     airbase: new Image(),
     shield: new Image(),
+    atardecer: new Image(),
   },
   sprites: {},
   keys: new Set(),

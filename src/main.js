@@ -65,6 +65,7 @@ const IA_LAMINAS = [
   "basket",
   "airbase",
   "shield",
+  "atardecer",
 ];
 for (const nombre of IA_LAMINAS) {
   G.iaSheets[nombre].src = `assets/ia-${nombre.replace(/([A-Z])/g, "-$1").toLowerCase()}.webp`;

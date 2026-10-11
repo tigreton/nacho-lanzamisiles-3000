@@ -148,8 +148,16 @@ function drawBalloonSprite(enemy) {
 
 
 function drawBackground(backgroundIndex = 0) {
-  const crop = CROPS.backgrounds[backgroundIndex % CROPS.backgrounds.length];
-  G.ctx.drawImage(G.sheet, crop[0], crop[1], crop[2], crop[3], 0, 0, W, H);
+  const indice = backgroundIndex % CROPS.backgrounds.length;
+  if (indice === 2 && G.sprites.iaAtardecer) {
+    // El atardecer de las oleadas 11-12 usa la lámina IA completa: el
+    // recorte del atlas original es 234x149 estirado a pantalla y su
+    // resplandor saturado se comía la lectura del combate.
+    G.ctx.drawImage(G.sprites.iaAtardecer, 0, 0, W, H);
+  } else {
+    const crop = CROPS.backgrounds[indice];
+    G.ctx.drawImage(G.sheet, crop[0], crop[1], crop[2], crop[3], 0, 0, W, H);
+  }
 
   const tint = G.ctx.createLinearGradient(0, 0, 0, H);
   tint.addColorStop(0, "rgba(12, 49, 72, 0.04)");

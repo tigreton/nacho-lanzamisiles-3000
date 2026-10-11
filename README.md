@@ -26,6 +26,9 @@ propios generados con IA, procesados offline a láminas WebP transparentes con
 - `assets/ia-basket.webp`: cesta desprendida del globo, con cuerdas rotas.
 - `assets/ia-airbase.webp`: base aérea volante con pista de aterrizaje.
 - `assets/ia-shield.webp`: burbuja del escudo reflector.
+- `assets/ia-atardecer.webp`: fondo de atardecer de las oleadas 11-12 (en
+  sustitución del recorte del atlas, cuyo resplandor saturado dominaba la
+  pantalla y se percibía como un círculo rojo gigante sobre los enemigos).
 
 ## Jugar online
 
