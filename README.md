@@ -35,6 +35,44 @@ propios generados con IA, procesados offline a láminas WebP transparentes con
   aviso del cañón—, construidas con
   `plans/herramientas/tiras-efectos-ia.py` a partir de arte IA.
 
+## Galería
+
+Capturas reales del juego (carpeta [`docs/capturas/`](docs/capturas)):
+
+### Helicópteros y aliado
+
+<table><tr>
+<td align="center"><img src="docs/capturas/personaje-blindado.jpg" width="380" alt="Helicóptero BLINDADO disparando"><br><b>BLINDADO</b></td>
+<td align="center"><img src="docs/capturas/personaje-sigilo.jpg" width="380" alt="Helicóptero SIGILO disparando"><br><b>SIGILO</b></td>
+</tr><tr>
+<td align="center"><img src="docs/capturas/dron-aliado.jpg" width="380" alt="Dron aliado escoltando y disparando"><br><b>Dron aliado</b></td>
+<td align="center"><img src="docs/capturas/enemigos.jpg" width="380" alt="Enemigos identificados: heli, dron, escuadrón en V, kamikaze y blindado"><br><b>Enemigos</b></td>
+</tr></table>
+
+### Jefes
+
+<table><tr>
+<td align="center"><img src="docs/capturas/jefe-acorazado.jpg" width="300" alt="Jefe acorazado disparando"><br><b>Acorazado</b> (oleada 4)</td>
+<td align="center"><img src="docs/capturas/jefe-dirigible.jpg" width="300" alt="Jefe dirigible lanzando globos"><br><b>Dirigible</b> (oleada 8)</td>
+<td align="center"><img src="docs/capturas/jefe-fortaleza.jpg" width="300" alt="Jefe fortaleza con torretas y un cráter"><br><b>Fortaleza</b> (oleada 12)</td>
+</tr></table>
+
+### Arsenal y botín
+
+<table><tr>
+<td align="center"><img src="docs/capturas/armas.jpg" width="380" alt="Balas, misil explosivo, teledirigido y misil cargado"><br><b>Arsenal</b></td>
+<td align="center"><img src="docs/capturas/botin.jpg" width="380" alt="Monedas y potenciadores flotando"><br><b>Botín</b></td>
+</tr></table>
+
+### Habilidades y base aérea
+
+<table><tr>
+<td align="center"><img src="docs/capturas/habilidades.jpg" width="380" alt="Escudo reflector, arco de carga y dron aliado"><br><b>Escudo + carga</b></td>
+<td align="center"><img src="docs/capturas/miniatura.jpg" width="380" alt="SIGILO encogido esquivando balas"><br><b>MINIATURA</b></td>
+</tr><tr>
+<td align="center"><img src="docs/capturas/base-aerea.jpg" width="380" alt="Base aérea volante con pista ATERRIZA"><br><b>Base aérea</b></td>
+</tr></table>
+
 ## Jugar online
 
 <https://tigreton.github.io/nacho-lanzamisiles-3000/>
