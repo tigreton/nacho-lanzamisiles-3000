@@ -10,6 +10,7 @@ import { rand } from "./utils.js";
 import { unlockAudio, tone, toggleSound } from "./audio.js";
 import { ensureMusic, initMusicUI } from "./music.js";
 import { installInput, pollGamepad } from "./input.js";
+import { installCheatCodes } from "./systems/cheats.js";
 import { getHighScore } from "./records.js";
 
 
@@ -249,6 +250,7 @@ function loop(time) {
 }
 
 installInput({ togglePause, startGame });
+installCheatCodes();
 
 // Gancho de QA: permite al guion de pruebas saltar a una oleada o modo
 // concretos sin jugar hasta ellos y avanzar fotogramas a demanda, porque
