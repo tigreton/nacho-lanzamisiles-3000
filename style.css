@@ -219,7 +219,7 @@ button {
 }
 
 .menu-card {
-  width: min(450px, 47vw);
+  width: min(500px, 47vw);
   max-height: 100%;
   overflow-y: auto;
   padding-right: 4px;
@@ -236,8 +236,10 @@ button {
   text-shadow: 0 5px 0 rgba(0, 0, 0, 0.35);
 }
 
+/* "OPERACIÓN" ocupa 6,17em en Black Ops One: a 4,9rem mide ~484px y cabe
+   en la tarjeta de 500px sin recortarse contra el overflow del panel. */
 .menu-card h1 {
-  font-size: clamp(2.7rem, 6vw, 6.4rem);
+  font-size: clamp(2.7rem, 6vw, 4.9rem);
 }
 
 .menu-card h1 em {
