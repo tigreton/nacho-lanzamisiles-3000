@@ -366,21 +366,10 @@ button {
 }
 
 /* En pantallas 16:9 de poca altura el menú con tres selectores no cabe:
-   se sacrifican primero los controles y luego el texto de ambientación
-   (igual que el corte móvil) según el alto REAL del escenario, no el del
-   viewport, que ya no guarda relación con él. Si aún sobra contenido,
-   la tarjeta desplaza sola en vez de recortar opciones. */
-@container stage (max-height: 840px) {
-  .controls-card {
-    display: none;
-  }
-}
-
-@container stage (max-height: 740px) {
-  .mission-copy {
-    display: none;
-  }
-}
+   se sacrifican controles y texto de ambientación según el alto REAL del
+   escenario (queries al final del archivo, en container-queries.css
+   de abajo). Si aún sobra contenido, la tarjeta desplaza sola en vez
+   de recortar opciones. */
 
 .helicopter-picker {
   width: min(430px, 100%);
@@ -848,6 +837,51 @@ kbd {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Sacrificio progresivo del menú por alto REAL del escenario (no del
+   viewport): al final del archivo para ganar a las reglas base de
+   .controls-card/.mission-copy con misma especificidad. Medido a
+   stage de 749px: contenido completo 762px, sin controles 718px. */
+@container stage (max-height: 840px) {
+  .controls-card {
+    display: none;
+  }
+}
+
+@container stage (max-height: 790px) {
+  .mission-copy {
+    display: none;
+  }
+}
+
+/* Escenario bajito (1366x768 y compañía, stage ~577px): además de los
+   sacrificios, se compacta título, tarjetas de helicóptero y márgenes
+   para que la carta quepa sin desplazar. */
+@container stage (max-height: 640px) {
+  .menu-card h1 {
+    margin: 6px 0;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+  }
+
+  .difficulty-picker,
+  .mode-picker,
+  .helicopter-picker {
+    margin-bottom: 8px;
+  }
+
+  .helicopter-option {
+    min-height: 80px;
+  }
+
+  .helicopter-option img {
+    height: 48px;
+  }
+
+  .menu-record,
+  .menu-logros {
+    margin-top: 6px;
   }
 }
 
