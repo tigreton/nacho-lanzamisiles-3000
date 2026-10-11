@@ -110,7 +110,7 @@ function updateMenuRecord() {
   refreshModeAvailability();
   const etiqueta = DIFFICULTIES[G.selectedDifficulty].label;
   const etiquetaModo = GAME_MODES[G.selectedMode].label;
-  const top = getHighScores(G.selectedDifficulty, G.selectedMode);
+  const top = getHighScores(G.selectedDifficulty, G.selectedMode).slice(0, 3);
   const titulo = G.selectedMode === "campana" ? etiqueta : `${etiquetaModo} · ${etiqueta}`;
   const filas = top.length
     ? `<ol class="menu-top">${top
@@ -120,7 +120,7 @@ function updateMenuRecord() {
   const totalLogros = Object.keys(ACHIEVEMENTS).length;
   const logros = getUnlockedAchievements().size;
   G.ui.menuRecord.innerHTML =
-    `<p class="menu-record-title">TOP 5 · ${titulo}</p>${filas}<p class="menu-logros">★ LOGROS ${logros}/${totalLogros}</p>`;
+    `<p class="menu-record-title">TOP 3 · ${titulo}</p>${filas}<p class="menu-logros">★ LOGROS ${logros}/${totalLogros}</p>`;
 }
 
 

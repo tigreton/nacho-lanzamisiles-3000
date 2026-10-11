@@ -157,6 +157,10 @@ button {
   aspect-ratio: 16 / 9;
   background: #111f2d;
   isolation: isolate;
+  /* El alto del escenario, no el del viewport, decide si el menú cabe:
+     aquí se anclan las container queries de la tarjeta. */
+  container-type: size;
+  container-name: stage;
 }
 
 #game-canvas {
@@ -353,12 +357,18 @@ button {
 }
 
 /* En pantallas 16:9 de poca altura el menú con tres selectores no cabe:
-   se sacrifican primero los textos de ambientación y controles (igual
-   que el corte móvil) y, si aún sobra contenido, la tarjeta desplaza
-   sola en vez de recortar opciones. */
-@media (max-height: 780px) {
-  .mission-copy,
+   se sacrifican primero los controles y luego el texto de ambientación
+   (igual que el corte móvil) según el alto REAL del escenario, no el del
+   viewport, que ya no guarda relación con él. Si aún sobra contenido,
+   la tarjeta desplaza sola en vez de recortar opciones. */
+@container stage (max-height: 840px) {
   .controls-card {
+    display: none;
+  }
+}
+
+@container stage (max-height: 740px) {
+  .mission-copy {
     display: none;
   }
 }
