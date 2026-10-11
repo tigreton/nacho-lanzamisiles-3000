@@ -212,22 +212,11 @@
             </div>
           </div>
 
-          <div id="howto-screen" class="screen screen--bottom">
-            <div class="compact-card">
-              <span class="eyebrow">MANUAL DE VUELO</span>
-              <p class="howto-copy">
-                Derriba enemigos, recoge monedas y mejora tu helicóptero en la
-                armería de cada oleada. Tres jefes rotan cada 4 oleadas:
-                acorazado, dirigible de globos y fortaleza voladora (derríbale
-                las torretas para tumbarla), y se enfurecen al 50% de vida.
-                Cuidado con los kamikazes (avisan antes de lanzarse en piqué),
-                los blindados (su placa frontal repele: apunta a la cúpula roja,
-                que hace daño doble) y los escuadrones en V. Mantén pulsado el
-                disparo para cargar un misil grande; encadena bajas para
-                multiplicar los puntos.
-              </p>
-              <button id="howto-back" class="primary-button" type="button">VOLVER</button>
-            </div>
+          <!-- Toda la explicación vive en el canvas (drawHowTo); el HTML solo
+               aporta el botón de salida para ratón, teclado y mando. Va arriba
+               a la derecha, hueco libre a cualquier tamaño de ventana. -->
+          <div id="howto-screen" class="screen">
+            <button id="howto-back" class="primary-button" type="button">VOLVER</button>
           </div>
 
           <div id="gameover-screen" class="screen">

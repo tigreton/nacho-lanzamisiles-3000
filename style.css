@@ -508,29 +508,14 @@ button {
   color: var(--acid);
 }
 
-.screen--bottom {
-  align-items: end;
-}
-
-.howto-copy {
-  margin: 10px 0 14px;
-  max-width: 420px;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.78rem;
-  line-height: 1.5;
-  text-align: center;
-}
-
-/* El manual comparte compact-card con otras pantallas: se compacta a solas
-   para que la tarjeta no tape la galería de enemigos dibujada en el canvas. */
-#howto-screen .compact-card {
-  padding: 24px 32px;
-}
-
-#howto-screen .howto-copy {
-  margin: 8px 0 12px;
-  font-size: 0.72rem;
-  line-height: 1.42;
+/* La explicación completa la dibuja el canvas (drawHowTo), que ya aplica su
+   propio velo oscuro: aquí ni fondo ni blur, para no ensuciar ni difuminar la
+   galería. Solo flota el botón VOLVER, arriba a la derecha, donde el canvas
+   deja hueco libre a cualquier tamaño de ventana. */
+#howto-screen {
+  background: none;
+  backdrop-filter: none;
+  place-items: start end;
 }
 
 .menu-record {
