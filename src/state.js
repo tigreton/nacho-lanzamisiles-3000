@@ -1,7 +1,7 @@
 // Estado compartido del juego: las mutables viven en la bolsa G para que
 // los módulos puedan leerlas y reasignarlas sin ciclos de importación.
 import { W, H, DIFFICULTIES, HELICOPTERS, GAME_MODES, ACHIEVEMENTS, COMBO_KILLS_PER_STEP, MAX_COMBO_MULTIPLIER } from "./config.js";
-import { getHighScores, getUnlockedAchievements } from "./records.js";
+import { getHighScores, getUnlockedAchievements, isCheatActive } from "./records.js";
 
 const canvas = document.querySelector("#game-canvas");
 
@@ -127,9 +127,10 @@ function updateMenuRecord() {
 }
 
 
-// El modo solo jefes se desbloquea con el logro del primer dirigible:
-// hasta entonces el botón queda deshabilitado y explica cómo abrirlo.
-function refreshModeAvailability() {
+// El modo solo jefes se desbloquea con el logro del primer dirigible (o
+// con el truco oculto de cheats.js): hasta entonces el botón queda
+// deshabilitado y explica cómo abrirlo.
+export function refreshModeAvailability() {
   const desbloqueado = modoJefesDesbloqueado();
   for (const button of G.ui.modeButtons) {
     if (button.dataset.mode !== "jefes") continue;
@@ -150,7 +151,10 @@ function refreshModeAvailability() {
 
 
 function modoJefesDesbloqueado() {
-  return getUnlockedAchievements().has(GAME_MODES.jefes.unlockAchievement);
+  return (
+    getUnlockedAchievements().has(GAME_MODES.jefes.unlockAchievement) ||
+    isCheatActive("jefes")
+  );
 }
 
 export function selectDifficulty(id) {

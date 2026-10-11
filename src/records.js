@@ -3,6 +3,7 @@
 
 const TOP_SIZE = 5;
 const CLAVE_LOGROS = "operacion-nacho-logros";
+const CLAVE_TRUCOS = "operacion-nacho-trucos";
 // La campaña conserva la clave histórica por dificultad; los demás modos
 // (supervivencia, solo jefes) tienen su propio top por dificultad.
 const claveTop = (difficultyId, modeId = "campana") =>
@@ -82,6 +83,31 @@ export function unlockAchievement(id) {
     if (datos[id]) return false;
     datos[id] = true;
     localStorage.setItem(CLAVE_LOGROS, JSON.stringify(datos));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+
+// Trucos ocultos: marcas aparte de los logros, para que el contador de
+// logros del menú no sume lo desbloqueado haciendo trampa.
+export function isCheatActive(id) {
+  try {
+    return !!JSON.parse(localStorage.getItem(CLAVE_TRUCOS))[id];
+  } catch {
+    return false;
+  }
+}
+
+
+// Devuelve true solo la primera vez que se activa el truco.
+export function activateCheat(id) {
+  try {
+    const datos = JSON.parse(localStorage.getItem(CLAVE_TRUCOS)) || {};
+    if (datos[id]) return false;
+    datos[id] = true;
+    localStorage.setItem(CLAVE_TRUCOS, JSON.stringify(datos));
     return true;
   } catch {
     return false;
