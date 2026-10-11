@@ -620,35 +620,37 @@ function drawHowTo() {
   G.ctx.textBaseline = "middle";
   G.ctx.fillStyle = "#d8f23b";
   G.ctx.font = '400 34px "Black Ops One", Impact, sans-serif';
-  G.ctx.fillText("CÓMO JUGAR", W / 2, 64);
+  G.ctx.fillText("CÓMO JUGAR", W / 2, 60);
 
   const etiqueta = (texto, x, y) => {
     G.ctx.fillStyle = "rgba(255, 255, 255, 0.78)";
-    G.ctx.font = "900 11px Inter, sans-serif";
+    G.ctx.font = "900 12px Inter, sans-serif";
     G.ctx.fillText(texto, x, y);
   };
   const seccion = (texto, y) => {
     G.ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    G.ctx.font = "900 12px Inter, sans-serif";
+    G.ctx.font = "900 13px Inter, sans-serif";
     G.ctx.fillText(texto, W / 2, y);
   };
 
-  seccion("ENEMIGOS", 122);
+  seccion("ENEMIGOS", 112);
+  // Centros calculados para un hueco fijo de 47 px entre sprites, con los dos
+  // jefes (más anchos) separados del resto y de entre sí.
   const enemigos = [
-    [G.sprites.enemyHeli?.[0], "HELI", 135, 88],
-    [G.sprites.drone?.[0], "DRON", 275, 80],
-    [G.sprites.fighter?.[0], "CAZA", 415, 96],
-    [G.sprites.iaKamikaze, "KAMIKAZE", 555, 80],
-    [G.sprites.iaGunship, "BLINDADO", 700, 92],
-    [G.sprites.boss, "ACORAZADO", 880, 150],
-    [G.sprites.airshipBoss, "DIRIGIBLE", 1065, 170],
+    [G.sprites.enemyHeli?.[0], "HELI", 124, 88],
+    [G.sprites.drone?.[0], "DRON", 255, 80],
+    [G.sprites.fighter?.[0], "CAZA", 390, 96],
+    [G.sprites.iaKamikaze, "KAMIKAZE", 525, 80],
+    [G.sprites.iaGunship, "BLINDADO", 658, 92],
+    [G.sprites.boss, "ACORAZADO", 826, 150],
+    [G.sprites.airshipBoss, "DIRIGIBLE", 1033, 170],
   ];
   for (const [sprite, texto, x, tam] of enemigos) {
-    drawSprite(sprite, x, 210, tam, tam * 0.75, { glow: "rgba(255, 72, 20, 0.25)", blur: 12 });
-    etiqueta(texto, x, 285);
+    drawSprite(sprite, x, 196, tam, tam * 0.75, { glow: "rgba(255, 72, 20, 0.25)", blur: 12 });
+    etiqueta(texto, x, 270);
   }
 
-  seccion("BOTÍN", 350);
+  seccion("BOTÍN", 318);
   const botin = [
     [G.sprites.coin, "MONEDA", 250],
     [G.sprites.powerups?.[0], "RÁFAGA", 460],
@@ -657,19 +659,20 @@ function drawHowTo() {
     [G.sprites.powerups?.[3], "ESTRELLA", 1060],
   ];
   for (const [sprite, texto, x] of botin) {
-    drawSprite(sprite, x, 425, 64, 62, { glow: "#9ce7ff", blur: 10 });
-    etiqueta(texto, x, 482);
+    drawSprite(sprite, x, 386, 64, 62, { glow: "#9ce7ff", blur: 10 });
+    etiqueta(texto, x, 444);
   }
 
-  seccion("CONTROLES", 540);
-  G.ctx.fillStyle = "rgba(255, 255, 255, 0.66)";
+  // La esquina superior derecha queda libre para el botón VOLVER del HTML.
+  seccion("CONTROLES", 488);
+  G.ctx.fillStyle = "rgba(255, 255, 255, 0.72)";
   G.ctx.font = "700 13px Inter, sans-serif";
-  G.ctx.fillText("WASD / flechas mover · ESPACIO / J disparar · P / ESC pausa · ratón y táctil arrastrando", W / 2, 572);
-  G.ctx.fillText("Mantén pulsado el disparo para cargar un misil grande · suelta para lanzarlo", W / 2, 596);
-  G.ctx.fillText("Mando: stick mueve · A dispara (mantén para cargar) · Start pausa", W / 2, 620);
+  G.ctx.fillText("WASD / flechas mover · ESPACIO / J disparar · P / ESC pausa · ratón y táctil arrastrando", W / 2, 514);
+  G.ctx.fillText("Mantén pulsado el disparo para cargar un misil grande · suelta para lanzarlo", W / 2, 535);
+  G.ctx.fillText("Mando: stick mueve · A dispara (mantén para cargar) · Start pausa", W / 2, 556);
   G.ctx.fillStyle = "#d8f23b";
-  G.ctx.fillText("Tres jefes rotan cada 4 oleadas y se enfurecen al 50% · A la fortaleza, derríbale las torretas", W / 2, 644);
-  G.ctx.fillText("Modos: campaña, supervivencia sin fin y solo jefes · Bajas seguidas = multiplicador · Rozar = puntos", W / 2, 668);
+  G.ctx.fillText("Kamikazes avisan antes de lanzarse · Al blindado, apúntale a la cúpula roja (daño doble) · Bajas seguidas = multiplicador", W / 2, 582);
+  G.ctx.fillText("Tres jefes rotan cada 4 oleadas y se enfurecen al 50% · A la fortaleza, derríbale las torretas · Rozar = puntos", W / 2, 603);
 }
 
 export function render() {
