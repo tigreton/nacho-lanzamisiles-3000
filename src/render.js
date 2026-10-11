@@ -35,23 +35,15 @@ function drawSprite(image, x, y, width, height, options = {}) {
 
 
 function drawGunshipWeakpoint(enemy) {
-  // Punto débil: cúpula roja pulsante sobre el morro, donde los impactos
+  // Punto débil: cúpula roja latiente sobre el casco, donde los impactos
   // hacen daño doble (coincide con el círculo de hitsGunshipWeakpoint).
+  // El pulso es la tira IA de frames ia-fx-debil.webp.
   const weakX = enemy.x + enemy.w * GUNSHIP_WEAKPOINT.offsetX;
   const weakY = enemy.y + enemy.h * GUNSHIP_WEAKPOINT.offsetY;
-  const weakR = enemy.w * GUNSHIP_WEAKPOINT.radius * 0.62;
-  const pulso = 0.75 + Math.sin(G.state.elapsed * 7) * 0.25;
-  G.ctx.save();
-  G.ctx.shadowColor = "#ff3b18";
-  G.ctx.shadowBlur = 10 + 8 * pulso;
-  G.ctx.fillStyle = `rgba(255, 60, 25, ${0.55 + pulso * 0.3})`;
-  G.ctx.beginPath();
-  G.ctx.arc(weakX, weakY, weakR, 0, Math.PI * 2);
-  G.ctx.fill();
-  G.ctx.strokeStyle = "rgba(255, 214, 200, 0.85)";
-  G.ctx.lineWidth = 2;
-  G.ctx.stroke();
-  G.ctx.restore();
+  const tira = G.sprites.iaFxDebil;
+  const frame = tira[Math.floor(G.state.elapsed * 12) % tira.length];
+  const lado = enemy.w * GUNSHIP_WEAKPOINT.radius * 2 * 1.05;
+  drawSprite(frame, weakX, weakY, lado, lado);
 }
 
 
@@ -76,8 +68,9 @@ function drawFortress(fortress) {
   G.ctx.save();
   G.ctx.translate(fortress.x, fortress.y);
   G.ctx.rotate(Math.sin(fortress.age * 0.7) * 0.012);
-  for (const socket of fortress.turretSockets) {
+  fortress.turretSockets.forEach((socket, indice) => {
     if (socket.alive) {
+      // Montura viva: aro mecánico donde ancla la torreta.
       G.ctx.fillStyle = "#46565e";
       G.ctx.strokeStyle = "#11181b";
       G.ctx.lineWidth = 4;
@@ -86,16 +79,13 @@ function drawFortress(fortress) {
       G.ctx.fill();
       G.ctx.stroke();
     } else {
-      G.ctx.fillStyle = "#12181b";
-      G.ctx.beginPath();
-      G.ctx.arc(socket.offsetX, socket.offsetY, 22, 0, Math.PI * 2);
-      G.ctx.fill();
-      G.ctx.fillStyle = `rgba(255, 96, 24, ${0.35 + Math.sin(fortress.age * 6 + socket.offsetX) * 0.2})`;
-      G.ctx.beginPath();
-      G.ctx.arc(socket.offsetX, socket.offsetY, 9, 0, Math.PI * 2);
-      G.ctx.fill();
+      // Torreta derribada: cráter con brasas de la tira IA, desfasado por
+      // anclaje para que no respiren todos a la vez.
+      const tira = G.sprites.iaFxCrater;
+      const frame = tira[Math.floor(fortress.age * 10 + indice * 2) % tira.length];
+      drawSprite(frame, socket.offsetX, socket.offsetY, 56, 56);
     }
-  }
+  });
   G.ctx.restore();
 }
 
@@ -108,15 +98,14 @@ function drawTurret(turret) {
   drawSprite(sprite, turret.x, turret.y, turret.w, turret.h, { rotate: angulo });
 
   if (turret.fireTimer < 0.32) {
+    // Fogonazo de aviso: la tira IA crece a medida que se acerca el disparo.
     const aviso = 1 - turret.fireTimer / 0.32;
+    const tira = G.sprites.iaFxFogonazo;
+    const frame = tira[Math.min(tira.length - 1, Math.floor(aviso * tira.length))];
     G.ctx.save();
     G.ctx.translate(turret.x, turret.y);
     G.ctx.rotate(angulo);
-    G.ctx.fillStyle = turret.parent?.phase2 ? "#ff3013" : "#ff8a18";
-    G.ctx.globalAlpha = 0.35 + aviso * 0.6;
-    G.ctx.beginPath();
-    G.ctx.arc(turret.w * 0.72, 0, 5 + aviso * 4, 0, Math.PI * 2);
-    G.ctx.fill();
+    drawSprite(frame, turret.w * 0.72, 0, 34, 34, { alpha: 0.55 + aviso * 0.45 });
     G.ctx.restore();
   }
 

@@ -6,7 +6,7 @@ import { buyShopItem, continueFromShop } from "./systems/shop.js";
 import { continueFromHelicopter } from "./entities/airbase.js";
 import { activateAbility } from "./entities/player.js";
 import { render } from "./render.js";
-import { prepareSprites, prepareAirshipSprites } from "./sprites.js";
+import { prepareSprites, prepareAirshipSprites, cutStrip } from "./sprites.js";
 import { rand } from "./utils.js";
 import { unlockAudio, tone, toggleSound } from "./audio.js";
 import { ensureMusic, initMusicUI } from "./music.js";
@@ -68,7 +68,13 @@ const IA_LAMINAS = [
   "airbase",
   "shield",
   "atardecer",
+  "fxDebil",
+  "fxCrater",
+  "fxFogonazo",
 ];
+// Las láminas de efectos son tiras horizontales de N frames iguales: al
+// cargar se trocean en un array de canvases (sprites.js cutStrip).
+const IA_TIRAS = { fxDebil: 8, fxCrater: 8, fxFogonazo: 5 };
 for (const nombre of IA_LAMINAS) {
   G.iaSheets[nombre].src = `assets/ia-${nombre.replace(/([A-Z])/g, "-$1").toLowerCase()}.webp`;
 }
@@ -332,10 +338,12 @@ G.gondolaSheet.addEventListener("error", showSpriteLoadError);
 for (const helicopterSheet of Object.values(G.helicopterSheets)) {
   helicopterSheet.addEventListener("error", showSpriteLoadError);
 }
-// Láminas IA: se cargan como sprites individuales (ia<Nombre> en G.sprites).
+// Láminas IA: se cargan como sprites individuales (ia<Nombre> en G.sprites);
+// las tiras de efectos se trocean en arrays de frames.
 for (const nombre of IA_LAMINAS) {
   G.iaSheets[nombre].addEventListener("load", () => {
-    G.sprites[`ia${nombre[0].toUpperCase()}${nombre.slice(1)}`] = G.iaSheets[nombre];
+    const clave = `ia${nombre[0].toUpperCase()}${nombre.slice(1)}`;
+    G.sprites[clave] = IA_TIRAS[nombre] ? cutStrip(G.iaSheets[nombre], IA_TIRAS[nombre]) : G.iaSheets[nombre];
     iaSheetsReady += 1;
     finishLoading();
   });
