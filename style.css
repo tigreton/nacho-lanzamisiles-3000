@@ -72,8 +72,11 @@ button {
   place-items: center;
 }
 
+/* El ancho se ciñe también a la altura disponible (cabecera 73 + pie 46 +
+   márgenes del shell ~68 + bordes): así el marco completo entra en el
+   viewport sin scroll de página. Los cortes de móvil mandan sobre esto. */
 .game-frame {
-  width: 100%;
+  width: min(100%, calc((100dvh - 190px) * 16 / 9));
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -122,6 +125,12 @@ button {
   letter-spacing: 0.04em;
 }
 
+/* En el menú el título gigante ya ocupa la tarjeta: se apaga el eco de
+   la cabecera (visibility mantiene el alto de la barra). */
+.game-frame:has(#menu-screen.screen--visible) .brand strong {
+  visibility: hidden;
+}
+
 .header-actions {
   display: flex;
   gap: 8px;
@@ -157,6 +166,10 @@ button {
   aspect-ratio: 16 / 9;
   background: #111f2d;
   isolation: isolate;
+  /* El alto del escenario, no el del viewport, decide si el menú cabe:
+     aquí se anclan las container queries de la tarjeta. */
+  container-type: size;
+  container-name: stage;
 }
 
 #game-canvas {
@@ -219,7 +232,7 @@ button {
 }
 
 .menu-card {
-  width: min(450px, 47vw);
+  width: min(500px, 47vw);
   max-height: 100%;
   overflow-y: auto;
   padding-right: 4px;
@@ -236,8 +249,10 @@ button {
   text-shadow: 0 5px 0 rgba(0, 0, 0, 0.35);
 }
 
+/* "OPERACIÓN" ocupa 6,17em en Black Ops One: a 4,9rem mide ~484px y cabe
+   en la tarjeta de 500px sin recortarse contra el overflow del panel. */
 .menu-card h1 {
-  font-size: clamp(2.7rem, 6vw, 6.4rem);
+  font-size: clamp(2.7rem, 6vw, 4.9rem);
 }
 
 .menu-card h1 em {
@@ -351,15 +366,10 @@ button {
 }
 
 /* En pantallas 16:9 de poca altura el menú con tres selectores no cabe:
-   se sacrifican primero los textos de ambientación y controles (igual
-   que el corte móvil) y, si aún sobra contenido, la tarjeta desplaza
-   sola en vez de recortar opciones. */
-@media (max-height: 780px) {
-  .mission-copy,
-  .controls-card {
-    display: none;
-  }
-}
+   se sacrifican controles y texto de ambientación según el alto REAL del
+   escenario (queries al final del archivo, en container-queries.css
+   de abajo). Si aún sobra contenido, la tarjeta desplaza sola en vez
+   de recortar opciones. */
 
 .helicopter-picker {
   width: min(430px, 100%);
@@ -827,6 +837,51 @@ kbd {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Sacrificio progresivo del menú por alto REAL del escenario (no del
+   viewport): al final del archivo para ganar a las reglas base de
+   .controls-card/.mission-copy con misma especificidad. Medido a
+   stage de 749px: contenido completo 762px, sin controles 718px. */
+@container stage (max-height: 840px) {
+  .controls-card {
+    display: none;
+  }
+}
+
+@container stage (max-height: 790px) {
+  .mission-copy {
+    display: none;
+  }
+}
+
+/* Escenario bajito (1366x768 y compañía, stage ~577px): además de los
+   sacrificios, se compacta título, tarjetas de helicóptero y márgenes
+   para que la carta quepa sin desplazar. */
+@container stage (max-height: 640px) {
+  .menu-card h1 {
+    margin: 6px 0;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+  }
+
+  .difficulty-picker,
+  .mode-picker,
+  .helicopter-picker {
+    margin-bottom: 8px;
+  }
+
+  .helicopter-option {
+    min-height: 80px;
+  }
+
+  .helicopter-option img {
+    height: 48px;
+  }
+
+  .menu-record,
+  .menu-logros {
+    margin-top: 6px;
   }
 }
 
