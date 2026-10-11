@@ -193,7 +193,7 @@ function drawMenuBackdrop() {
 
 
 function roundedRect(x, y, width, height, radius) {
-  const r = Math.min(radius, width / 2, height / 2);
+  const r = Math.max(0, Math.min(radius, width / 2, height / 2));
   G.ctx.beginPath();
   G.ctx.roundRect(x, y, width, height, r);
 }

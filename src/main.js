@@ -254,7 +254,7 @@ installInput({ togglePause, startGame });
 // concretos sin jugar hasta ellos y avanzar fotogramas a demanda, porque
 // en navegadores embebidos sin foco el requestAnimationFrame se congela
 // (docs/guion-pruebas.md). No lo usa el juego en producción.
-window.__qa = { G, setMode, startGame, advanceWave, updateGame };
+window.__qa = { G, setMode, startGame, advanceWave, updateGame, render };
 
 G.ui.play.addEventListener("click", startGame);
 G.ui.restart.addEventListener("click", startGame);
