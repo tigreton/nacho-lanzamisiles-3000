@@ -649,6 +649,8 @@ kbd {
 
 .shop-card {
   width: min(900px, 92vw);
+  max-height: 100%;
+  overflow-y: auto;
   padding: clamp(22px, 4vw, 36px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 16px;
@@ -1210,8 +1212,12 @@ body.controles-tactiles .touch-controls.is-visible {
     padding: 0;
   }
 
+  /* Sin cabecera ni pie, el alto manda: el marco se ciñe a la altura del
+     viewport (menos sus 2 px de borde) y sobra ancho, no juego. A 852x393,
+     por ejemplo, el escenario pasa de 479 px cortados a 393 px completos
+     con bandas laterales; la botonera y la armería vuelven a entrar. */
   .game-frame {
-    width: min(100%, 1120px);
+    width: min(100vw, calc((100dvh - 2px) * 16 / 9));
     border-radius: 0;
   }
 
