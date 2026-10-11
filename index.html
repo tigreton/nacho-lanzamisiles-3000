@@ -236,6 +236,36 @@
             </div>
           </div>
 
+          <!-- Botonera táctil: input.js añade controles-tactiles al body en
+               pantallas de puntero grueso (o ventanas estrechas) y setMode
+               añade is-visible solo durante la partida. -->
+          <div id="touch-controls" class="touch-controls">
+            <button id="fire-button" class="touch-button touch-button--fire" type="button"
+              aria-label="Disparar. Mantenlo pulsado para cargar el misil grande.">
+              <img src="assets/ia-charged.webp" alt="" draggable="false" />
+            </button>
+            <button id="ability-button" class="touch-button touch-button--ability" type="button"
+              aria-label="Habilidad del helicóptero">
+              <span class="touch-icon touch-icon--escudo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 3l7 3v5c0 4.6-3 8.6-7 10-4-1.4-7-5.4-7-10V6l7-3z" />
+                </svg>
+              </span>
+              <span class="touch-icon touch-icon--reducir" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="4 14 10 14 10 20" />
+                  <polyline points="20 10 14 10 14 4" />
+                  <line x1="14" y1="10" x2="21" y2="3" />
+                  <line x1="3" y1="21" x2="10" y2="14" />
+                </svg>
+              </span>
+              <span class="touch-button-veil" aria-hidden="true"></span>
+              <span class="touch-button-count" aria-hidden="true"></span>
+            </button>
+          </div>
+
           <div class="mobile-hint">ARRASTRA PARA MOVER Y DISPARAR</div>
         </div>
 

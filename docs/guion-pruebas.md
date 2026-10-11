@@ -45,7 +45,11 @@ NORMAL = 9, DIFÍCIL = 7).
 
 ## B2 — Partida (oleada 1)
 
-1. Mover con WASD/flechas y con el puntero (arrastrar = mover + autodisparo).
+1. Mover con WASD/flechas y con el puntero (arrastrar con ratón = mover +
+   autodisparo). En viewport estrecho (⩽760 px) o pantalla táctil aparece la
+   botonera: botón de disparo mantener/soltar = disparar y cargar, botón de
+   habilidad = activarla y recargar con velo circular; en ese modo arrastrar
+   solo mueve.
 2. Disparar con ESPACIO/J. Los enemigos entran por la derecha, disparan
    proyectiles evitables y estallan al morir (monedas y mejoras al botín).
 3. Recoger una moneda: contador de monedas +1.

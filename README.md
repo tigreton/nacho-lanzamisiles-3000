@@ -102,7 +102,13 @@ El servidor local sigue siendo la opción recomendada.
 - `Mayús` o `K`: habilidad secundaria del helicóptero (véase
   «Variantes de helicóptero»); cada uso necesita unos segundos de recarga
 - `P` o `Escape`: pausa
-- Ratón/táctil: arrastrar sobre el juego para mover y disparar
+- Ratón: arrastrar sobre el juego mueve y dispara a la vez
+- Táctil: arrastra para mover; en partida aparece una botonera junto a la
+  esquina inferior derecha con dos botones —disparo (mantener pulsado
+  dispara y carga el misil grande, que se lanza al soltar) y habilidad del
+  helicóptero, que muestra su recarga con un velo circular y los segundos
+  restantes—. La botonera solo aparece en pantallas táctiles o ventanas
+  estrechas; en ellas arrastrar solo mueve.
 - Mando: stick izquierdo o cruceta mueven, `A` dispara, `B` suelta la
   habilidad y `Start` pausa. En
   los menús (dificultad, helicóptero, armería, base aérea, pausa y fin de

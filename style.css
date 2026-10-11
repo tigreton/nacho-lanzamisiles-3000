@@ -804,6 +804,138 @@ kbd {
   pointer-events: none;
 }
 
+/* Con botonera táctile en pantalla el aviso se muda a la esquina libre
+   (la derecha es de los botones) y el texto lo reescribe input.js. */
+body.controles-tactiles .mobile-hint {
+  right: auto;
+  left: 14px;
+}
+
+/* Botonera táctil: disparo (sin recarga) y habilidad (velo circular que se
+   retira al recargar). input.js cuelga controles-tactiles del body en
+   pantallas de puntero grueso o ventanas estrechas —mismo criterio que el
+   bloque móvil de abajo— y setMode añade is-visible solo en partida. */
+.touch-controls {
+  position: absolute;
+  z-index: 4;
+  right: 14px;
+  bottom: 14px;
+  display: none;
+  gap: 14px;
+}
+
+body.controles-tactiles .touch-controls.is-visible {
+  display: flex;
+}
+
+.touch-button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  background: rgba(8, 16, 22, 0.55);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition: transform 80ms ease, border-color 120ms ease;
+}
+
+.touch-button:active {
+  transform: scale(0.93);
+}
+
+.touch-button--fire {
+  border-color: rgba(255, 122, 22, 0.78);
+  box-shadow: 0 0 14px rgba(255, 122, 22, 0.2);
+}
+
+.touch-button--fire img {
+  width: 54px;
+  height: auto;
+}
+
+/* Carga del misil completo: el botón avisa para soltar y lanzar. */
+.touch-button--fire.is-charged {
+  border-color: #ffd34d;
+  box-shadow: 0 0 18px rgba(255, 211, 77, 0.5);
+}
+
+.touch-button--ability .touch-icon {
+  display: grid;
+  place-items: center;
+}
+
+.touch-button--ability .touch-icon svg {
+  width: 36px;
+  height: 36px;
+}
+
+/* El escudo hereda el cian de la burbuja del juego; el icono de encoger,
+   el cian claro de la miniatura del Sigilo. */
+.touch-icon--escudo svg {
+  color: #68d8ff;
+}
+
+.touch-icon--reducir svg {
+  color: #9ff3ff;
+}
+
+/* Icono de la habilidad en curso: escudo del Blindado por defecto,
+   flechas de encoger del Sigilo con kind-reducir. */
+.touch-button--ability .touch-icon--reducir {
+  display: none;
+}
+
+.touch-button--ability.kind-reducir .touch-icon--reducir {
+  display: grid;
+}
+
+.touch-button--ability.kind-reducir .touch-icon--escudo {
+  display: none;
+}
+
+/* Velo de recarga: --listo (0 a 1) descubre el icono en sentido horario. */
+.touch-button-veil {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    transparent calc(var(--listo, 1) * 1turn),
+    rgba(5, 10, 14, 0.82) 0
+  );
+  pointer-events: none;
+}
+
+.touch-button--ability.is-ready {
+  border-color: var(--acid);
+  animation: touch-ready 1.6s ease-in-out infinite;
+}
+
+@keyframes touch-ready {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(200, 239, 41, 0.18);
+  }
+
+  50% {
+    box-shadow: 0 0 22px rgba(200, 239, 41, 0.45);
+  }
+}
+
+.touch-button-count {
+  position: absolute;
+  font-size: 1.2rem;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+}
+
 .game-footer {
   justify-content: center;
   min-height: 46px;
@@ -1086,5 +1218,25 @@ kbd {
   .game-header,
   .game-footer {
     display: none;
+  }
+
+  .touch-controls {
+    right: 10px;
+    bottom: 10px;
+    gap: 10px;
+  }
+
+  .touch-button {
+    width: 62px;
+    height: 62px;
+  }
+
+  .touch-button--fire img {
+    width: 44px;
+  }
+
+  .touch-button--ability .touch-icon svg {
+    width: 30px;
+    height: 30px;
   }
 }

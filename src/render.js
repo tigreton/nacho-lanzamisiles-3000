@@ -684,8 +684,8 @@ function drawHowTo() {
   seccion("CONTROLES", 488);
   G.ctx.fillStyle = "rgba(255, 255, 255, 0.72)";
   G.ctx.font = "700 13px Inter, sans-serif";
-  G.ctx.fillText("WASD / flechas mover · ESPACIO / J disparar · MAYÚS / K habilidad · P / ESC pausa · ratón y táctil arrastrando", W / 2, 514);
-  G.ctx.fillText("Mantén pulsado el disparo para cargar un misil grande · suelta para lanzarlo", W / 2, 535);
+  G.ctx.fillText("WASD / flechas mover · ESPACIO / J disparar · MAYÚS / K habilidad · P / ESC pausa · ratón arrastrando mueve y dispara", W / 2, 514);
+  G.ctx.fillText("Táctil: arrastra para mover · botonera en pantalla: disparo (mantén para cargar) y habilidad con su recarga", W / 2, 535);
   G.ctx.fillText("Habilidad única por helicóptero: el Blindado despliega un escudo reflector de 1 s · el Sigilo se encoge 2,5 s para esquivar", W / 2, 556);
   G.ctx.fillText("Mando: stick mueve · A dispara (mantén para cargar) · B habilidad · Start pausa", W / 2, 577);
   G.ctx.fillStyle = "#d8f23b";

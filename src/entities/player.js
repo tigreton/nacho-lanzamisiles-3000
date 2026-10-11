@@ -176,7 +176,13 @@ export function updatePlayer(dt) {
   }
   G.player.frame = Math.floor(G.state.elapsed * 8) % G.sprites.player.length;
 
-  const firing = G.keys.has("Space") || G.keys.has("KeyJ") || G.pointer.active;
+  // Sin botonera táctil (escritorio), arrastrar con ratón mueve y dispara;
+  // con ella, el disparo es cosa del botón (G.touchFire).
+  const firing =
+    G.keys.has("Space") ||
+    G.keys.has("KeyJ") ||
+    G.touchFire ||
+    (G.pointer.active && !G.controlesTactiles);
   // Carga de disparo: mantener pulsado sigue disparando y además carga el
   // misil grande; al soltar, si la carga pasó el mínimo, se dispara.
   if (firing) {

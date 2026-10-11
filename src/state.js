@@ -41,6 +41,11 @@ export const G = {
   shopWave: document.querySelector("#shop-wave"),
   continueButton: document.querySelector("#continue-button"),
   shopItemButtons: [...document.querySelectorAll(".shop-item")],
+  touchControls: document.querySelector("#touch-controls"),
+  fireButton: document.querySelector("#fire-button"),
+  abilityButton: document.querySelector("#ability-button"),
+  abilityCount: document.querySelector(".touch-button-count"),
+  mobileHint: document.querySelector(".mobile-hint"),
 },
   sheet: new Image(),
   airshipSheet: new Image(),
@@ -70,6 +75,11 @@ export const G = {
   sprites: {},
   keys: new Set(),
   pointer: { active: false, x: W * 0.22, y: H * 0.5 },
+  // Botonera táctil: touchFire es el "Espacio" del botón de disparo y
+  // controlesTactiles marca que la botonera está en pantalla (input.js),
+  // y entonces arrastrar solo mueve: el disparo vive en el botón.
+  touchFire: false,
+  controlesTactiles: false,
   mode: "loading",
   lastTime: performance.now(),
   selectedDifficulty: "normal",
@@ -109,6 +119,13 @@ export function setMode(nextMode) {
   else if (nextMode === "howto") showOnly(G.ui.howto);
   else if (nextMode === "gameover") showOnly(G.ui.gameover);
   else showOnly(null);
+  // La botonera táctil solo pisa el escenario en partida; fuera de ella se
+  // sueltan los dedos fantasma (pausa, tienda, fin de partida).
+  G.ui.touchControls.classList.toggle("is-visible", nextMode === "playing");
+  if (nextMode !== "playing") {
+    G.touchFire = false;
+    G.pointer.active = false;
+  }
   G.ui.pauseButton.textContent = nextMode === "paused" ? "SEGUIR" : "PAUSA";
 }
 

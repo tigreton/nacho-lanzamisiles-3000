@@ -1,6 +1,6 @@
 // Entrada: teclado, puntero/táctil y autopausa. Los handlers del juego se
 // inyectan en installInput para evitar ciclos de importación.
-import { W, H } from "./config.js";
+import { W, H, HELICOPTERS } from "./config.js";
 import { G, setMode } from "./state.js";
 import { unlockAudio, tone } from "./audio.js";
 
@@ -158,6 +158,53 @@ export function pollGamepad({ togglePause, activateAbility }) {
 }
 
 export function installInput({ togglePause, startGame, activateAbility }) {
+  // Botonera táctil: mismo criterio que el CSS móvil (puntero grueso o
+  // ventana estrecha). Con ella en pantalla, arrastrar sobre el lienzo
+  // solo mueve —el disparo pasa al botón— para no ametrallar sin querer
+  // al esquivar.
+  const consultaTactil = matchMedia("(pointer: coarse), (max-width: 760px)");
+  const aplicarTactil = () => {
+    G.controlesTactiles = consultaTactil.matches;
+    document.body.classList.toggle("controles-tactiles", G.controlesTactiles);
+    G.ui.mobileHint.textContent = G.controlesTactiles
+      ? "ARRASTRA PARA MOVER"
+      : "ARRASTRA PARA MOVER Y DISPARAR";
+  };
+  consultaTactil.addEventListener?.("change", aplicarTactil);
+  // Redimensionar la ventana puede cruzar el umbral de 760 px sin que el
+  // MediaQueryList llegue a avisar en algunos navegadores embebidos.
+  window.addEventListener("resize", aplicarTactil);
+  aplicarTactil();
+
+  // El menú contextual del pulso largo no tiene cabida en la botonera.
+  G.ui.touchControls.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+  });
+
+  // Disparo: mantener pulsado dispara y carga el misil grande, que se
+  // lanza al soltar —exactamente como Espacio. La captura del puntero
+  // garantiza el pointerup aunque el dedo se deslice fuera del botón.
+  G.ui.fireButton.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    if (G.mode !== "playing") return;
+    G.touchFire = true;
+    G.ui.fireButton.setPointerCapture?.(event.pointerId);
+    unlockAudio();
+  });
+  const soltarDisparo = () => {
+    G.touchFire = false;
+  };
+  G.ui.fireButton.addEventListener("pointerup", soltarDisparo);
+  G.ui.fireButton.addEventListener("pointercancel", soltarDisparo);
+
+  // Habilidad secundaria: una pulsación, como Mayús/K o el B del mando.
+  G.ui.abilityButton.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    if (G.mode !== "playing") return;
+    unlockAudio();
+    activateAbility?.();
+  });
+
   window.addEventListener("keydown", (event) => {
     if (event.code === "Space") {
       if (G.mode === "playing") {
@@ -199,6 +246,7 @@ export function installInput({ togglePause, startGame, activateAbility }) {
   const autopause = () => {
     G.keys.clear();
     G.pointer.active = false;
+    G.touchFire = false;
     if (G.mode === "playing") togglePause();
   };
   window.addEventListener("blur", autopause);
@@ -222,4 +270,20 @@ export function installInput({ togglePause, startGame, activateAbility }) {
   G.canvas.addEventListener("pointercancel", () => {
     G.pointer.active = false;
   });
+}
+
+// Refresco por fotograma de la botonera: el velo de recarga de la habilidad
+// se retira en sentido horario (--listo de 0 a 1), el contador muestra los
+// segundos que faltan y el botón de disparo avisa cuando el misil cargado
+// está listo para soltarlo.
+export function updateTouchControls() {
+  if (!G.controlesTactiles || G.mode !== "playing" || !G.player) return;
+  const ability = HELICOPTERS[G.player.helicopter]?.ability;
+  G.ui.abilityButton.classList.toggle("kind-reducir", ability?.kind === "reducir");
+  const total = ability?.cooldown ?? 1;
+  const restante = G.player.abilityCooldown;
+  G.ui.abilityButton.style.setProperty("--listo", String(Math.min(1, Math.max(0, 1 - restante / total))));
+  G.ui.abilityButton.classList.toggle("is-ready", restante <= 0);
+  G.ui.abilityCount.textContent = restante > 0 ? `${Math.ceil(restante)}` : "";
+  G.ui.fireButton.classList.toggle("is-charged", G.player.chargeFull);
 }

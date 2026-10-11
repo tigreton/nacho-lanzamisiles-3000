@@ -10,7 +10,7 @@ import { prepareSprites, prepareAirshipSprites, cutStrip } from "./sprites.js";
 import { rand } from "./utils.js";
 import { unlockAudio, tone, toggleSound } from "./audio.js";
 import { ensureMusic, initMusicUI } from "./music.js";
-import { installInput, pollGamepad } from "./input.js";
+import { installInput, pollGamepad, updateTouchControls } from "./input.js";
 import { installCheatCodes } from "./systems/cheats.js";
 import { getHighScore } from "./records.js";
 
@@ -255,6 +255,7 @@ function loop(time) {
   G.lastTime = time;
   pollGamepad({ togglePause, activateAbility });
   if (G.mode === "playing") updateGame(dt);
+  updateTouchControls();
   render();
   requestAnimationFrame(loop);
 }
@@ -266,7 +267,7 @@ installCheatCodes();
 // concretos sin jugar hasta ellos y avanzar fotogramas a demanda, porque
 // en navegadores embebidos sin foco el requestAnimationFrame se congela
 // (docs/guion-pruebas.md). No lo usa el juego en producción.
-window.__qa = { G, setMode, startGame, advanceWave, updateGame, render };
+window.__qa = { G, setMode, startGame, advanceWave, updateGame, updateTouchControls, render };
 
 G.ui.play.addEventListener("click", startGame);
 G.ui.restart.addEventListener("click", startGame);

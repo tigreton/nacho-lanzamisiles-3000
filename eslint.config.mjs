@@ -10,6 +10,7 @@ export default [
         window: "readonly",
         document: "readonly",
         performance: "readonly",
+        matchMedia: "readonly",
         requestAnimationFrame: "readonly",
         localStorage: "readonly",
         setTimeout: "readonly",
