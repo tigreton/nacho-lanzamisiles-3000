@@ -106,7 +106,7 @@ function pasosEje(activo, eje, ahora) {
   return 0;
 }
 
-export function pollGamepad({ togglePause }) {
+export function pollGamepad({ togglePause, activateAbility }) {
   const pads = navigator.getGamepads?.() ?? [];
   const pad = [...pads].find(Boolean);
   if (!pad) {
@@ -145,6 +145,9 @@ export function pollGamepad({ togglePause }) {
 
     if (cruz(0) && !botonAnterior.a) pulsarCursor();
     if (cruz(1) && !botonAnterior.b) retrocederConPad();
+  } else if (G.mode === "playing" && cruz(1) && !botonAnterior.b) {
+    // En partida el botón B suelta la habilidad secundaria del helicóptero.
+    activateAbility?.();
   }
 
   if (cruz(9) && !botonAnterior.start) {
@@ -154,7 +157,7 @@ export function pollGamepad({ togglePause }) {
   botonAnterior = { a: cruz(0), b: cruz(1), start: cruz(9) };
 }
 
-export function installInput({ togglePause, startGame }) {
+export function installInput({ togglePause, startGame, activateAbility }) {
   window.addEventListener("keydown", (event) => {
     if (event.code === "Space") {
       if (G.mode === "playing") {
@@ -175,6 +178,15 @@ export function installInput({ togglePause, startGame }) {
     if ((event.code === "KeyP" || event.code === "Escape") && !event.repeat) togglePause();
     if (event.code === "Enter" && G.mode === "menu") startGame();
     if (event.code === "Escape" && G.mode === "howto") setMode("menu");
+    // Habilidad secundaria: Mayús o K, una pulsación por pulsación de tecla
+    // (el autocorrepeat del sistema no debe ametrallarla).
+    if (
+      !event.repeat &&
+      G.mode === "playing" &&
+      ["ShiftLeft", "ShiftRight", "KeyK"].includes(event.code)
+    ) {
+      activateAbility?.();
+    }
   }, true);
 
   window.addEventListener("keyup", (event) => {
