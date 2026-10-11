@@ -8,6 +8,7 @@ import {
   CHARGE_TIME,
   GUNSHIP_WEAKPOINT,
   BOSSES,
+  HELICOPTERS,
 } from "./config.js";
 import { G, comboMultiplier } from "./state.js";
 import { rand, clamp, isBossEnemy } from "./utils.js";
@@ -240,6 +241,18 @@ function drawHud() {
   if (G.ally) powerLabels.push({ text: "DRON ALIADO", color: "#6cecff" });
   if (G.player.rapid > 0) powerLabels.push({ text: `RÁFAGA ${Math.ceil(G.player.rapid)}s`, color: "#ffb02e" });
   if (G.player.shield > 0) powerLabels.push({ text: `ESCUDO ${Math.ceil(G.player.shield)}s`, color: "#68d8ff" });
+  // Estado de la habilidad propia: activa (la del escudo ya luce en su
+  // etiqueta), recargando o lista para soltar con Mayús.
+  const habilidad = HELICOPTERS[G.player.helicopter]?.ability;
+  if (habilidad) {
+    if (habilidad.kind === "reducir" && G.player.abilityTimer > 0) {
+      powerLabels.push({ text: `${habilidad.label} ${G.player.abilityTimer.toFixed(1)}s`, color: "#9ff3ff" });
+    } else if (G.player.abilityCooldown > 0) {
+      powerLabels.push({ text: `HABILIDAD ${Math.ceil(G.player.abilityCooldown)}s`, color: "rgba(255,255,255,0.4)" });
+    } else {
+      powerLabels.push({ text: `${habilidad.label} LISTA`, color: habilidad.kind === "escudo" ? "#68d8ff" : "#9ff3ff" });
+    }
+  }
   G.ctx.font = '900 11px Inter, sans-serif';
   let labelX = 96;
   for (const { text, color } of powerLabels) {
@@ -513,9 +526,16 @@ function drawEntities() {
     });
   }
   const playerSprite = G.sprites.playerVariants?.[G.player.helicopter] || G.sprites.player[G.player.frame];
+  // Miniatura del Sigilo: el sprite ya se dibuja al tamaño reducido del
+  // jugador; el brillo pulsante marca que la habilidad sigue activa.
+  const encogido =
+    G.player.abilityTimer > 0 && HELICOPTERS[G.player.helicopter]?.ability?.kind === "reducir";
   drawSprite(playerSprite, G.player.x, G.player.y, G.player.w, G.player.h, {
     rotate: G.player.tilt,
     alpha: playerAlpha,
+    ...(encogido
+      ? { glow: `rgba(155, 243, 255, ${0.35 + Math.sin(G.state.elapsed * 9) * 0.2})`, blur: 12 }
+      : {}),
   });
 
   // Medidor de carga: un arco alrededor del helicóptero que se cierra al
@@ -669,15 +689,16 @@ function drawHowTo() {
     etiqueta(texto, x, 482);
   }
 
-  seccion("CONTROLES", 540);
+  seccion("CONTROLES", 528);
   G.ctx.fillStyle = "rgba(255, 255, 255, 0.66)";
   G.ctx.font = "700 13px Inter, sans-serif";
-  G.ctx.fillText("WASD / flechas mover · ESPACIO / J disparar · P / ESC pausa · ratón y táctil arrastrando", W / 2, 572);
-  G.ctx.fillText("Mantén pulsado el disparo para cargar un misil grande · suelta para lanzarlo", W / 2, 596);
-  G.ctx.fillText("Mando: stick mueve · A dispara (mantén para cargar) · Start pausa", W / 2, 620);
+  G.ctx.fillText("WASD / flechas mover · ESPACIO / J disparar · MAYÚS / K habilidad · P / ESC pausa · ratón y táctil arrastrando", W / 2, 556);
+  G.ctx.fillText("Mantén pulsado el disparo para cargar un misil grande · suelta para lanzarlo", W / 2, 578);
+  G.ctx.fillText("Habilidad única por helicóptero: el Blindado despliega un escudo reflector de 1 s · el Sigilo se encoge 2,5 s para esquivar", W / 2, 600);
+  G.ctx.fillText("Mando: stick mueve · A dispara (mantén para cargar) · B habilidad · Start pausa", W / 2, 622);
   G.ctx.fillStyle = "#d8f23b";
-  G.ctx.fillText("Tres jefes rotan cada 4 oleadas y se enfurecen al 50% · A la fortaleza, derríbale las torretas", W / 2, 644);
-  G.ctx.fillText("Modos: campaña, supervivencia sin fin y solo jefes · Bajas seguidas = multiplicador · Rozar = puntos", W / 2, 668);
+  G.ctx.fillText("Tres jefes rotan cada 4 oleadas y se enfurecen al 50% · A la fortaleza, derríbale las torretas", W / 2, 648);
+  G.ctx.fillText("Modos: campaña, supervivencia sin fin y solo jefes · Bajas seguidas = multiplicador · Rozar = puntos", W / 2, 670);
 }
 
 export function render() {

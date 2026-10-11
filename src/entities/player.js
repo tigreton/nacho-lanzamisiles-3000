@@ -1,5 +1,5 @@
-// Jugador: movimiento, disparo, carga y dano.
-import { W, H, HELICOPTERS, CHARGE_TIME, CHARGE_MIN, CHARGE_COOLDOWN } from "../config.js";
+// Jugador: movimiento, disparo, carga, habilidad secundaria y dano.
+import { W, H, HELICOPTERS, PLAYER_SIZE, CHARGE_TIME, CHARGE_MIN, CHARGE_COOLDOWN } from "../config.js";
 import { G } from "../state.js";
 import { clamp, lerp } from "../utils.js";
 import { tone } from "../audio.js";
@@ -18,6 +18,11 @@ export function applyHelicopterStats(id) {
   G.player.fireCooldownMultiplier = stats.fireCooldownMultiplier;
   G.player.damageReduction = stats.damageReduction;
   G.player.hitboxBonus = stats.hitboxBonus;
+  // Cambiar de aparato en la base aérea corta cualquier habilidad en curso:
+  // la miniatura del Sigilo no puede sobrevivir a un helicóptero distinto.
+  G.player.abilityTimer = 0;
+  G.player.w = PLAYER_SIZE.w;
+  G.player.h = PLAYER_SIZE.h;
 }
 
 
@@ -105,6 +110,29 @@ export function hurtPlayer(damage) {
 }
 
 
+// Habilidad secundaria (Mayús o K en teclado, B en mando): cada helicóptero
+// tiene la suya propia y comparte este canal de activación y enfriamiento.
+export function activateAbility() {
+  if (G.mode !== "playing" || !G.player || !G.state) return;
+  const ability = HELICOPTERS[G.player.helicopter]?.ability;
+  if (!ability || G.player.abilityTimer > 0 || G.player.abilityCooldown > 0) return;
+  G.player.abilityTimer = ability.duration;
+  G.player.abilityCooldown = ability.cooldown;
+  if (ability.kind === "escudo") {
+    // Monta sobre el escudo de la armería: mismo rebote de proyectiles,
+    // misma burbuja de energía, sin apilar duraciones.
+    G.player.shield = Math.max(G.player.shield, ability.duration);
+    createBurst(G.player.x, G.player.y, "#68d8ff", 16, 210);
+    tone(520, 0.16, "sine", 0.03, 300);
+  } else {
+    G.player.w = PLAYER_SIZE.w * ability.scale;
+    G.player.h = PLAYER_SIZE.h * ability.scale;
+    createBurst(G.player.x, G.player.y, "#9ff3ff", 12, 150);
+    tone(920, 0.16, "triangle", 0.026, -430);
+  }
+}
+
+
 export function updatePlayer(dt) {
   let dx = 0;
   let dy = 0;
@@ -134,6 +162,18 @@ export function updatePlayer(dt) {
   G.player.invulnerable = Math.max(0, G.player.invulnerable - dt);
   G.player.shield = Math.max(0, G.player.shield - dt);
   G.player.rapid = Math.max(0, G.player.rapid - dt);
+  // La habilidad corre su duración y luego empieza a enfriarse; al acabar
+  // la miniatura, el helicóptero recupera su tamaño (y con él su hitbox).
+  G.player.abilityCooldown = Math.max(0, G.player.abilityCooldown - dt);
+  if (G.player.abilityTimer > 0) {
+    G.player.abilityTimer = Math.max(0, G.player.abilityTimer - dt);
+    if (G.player.abilityTimer === 0 && HELICOPTERS[G.player.helicopter]?.ability?.kind === "reducir") {
+      G.player.w = PLAYER_SIZE.w;
+      G.player.h = PLAYER_SIZE.h;
+      createBurst(G.player.x, G.player.y, "#9ff3ff", 8, 120);
+      tone(300, 0.12, "triangle", 0.02, 380);
+    }
+  }
   G.player.frame = Math.floor(G.state.elapsed * 8) % G.sprites.player.length;
 
   const firing = G.keys.has("Space") || G.keys.has("KeyJ") || G.pointer.active;

@@ -56,9 +56,12 @@ El servidor local sigue siendo la opción recomendada.
 - `WASD` o flechas: mover
 - `Espacio` o `J`: disparar; mantener pulsado carga un misil grande
   (daño y onda expansiva crecen con la carga) que se lanza al soltar
+- `Mayús` o `K`: habilidad secundaria del helicóptero (véase
+  «Variantes de helicóptero»); cada uso necesita unos segundos de recarga
 - `P` o `Escape`: pausa
 - Ratón/táctil: arrastrar sobre el juego para mover y disparar
-- Mando: stick izquierdo o cruceta mueven, `A` dispara y `Start` pausa. En
+- Mando: stick izquierdo o cruceta mueven, `A` dispara, `B` suelta la
+  habilidad y `Start` pausa. En
   los menús (dificultad, helicóptero, armería, base aérea, pausa y fin de
   partida) la cruceta o el stick mueven el cursor entre las opciones, `A`
   pulsa la señalada, `Start` activa la acción principal de la pantalla y `B`
@@ -117,6 +120,13 @@ Se han guardado dos diseños nuevos para elegir como helicóptero del jugador:
 Las habilidades son distintas: `BLINDADO` empieza con 2 vidas extra y reduce
 un 25% el daño recibido; `SIGILO` se mueve un 22% más rápido, dispara un 28%
 antes y tiene un hitbox un 13% menor.
+
+Además, cada helicóptero aporta su propia habilidad secundaria, lista desde
+el despegue y con enfriamiento propio: `BLINDADO` despliega durante 1 segundo
+el mismo escudo reflector de la armería (rebota los proyectiles enemigos
+hacia quienes los dispararon); `SIGILO` se encoge a algo más de la mitad de
+su tamaño durante 2,5 segundos: sprite y hitbox se empequeñecen con él
+para colarse entre balas.
 
 Al empezar puedes elegir entre los dos helicópteros. En las oleadas pares no
 boss aparece una base aérea volante; colócate encima de la plataforma con

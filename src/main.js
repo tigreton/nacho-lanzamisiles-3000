@@ -1,9 +1,10 @@
 // Estado, arranque y bucle principal. La configuración vive en config.js.
-import { W, H, DIFFICULTIES, HELICOPTERS } from "./config.js";
+import { W, H, DIFFICULTIES, HELICOPTERS, PLAYER_SIZE } from "./config.js";
 import { G, setMode, selectDifficulty, selectMode, selectHelicopter } from "./state.js";
 import { updateGame, advanceWave } from "./systems/waves.js";
 import { buyShopItem, continueFromShop } from "./systems/shop.js";
 import { continueFromHelicopter } from "./entities/airbase.js";
+import { activateAbility } from "./entities/player.js";
 import { render } from "./render.js";
 import { prepareSprites, prepareAirshipSprites } from "./sprites.js";
 import { rand } from "./utils.js";
@@ -94,8 +95,8 @@ function resetGame() {
   G.player = {
     x: 150,
     y: H * 0.5,
-    w: 150,
-    h: 100,
+    w: PLAYER_SIZE.w,
+    h: PLAYER_SIZE.h,
     helicopter: G.selectedHelicopter,
     hp: maxHp,
     maxHp,
@@ -110,6 +111,8 @@ function resetGame() {
     explosiveAmmo: 0,
     homingAmmo: 0,
     allyArmed: false,
+    abilityTimer: 0,
+    abilityCooldown: 0,
     charge: 0,
     chargeFull: false,
     frame: 0,
@@ -243,13 +246,13 @@ function togglePause() {
 function loop(time) {
   const dt = Math.min(0.034, (time - G.lastTime) / 1000 || 0);
   G.lastTime = time;
-  pollGamepad({ togglePause });
+  pollGamepad({ togglePause, activateAbility });
   if (G.mode === "playing") updateGame(dt);
   render();
   requestAnimationFrame(loop);
 }
 
-installInput({ togglePause, startGame });
+installInput({ togglePause, startGame, activateAbility });
 
 // Gancho de QA: permite al guion de pruebas saltar a una oleada o modo
 // concretos sin jugar hasta ellos y avanzar fotogramas a demanda, porque

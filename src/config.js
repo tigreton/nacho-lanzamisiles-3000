@@ -42,6 +42,10 @@ export const DIFFICULTIES = {
 };
 
 
+// Tamaño lógico base del helicóptero del jugador: la habilidad del Sigilo
+// lo reduce temporalmente y al expirar se restauran estos valores.
+export const PLAYER_SIZE = { w: 150, h: 100 };
+
 export const HELICOPTERS = {
   v1: {
     label: "BLINDADO",
@@ -51,6 +55,9 @@ export const HELICOPTERS = {
     speedMultiplier: 0.94,
     fireCooldownMultiplier: 1,
     hitboxBonus: 0,
+    // Habilidad secundaria: despliega 1 segundo del mismo escudo reflector
+    // que vende la armería (reutiliza su rebote de proyectiles y su burbuja).
+    ability: { kind: "escudo", label: "ESCUDO", duration: 1, cooldown: 9 },
   },
   v2: {
     label: "SIGILO",
@@ -60,6 +67,9 @@ export const HELICOPTERS = {
     speedMultiplier: 1.22,
     fireCooldownMultiplier: 0.72,
     hitboxBonus: 0.13,
+    // Habilidad secundaria: se encoge para colarse entre proyectiles; el
+    // hitbox y el sprite se empequeñecen con él.
+    ability: { kind: "reducir", label: "MINIATURA", duration: 2.5, cooldown: 7, scale: 0.55 },
   },
 };
 
