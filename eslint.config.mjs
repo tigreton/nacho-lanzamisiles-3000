@@ -17,6 +17,7 @@ export default [
         setInterval: "readonly",
         clearInterval: "readonly",
         navigator: "readonly",
+        screen: "readonly",
         Image: "readonly",
         AudioContext: "readonly",
         webkitAudioContext: "readonly",

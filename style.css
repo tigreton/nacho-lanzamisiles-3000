@@ -158,6 +158,37 @@ button {
   transform: translateY(-1px);
 }
 
+/* Pantalla completa: mismo hueco que sus vecinas de texto, con el par de
+   flechas diagonales (abrir/cerrar) que ya usa la botonera táctil. */
+.fullscreen-button {
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  padding: 0;
+}
+
+/* Sin Fullscreen API (iPhone) fullscreen.js oculta el botón del todo. */
+.fullscreen-button[hidden] {
+  display: none;
+}
+
+.fullscreen-button svg {
+  width: 15px;
+  height: 15px;
+}
+
+.fullscreen-button .icono-pantalla--comprimir {
+  display: none;
+}
+
+body.pantalla-completa .fullscreen-button .icono-pantalla--expandir {
+  display: none;
+}
+
+body.pantalla-completa .fullscreen-button .icono-pantalla--comprimir {
+  display: block;
+}
+
 .stage {
   position: relative;
   width: 100%;
@@ -1245,4 +1276,14 @@ body.controles-tactiles .touch-controls.is-visible {
     width: 30px;
     height: 30px;
   }
+}
+
+/* Pantalla completa: si el navegador no acepta el apaisado (Firefox) y el
+   móvil sigue en vertical, el escenario es una franja 16:9 —se centra sobre
+   el fondo en vez de quedar pegada arriba. En apaisado no cambia nada
+   porque el marco ya llena la altura. */
+body.pantalla-completa .page-shell {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
 }

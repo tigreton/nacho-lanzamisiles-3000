@@ -10,6 +10,7 @@ import { prepareSprites, prepareAirshipSprites, cutStrip } from "./sprites.js";
 import { rand } from "./utils.js";
 import { unlockAudio, tone, toggleSound } from "./audio.js";
 import { ensureMusic, initMusicUI } from "./music.js";
+import { initFullscreenUI } from "./fullscreen.js";
 import { installInput, pollGamepad, updateTouchControls } from "./input.js";
 import { installCheatCodes } from "./systems/cheats.js";
 import { getHighScore } from "./records.js";
@@ -278,6 +279,7 @@ G.ui.soundButton.addEventListener("click", toggleSound);
 G.ui.howtoButton.addEventListener("click", () => setMode("howto"));
 G.ui.howtoBack.addEventListener("click", () => setMode("menu"));
 initMusicUI();
+initFullscreenUI();
 G.ui.continueButton.addEventListener("click", continueFromShop);
 G.ui.helicopterContinue.addEventListener("click", continueFromHelicopter);
 for (const button of G.ui.difficultyButtons) {

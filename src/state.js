@@ -22,6 +22,7 @@ export const G = {
   restart: document.querySelector("#restart-button"),
   resume: document.querySelector("#resume-button"),
   pauseButton: document.querySelector("#pause-button"),
+  fullscreenButton: document.querySelector("#fullscreen-button"),
   soundButton: document.querySelector("#sound-button"),
   musicButton: document.querySelector("#music-button"),
   resultTitle: document.querySelector("#result-title"),
